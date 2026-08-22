@@ -1,0 +1,146 @@
+arazzo: 1.0.1
+info:
+  title: Petstore Create-Update-Get Workflow
+  summary: Create a pet, update it, and retrieve it, notifying via AsyncAPI after create and update.
+  version: 1.0.0
+sourceDescriptions:
+  - name: petstoreOpenApi
+    url: ./petstore_openapi.yaml
+    type: openapi
+  - name: petstoreAsyncApi
+    url: ./petstore_asyncapi.yaml
+    type: asyncapi
+workflows:
+  - workflowId: createUpdateGetPet
+    summary: | 
+      Create a pet, publish a PetCreated notification, 
+      update the pet, publish a PetCreated (updated) notification, then fetch the pet.
+    inputs:
+      type: object
+      properties:
+        name:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        photoUrls:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        status:
+          type: string
+          enum:
+            - available
+            - pending
+            - sold
+    steps:
+      - stepId: createPet
+        description: Add a new pet to the store.
+        operationId: addPet
+        requestBody:
+          contentType: application/json
+          payload:
+            name: $inputs.name
+            category: $inputs.category
+            photoUrls: $inputs.photoUrls
+            tags: $inputs.tags
+            status: $inputs.status
+        successCriteria:
+          - condition: $statusCode == 200
+        outputs:
+          petId: $response.body#/id
+          petName: $response.body#/name
+          petCategory: $response.body#/category/name
+          petStatus: $response.body#/status
+
+      - stepId: notifyPetCreated
+        description: >-
+          Publish a PetCreated_V1 notification on the petsSnsTopic channel after the pet is created.
+        x-asyncapi:
+          sourceDescription: petstoreAsyncApi
+          operationId: PetCreated_Sns_V1
+          message: PetCreated_V1
+          payload:
+            type: com.nytimes.spg.pet.created.v1
+            data:
+              id: $steps.createPet.outputs.petId
+              category: $steps.createPet.outputs.petCategory
+              name: $steps.createPet.outputs.petName
+              status: $steps.createPet.outputs.petStatus
+
+      - stepId: updatePet
+        description: Update the existing pet by id.
+        operationId: updatePet
+        requestBody:
+          contentType: application/json
+          payload:
+            id: $steps.createPet.outputs.petId
+            name: $inputs.name
+            category: $inputs.category
+            photoUrls: $inputs.photoUrls
+            tags: $inputs.tags
+            status: $inputs.status
+        successCriteria:
+          - condition: $statusCode == 200
+        outputs:
+          petId: $response.body#/id
+          petName: $response.body#/name
+          petCategory: $response.body#/category/name
+          petStatus: $response.body#/status
+
+      - stepId: notifyPetUpdated
+        description: >-
+          Publish a PetCreated_V1 notification on the petsSnsTopic channel after the pet is
+          updated, reflecting the pet's new state. The AsyncAPI spec has no dedicated
+          PetUpdated message, so the same PetCreated_Sns_V1 operation/message is reused to
+          broadcast current pet state.
+        x-asyncapi:
+          sourceDescription: petstoreAsyncApi
+          operationId: PetCreated_Sns_V1
+          message: PetCreated_V1
+          payload:
+            type: com.nytimes.spg.pet.created.v1
+            data:
+              id: $steps.updatePet.outputs.petId
+              category: $steps.updatePet.outputs.petCategory
+              name: $steps.updatePet.outputs.petName
+              status: $steps.updatePet.outputs.petStatus
+
+      - stepId: getPet
+        description: Fetch the pet by id to confirm the update was applied.
+        operationId: getPetById
+        parameters:
+          - name: petId
+            in: path
+            value: $steps.updatePet.outputs.petId
+        successCriteria:
+          - condition: $statusCode == 200
+        outputs:
+          petId: $response.body#/id
+          petName: $response.body#/name
+          petStatus: $response.body#/status
+    outputs:
+      petId: $steps.getPet.outputs.petId
+      petName: $steps.getPet.outputs.petName
+      petStatus: $steps.getPet.outputs.petStatus
+components:
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string

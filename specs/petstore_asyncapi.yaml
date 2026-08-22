@@ -1,0 +1,280 @@
+asyncapi: 3.0.0
+defaultContentType: 'application/json'
+info:
+  title: SPG Petstore AsyncAPI
+  description: |
+    This is a AsyncAPI spec for the Petstore.
+  version: 0.1.0
+  tags:
+    - name: GithubRepository
+      description: GitHub Repo
+      externalDocs:
+        description: GitHub Repo
+        url: https://github.com/nytimes/spg-petstore
+channels:
+  petsSnsTopic:
+    description: Petstore Pets SNS Topic.
+    address: 'arn:aws:sns:us-east-1:{awsAccountId}:petstore-pets-{env}'
+    parameters:
+      awsAccountId:
+        $ref: '#/components/parameters/arnAwsAccountId'
+      env:
+        $ref: '#/components/parameters/arnEnv'
+    messages:
+      PetCreated_V0:
+        $ref: '#/components/messages/PetCreated_V0'
+      PetCreated_V1:
+        $ref: '#/components/messages/PetCreated_V1'
+      PetDeleted_V0:
+        $ref: '#/components/messages/PetDeleted_V0'
+  petCreatedSqsQueue:
+    description: Petstore PetCreated SQS Queue
+    address: 'arn:aws:sqs:us-east-1:{awsAccountId}:spg-petstore-pet-created-{env}'
+    parameters:
+      awsAccountId:
+        $ref: '#/components/parameters/arnAwsAccountId'
+      env:
+        $ref: '#/components/parameters/arnEnv'
+    messages:
+      PetCreated_V0:
+        $ref: '#/components/messages/PetCreated_V0'
+operations:
+  PetCreated_Sns_V0:
+    description: Receive PetCreated notification
+    action: receive
+    tags:
+      - name: PetsSnsTopic
+    channel:
+      $ref: '#/channels/petsSnsTopic'
+    messages:
+      - $ref: '#/channels/petsSnsTopic/messages/PetCreated_V0'
+  PetCreated_Sns_V1:
+    description: Receive PetCreated notification
+    action: receive
+    tags:
+      - name: PetsSnsTopic
+    channel:
+      $ref: '#/channels/petsSnsTopic'
+    messages:
+      - $ref: '#/channels/petsSnsTopic/messages/PetCreated_V1'
+  PetDeleted_Sns_V0:
+    description: Receive PetDeleted notification
+    action: receive
+    tags:
+      - name: PetsSnsTopic
+    channel:
+      $ref: '#/channels/petsSnsTopic'
+    messages:
+      - $ref: '#/channels/petsSnsTopic/messages/PetDeleted_V0'
+  PetCreated_Sqs_V0:
+    description: Receive PetCreated message
+    action: receive
+    tags:
+      - name: PetCreatedSqsQueue
+    channel:
+      $ref: '#/channels/petCreatedSqsQueue'
+    messages:
+      - $ref: '#/channels/petCreatedSqsQueue/messages/PetCreated_V0'
+components:
+  parameters:
+    arnEnv:
+      enum:
+        - 'stg'
+        - 'prd'
+      description: The SPG AWSMA environment
+    arnAwsAccountId:
+      enum:
+        - '879699292003'
+        - '515403100142'
+      description: |
+        The SPG AWSMA account id: 
+        - STG: 879699292003
+        - PRD: 515403100142
+  messages:
+    PetCreated_V0:
+      summary: A Pet has been created.
+      name: PetCreated_V0
+      title: PetCreated_V0
+      traits:
+        - $ref: '#/components/messageTraits/ceHeader'
+      payload:
+        $ref: '#/components/schemas/petCreatedPayload_V0'
+    PetCreated_V1:
+      summary: A Pet has been created.
+      name: PetCreated_V1
+      title: PetCreated_V1
+      traits:
+        - $ref: '#/components/messageTraits/ceHeader'
+      payload:
+        $ref: '#/components/schemas/petCreatedPayload_V1'
+    PetDeleted_V0:
+      summary: A Pet has been deleted.
+      name: PetDeleted_V0
+      title: PetDeleted_V0
+      traits:
+        - $ref: '#/components/messageTraits/ceHeader'
+      payload:
+        $ref: '#/components/schemas/petDeletedPayload_V0'
+  schemas:
+    cloudEventCommonProperties:
+      title: the CloudEvent common properties
+      type: object
+      properties:
+        specversion:
+          type: string
+          description: The CloudEvents spec version
+          const: '1.0'
+        source:
+          type: string
+          description: The notification source
+          format: uri
+          const: 'https://github.com/nytimes/spg-petstore'
+        id:
+          type: string
+          description: The notification unique identifier
+          format: uuid
+          example: '018D6B5C-BB9C-7175-6688-CBEC891CB718'
+      required:
+        - specversion
+        - source
+        - id
+      additionalProperties: false
+    petCreatedPayload_V0:
+      title: PetCreated_V0
+      name: PetCreated_V0
+      type: object
+      additionalProperties: false
+      allOf:
+        - $ref: '#/components/schemas/cloudEventCommonProperties'
+        - type: object
+          title: the specific notification type
+          properties:
+            type:
+              type: string
+              description: The notification type
+              const: 'com.nytimes.spg.pet.created.v0'
+          required:
+            - type
+          additionalProperties: false
+        - type: object
+          title: the specific notification data
+          properties:
+            data:
+              title: PetCreatedData_V0
+              type: object
+              properties:
+                id:
+                  type: integer
+                  format: int64
+                  description: The Pet Identifier
+                category:
+                  type: string
+                  description: The Pet Category
+                  example: "dog"
+                name:
+                  type: string
+                  description: The Pet Name
+                  example: "Spot"
+              required:
+                - id
+                - category
+              additionalProperties: false
+          required:
+            - data
+          additionalProperties: false
+    petCreatedPayload_V1:
+      title: PetCreated_V1
+      name: PetCreated_V1
+      type: object
+      additionalProperties: false
+      allOf:
+        - $ref: '#/components/schemas/cloudEventCommonProperties'
+        - type: object
+          title: the specific notification type
+          properties:
+            type:
+              type: string
+              description: The notification type
+              const: 'com.nytimes.spg.pet.created.v1'
+          required:
+            - type
+          additionalProperties: false
+        - type: object
+          title: the specific notification data
+          properties:
+            data:
+              title: PetCreatedData_V1
+              type: object
+              properties:
+                id:
+                  type: integer
+                  format: int64
+                  description: The Pet Identifier
+                category:
+                  type: string
+                  description: The Pet Category
+                  example: "dog"
+                name:
+                  type: string
+                  description: The Pet Name
+                  example: "Spot"
+                status:
+                  type: string
+                  title: PetStatusEnum
+                  description: The Pet Status in the store
+                  enum:
+                    - available
+                    - pending
+                    - sold
+              required:
+                - id
+                - category
+              additionalProperties: false
+    petDeletedPayload_V0:
+      title: PetDeleted_V0
+      name: PetDeleted_V0
+      type: object
+      additionalProperties: false
+      allOf:
+        - $ref: '#/components/schemas/cloudEventCommonProperties'
+        - type: object
+          title: the specific notification type
+          properties:
+            type:
+              type: string
+              description: The notification type
+              const: 'com.nytimes.spg.pet.deleted.v0'
+          required:
+            - type
+          additionalProperties: false
+        - type: object
+          title: the specific notification data
+          properties:
+            data:
+              title: PetDeletedData_V0
+              type: object
+              properties:
+                id:
+                  type: integer
+                  format: int64
+                  description: The Pet Identifier
+                category:
+                  type: string
+                  description: The Pet Category
+                  example: "dog"
+              required:
+                - id
+                - category
+              additionalProperties: false
+  messageTraits:
+    ceHeader:
+      headers:
+        type: object
+        additionalProperties: false
+        required:
+          - Content-Type
+        properties:
+          Content-Type:
+            type: string
+            description: Header required by the CloudEvents spec and passed as an SQS message attribute. Safe to ignore in the receiving application.
+            const: 'application/cloudevents+json'
