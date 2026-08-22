@@ -57,7 +57,13 @@ class MigrationSchemaTest {
                 "truck_dispatches",
                 "terminal_acceptances",
                 "cbp_examinations",
-                "actual_cargo_details");
+                "actual_cargo_details",
+                "master_bol_instructions",
+                "master_bols",
+                "master_bol_discrepancies",
+                "house_bols",
+                "house_bol_distributions",
+                "original_bol_tracking");
     }
 
     @Test
@@ -68,6 +74,6 @@ class MigrationSchemaTest {
                         + "WHERE success = TRUE AND version IS NOT NULL ORDER BY installed_rank",
                 String.class);
 
-        assertThat(versions).containsExactly("1", "2", "3", "4", "6");
+        assertThat(versions).containsExactly("1", "2", "3", "4", "6", "8");
     }
 }

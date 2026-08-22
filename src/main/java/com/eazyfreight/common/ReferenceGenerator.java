@@ -26,6 +26,8 @@ public class ReferenceGenerator {
     public static final String TRUCK_DELIVERY_ORDER_PREFIX = "TDO";
     public static final String EEI_FILING_PREFIX = "EEI";
     public static final String DISPATCH_PREFIX = "TDO";
+    public static final String INSTRUCTIONS_PREFIX = "SI";
+    public static final String HOUSE_BOL_PREFIX = "HBL";
 
     private final ReferenceSequenceRepository repository;
     private final Clock clock;
