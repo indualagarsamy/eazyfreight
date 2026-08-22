@@ -5,6 +5,9 @@ import com.eazyfreight.booking.BookingCargoDetail;
 import com.eazyfreight.booking.BookingRepository;
 import com.eazyfreight.booking.BookingStatus;
 import com.eazyfreight.common.ReferenceGenerator;
+import com.eazyfreight.compliance.EEIFilingRepository;
+import com.eazyfreight.compliance.FilingStatus;
+import com.eazyfreight.compliance.ItnRecord;
 import com.eazyfreight.exception.BookingNotFoundException;
 import com.eazyfreight.exception.DomainRuleViolationException;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -26,6 +30,7 @@ public class LogisticsService {
 
     private final ContainerAssignmentRepository repository;
     private final BookingRepository bookingRepository;
+    private final EEIFilingRepository filingRepository;
     private final ReferenceGenerator referenceGenerator;
     private final Clock clock;
 
@@ -41,6 +46,8 @@ public class LogisticsService {
                         booking.getCarrierBooking() == null
                                 ? null : booking.getCarrierBooking().getContainerType(),
                         clock.instant()));
+
+        catchUpOnItn(assignment, bookingId);
 
         assignment.dispatchOutbound(
                 () -> dispatchReference(MovementType.OUTBOUND),
@@ -232,6 +239,29 @@ public class LogisticsService {
             assignment.recordItnReceived(itnNumber, clock.instant());
             repository.save(assignment);
         });
+    }
+
+    /**
+     * Compliance can file the EEI the moment the carrier confirms, which is often
+     * before anyone books a truck. When that happens {@link #recordItnReceived} has
+     * no assignment to write to and the event is dropped, leaving the inbound gate
+     * shut with nothing left to reopen it. So the assignment also asks, on the way
+     * in, whether an ITN is already on file. The gate is open because an ITN exists,
+     * not because a message happened to arrive in a convenient order.
+     */
+    private void catchUpOnItn(ContainerAssignment assignment, UUID bookingId) {
+        if (assignment.isItnReceived()) {
+            return;
+        }
+        activeItn(bookingId).ifPresent(itn -> assignment.recordItnReceived(itn, clock.instant()));
+    }
+
+    private Optional<String> activeItn(UUID bookingId) {
+        return filingRepository.findByBookingId(bookingId).stream()
+                .filter(filing -> filing.getStatus() == FilingStatus.ACCEPTED)
+                .flatMap(filing -> filing.activeItn().stream())
+                .map(ItnRecord::getItnNumber)
+                .findFirst();
     }
 
     // ----------------------------------------------------------------- queries

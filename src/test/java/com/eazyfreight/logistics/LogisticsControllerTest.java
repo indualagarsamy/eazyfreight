@@ -153,6 +153,26 @@ class LogisticsControllerTest {
     }
 
     @Test
+    void anItnFiledBeforeTheContainerExistsStillOpensTheGate() throws Exception {
+        String bookingId = confirmedBooking();
+
+        // Compliance files as soon as the carrier confirms — before anyone books a
+        // truck, so there is no container assignment for the gate event to land on.
+        acceptedFiling(bookingId);
+        sealedContainer(bookingId);
+
+        mockMvc.perform(get("/api/logistics/bookings/" + bookingId + "/itn-gate"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.clear").value(true));
+
+        mockMvc.perform(post("/api/logistics/bookings/" + bookingId + "/inbound-dispatch")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(dispatchPayload("Customer premises", "APM Terminals")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.itnReceived").value(true));
+    }
+
+    @Test
     void containerNumberIsRecordedLateAndOnlyOnce() throws Exception {
         String bookingId = confirmedBooking();
         mockMvc.perform(post("/api/logistics/bookings/" + bookingId + "/outbound-dispatch")
