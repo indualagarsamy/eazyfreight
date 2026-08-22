@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   useAcceptCounterOffer, useAcknowledgeEtdVariance, useBooking, useCancelBooking,
-  useDispatchTruckDeliveryOrder, useGenerateTruckDeliveryOrder, useMarkItnFiled,
+  useDispatchTruckDeliveryOrder, useGenerateTruckDeliveryOrder,
   useRecordCarrierConfirmation, useRecordCarrierRejection, useRecordCounterOffer,
   useRecordVesselOverbooking, useReinstateBooking,
   useRejectCounterOffer, useSendBookingConfirmation, useSubmitBooking,
@@ -17,6 +17,7 @@ import { Modal } from '../components/Modal'
 import { GatedButton } from '../components/GatedButton'
 import { ErrorState, Skeleton } from '../components/States'
 import { useToast } from '../components/Toast'
+import { useFilingsForBooking, useInitiateFiling } from '../api/compliance'
 import { containerLabel, date, dateTime, number, shortId, titleCase } from '../components/format'
 import styles from './Detail.module.css'
 
@@ -102,7 +103,9 @@ export function BookingDetailPage() {
   const overbook = useRecordVesselOverbooking(id)
   const reinstate = useReinstateBooking(id)
   const cancel = useCancelBooking(id)
-  const markItn = useMarkItnFiled(id)
+
+  const { data: filings } = useFilingsForBooking(id)
+  const initiateFiling = useInitiateFiling()
 
   const [dialog, setDialog] = useState<null | 'submit' | 'confirm' | 'reject' | 'counter' | 'tdo' | 'reinstate' | 'cancel'>(null)
 
@@ -165,7 +168,45 @@ export function BookingDetailPage() {
         badges={
           <>
             <StatusPill status={booking.status} />
-            {booking.reinstatements.length > 0 && (
+            <section className="card">
+          <div className="card-header">
+            <h2>Export compliance</h2>
+            {(filings ?? []).length === 0 && (
+              <button
+                className="btn btn-sm"
+                disabled={initiateFiling.isPending}
+                onClick={() => void run('EEI filing opened',
+                  () => initiateFiling.mutateAsync(booking.id))}
+              >
+                Open EEI filing
+              </button>
+            )}
+          </div>
+          <div className="card-body">
+            {(filings ?? []).length === 0 ? (
+              <p className="muted">
+                No EEI filing yet. The ITN gates both the inbound truck dispatch and the
+                Master BOL instructions, so it is the first thing to raise after confirmation.
+              </p>
+            ) : (
+              <div className="stack" style={{ gap: 10 }}>
+                {(filings ?? []).map((filing) => (
+                  <Link key={filing.id} to={`/compliance/${filing.id}`} className={styles.filingRow}>
+                    <span className="mono">{filing.filingReference}</span>
+                    <StatusPill status={filing.filingType} size="sm" />
+                    <StatusPill status={filing.status} size="sm" />
+                    <span className="spacer" />
+                    {filing.activeItnNumber
+                      ? <span className="mono">{filing.activeItnNumber}</span>
+                      : <span className="faint">no ITN</span>}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {booking.reinstatements.length > 0 && (
               <StatusPill status="ROLLED" tone="info"
                 label={`Rolled ×${booking.reinstatements.length}`} />
             )}
@@ -229,13 +270,6 @@ export function BookingDetailPage() {
             <Action action="reinstate" label="Roll to next sailing" onClick={() => setDialog('reinstate')} />
             <Action action="cancel" label="Cancel booking"
               onClick={() => setDialog('cancel')} variant="btn-danger" />
-            {!booking.itnFiled && (
-              <button className="btn btn-sm btn-ghost"
-                title="Simulates the Compliance track reporting an ITN# on file"
-                onClick={() => void run('Marked as ITN filed', () => markItn.mutateAsync())}>
-                Mark ITN filed
-              </button>
-            )}
           </div>
         </section>
 
@@ -299,6 +333,44 @@ export function BookingDetailPage() {
             </div>
           </section>
         </div>
+
+        <section className="card">
+          <div className="card-header">
+            <h2>Export compliance</h2>
+            {(filings ?? []).length === 0 && (
+              <button
+                className="btn btn-sm"
+                disabled={initiateFiling.isPending}
+                onClick={() => void run('EEI filing opened',
+                  () => initiateFiling.mutateAsync(booking.id))}
+              >
+                Open EEI filing
+              </button>
+            )}
+          </div>
+          <div className="card-body">
+            {(filings ?? []).length === 0 ? (
+              <p className="muted">
+                No EEI filing yet. The ITN gates both the inbound truck dispatch and the
+                Master BOL instructions, so it is the first thing to raise after confirmation.
+              </p>
+            ) : (
+              <div className="stack" style={{ gap: 10 }}>
+                {(filings ?? []).map((filing) => (
+                  <Link key={filing.id} to={`/compliance/${filing.id}`} className={styles.filingRow}>
+                    <span className="mono">{filing.filingReference}</span>
+                    <StatusPill status={filing.filingType} size="sm" />
+                    <StatusPill status={filing.status} size="sm" />
+                    <span className="spacer" />
+                    {filing.activeItnNumber
+                      ? <span className="mono">{filing.activeItnNumber}</span>
+                      : <span className="faint">no ITN</span>}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
 
         {booking.reinstatements.length > 0 && (
           <section className="card">

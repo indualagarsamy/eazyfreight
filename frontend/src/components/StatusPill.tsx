@@ -27,7 +27,15 @@ const TDO_TONES: Record<string, Tone> = {
   GENERATED: 'neutral', DISPATCHED: 'info', PICKED_UP: 'info', DELIVERED: 'positive',
 }
 
-const REGISTRY = { ...QUOTE_TONES, ...BOOKING_TONES, ...SCREENING_TONES, ...TDO_TONES }
+const FILING_TONES: Record<string, Tone> = {
+  DRAFT: 'neutral', SUBMITTED: 'info', ACCEPTED: 'positive',
+  REJECTED: 'danger', CANCELLED: 'danger',
+  ORIGINAL: 'neutral', AMENDMENT: 'info',
+}
+
+const REGISTRY = {
+  ...QUOTE_TONES, ...BOOKING_TONES, ...SCREENING_TONES, ...TDO_TONES, ...FILING_TONES,
+}
 
 interface Props {
   status: string

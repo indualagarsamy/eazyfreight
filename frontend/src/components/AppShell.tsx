@@ -4,6 +4,7 @@ import styles from './AppShell.module.css'
 const NAV = [
   { to: '/quotes', label: 'Quotes' },
   { to: '/bookings', label: 'Bookings' },
+  { to: '/compliance', label: 'Compliance' },
 ]
 
 export function AppShell() {
@@ -30,7 +31,7 @@ export function AppShell() {
         <div className={styles.sidebarFoot}>
           <p className={styles.footLine}>Ocean Export</p>
           <p className={styles.footHint}>
-            Quote and Booking contexts. The post-booking tracks are not built yet.
+            Quote, Booking and Export Compliance. The remaining post-booking tracks are not built yet.
           </p>
         </div>
       </aside>

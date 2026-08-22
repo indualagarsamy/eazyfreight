@@ -190,11 +190,4 @@ public class BookingController {
             @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
         return bookingService.cancel(id, request, actor);
     }
-
-    @PostMapping("/{id}/itn-filed")
-    public BookingResponse markItnFiled(
-            @PathVariable UUID id,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return bookingService.markItnFiled(id, actor);
-    }
 }

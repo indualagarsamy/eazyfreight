@@ -10,6 +10,7 @@ export interface BookingCargoInput {
   hsCode: string
   pieces: number
   weightKg: number
+  valueUsd: number
   lengthCm: number
   widthCm: number
   heightCm: number
@@ -134,5 +135,5 @@ export const useCancelBooking = (id: string) =>
   useBookingMutation<{ reason: string; initiatedBy: CancellationInitiator }>(id, (input) =>
     api.post<Booking>(`/api/bookings/${id}/cancel`, input))
 
-export const useMarkItnFiled = (id: string) =>
-  useBookingMutation<void>(id, () => api.post<Booking>(`/api/bookings/${id}/itn-filed`))
+// There is no mark-ITN-filed endpoint any more. Booking.itnFiled is set by an
+// event listener when Compliance records a CBP acceptance.

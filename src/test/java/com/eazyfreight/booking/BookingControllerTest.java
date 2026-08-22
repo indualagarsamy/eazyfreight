@@ -290,6 +290,7 @@ class BookingControllerTest {
                       "hsCode": "8471.30.0100",
                       "pieces": 10,
                       "weightKg": 500.000,
+                      "valueUsd": 50000.00,
                       "lengthCm": 100.00,
                       "widthCm": 100.00,
                       "heightCm": 100.00,

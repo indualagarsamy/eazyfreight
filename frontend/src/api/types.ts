@@ -150,6 +150,7 @@ export interface BookingCargoDetail {
   hsCode: string
   pieces: number
   weightKg: number
+  valueUsd: number | null
   lengthCm: number
   widthCm: number
   heightCm: number
@@ -189,6 +190,7 @@ export interface Booking {
   confirmationSentAt: string | null
   itnFiled: boolean
   totalWeightKg: number
+  totalValueUsd: number
   createdAt: string
   createdBy: string
   lastModifiedAt: string
@@ -207,4 +209,92 @@ export interface ApiErrorBody {
   error: string
   message: string
   fieldErrors: Record<string, string> | null
+}
+
+// ---------------------------------------------------------------- compliance
+
+export type FilingType = 'ORIGINAL' | 'AMENDMENT' | 'CANCELLATION'
+export type FilingStatus = 'DRAFT' | 'SUBMITTED' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED'
+
+export interface ItnRecord {
+  id: string
+  itnNumber: string
+  issuedAt: string
+  active: boolean
+  simulated: boolean
+  supersededByItnId: string | null
+  recordedAt: string
+  recordedBy: string
+}
+
+export interface EEIFilingHistoryEntry {
+  id: string
+  sequenceNumber: number
+  fromStatus: FilingStatus | null
+  toStatus: FilingStatus
+  occurredAt: string
+  actor: string
+  detail: string | null
+}
+
+export interface ExportLicense {
+  id: string
+  licenseNumber: string
+  issuingAuthority: string
+  licenseType: string
+  commodityEccn: string | null
+  validFrom: string
+  validUntil: string
+  valueAuthorized: number | null
+}
+
+export interface EEIFiling {
+  id: string
+  bookingId: string
+  filingReference: string
+  filingType: FilingType
+  parentFilingId: string | null
+  status: FilingStatus
+  shipperName: string | null
+  shipperEin: string | null
+  shipperAddress: string | null
+  consigneeName: string | null
+  consigneeAddress: string | null
+  consigneeCountry: string | null
+  scheduleBNumber: string | null
+  scheduleBTranslated: boolean
+  commodityDescription: string | null
+  quantityValue: number | null
+  quantityUnit: string | null
+  valueUsd: number | null
+  carrierScac: string | null
+  vesselName: string | null
+  voyageNumber: string | null
+  portOfExportCode: string | null
+  countryOfDestination: string | null
+  estimatedEtd: string | null
+  submittedAt: string | null
+  submittedBy: string | null
+  acceptedAt: string | null
+  rejectedAt: string | null
+  rejectionReasonCode: string | null
+  rejectionReasonDescription: string | null
+  cancelledAt: string | null
+  cancellationReason: string | null
+  aesSubmissionReference: string | null
+  simulated: boolean
+  amendmentReason: string | null
+  licenseRequired: boolean
+  filingRequired: boolean
+  missingRequiredFields: string[]
+  activeItnNumber: string | null
+  createdAt: string
+  exportLicense: ExportLicense | null
+  itnRecords: ItnRecord[]
+  history: EEIFilingHistoryEntry[]
+}
+
+export interface FilingSystemStatus {
+  simulated: boolean
+  notice: string
 }

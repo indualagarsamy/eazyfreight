@@ -1,0 +1,14 @@
+package com.eazyfreight.compliance;
+
+public enum FilingStatus {
+    DRAFT,
+    SUBMITTED,
+    ACCEPTED,
+    REJECTED,
+    CANCELLED;
+
+    /** Once submitted, the filing's data is frozen — CBP has seen it. */
+    public boolean isImmutable() {
+        return this != DRAFT;
+    }
+}

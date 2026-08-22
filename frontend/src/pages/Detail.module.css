@@ -106,3 +106,17 @@
 .sailingLabel { font-size: 11px; text-transform: uppercase; letter-spacing: .03em; color: var(--text-faint); }
 .sailingValue { font-weight: 550; }
 .sailingStale { text-decoration: line-through; color: var(--text-faint); }
+
+.filingRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-sunken);
+  color: inherit;
+  font-size: 13px;
+}
+
+.filingRow:hover { background: var(--bg-hover); text-decoration: none; }
