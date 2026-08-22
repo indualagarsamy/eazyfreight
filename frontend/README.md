@@ -10,7 +10,7 @@ The service must be up first:
 ```shell
 cd ..
 docker compose up -d
-export JAVA_HOME=/opt/homebrew/opt/openjdk@17   # keg-only install
+export JAVA_HOME=/opt/homebrew/opt/openjdk@21   # keg-only install
 ./gradlew bootRun                                # :8080
 ```
 

@@ -13,7 +13,7 @@ those specs describe.
 
 | | |
 |---|---|
-| Java | 17 (Gradle toolchain) |
+| Java | 21 (Gradle toolchain) |
 | Framework | Spring Boot 3.3.2 — Web, Data JPA, Validation, Actuator |
 | Database | PostgreSQL 16, schema managed by Flyway (`ddl-auto: validate`) |
 | Tests | JUnit 5 + MockMvc against in-memory H2 (37 tests) |
@@ -23,10 +23,10 @@ those specs describe.
 
 ## Running it
 
-Java 17 is required. If it was installed keg-only via Homebrew:
+Java 21 is required. If it was installed keg-only via Homebrew:
 
 ```shell
-export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+export JAVA_HOME=/opt/homebrew/opt/openjdk@21
 export PATH="$JAVA_HOME/bin:$PATH"
 ```
 
