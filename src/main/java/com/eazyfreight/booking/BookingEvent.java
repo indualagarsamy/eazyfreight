@@ -101,24 +101,6 @@ public sealed interface BookingEvent {
     ) implements BookingEvent {
     }
 
-    record TruckDeliveryOrderGenerated(
-            UUID bookingId,
-            String bookingReference,
-            String tdoReference,
-            String pickupAddress,
-            Instant occurredAt
-    ) implements BookingEvent {
-    }
-
-    record TruckDeliveryOrderDispatched(
-            UUID bookingId,
-            String tdoReference,
-            UUID driverId,
-            UUID truckingVendorId,
-            Instant occurredAt
-    ) implements BookingEvent {
-    }
-
     record VesselOverbookedNotified(
             UUID bookingId,
             String bookingReference,

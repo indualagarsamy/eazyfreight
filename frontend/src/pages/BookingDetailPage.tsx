@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   useAcceptCounterOffer, useAcknowledgeEtdVariance, useBooking, useCancelBooking,
-  useDispatchTruckDeliveryOrder, useGenerateTruckDeliveryOrder,
   useRecordCarrierConfirmation, useRecordCarrierRejection, useRecordCounterOffer,
   useRecordVesselOverbooking, useReinstateBooking,
   useRejectCounterOffer, useSendBookingConfirmation, useSubmitBooking,
@@ -22,7 +21,6 @@ import { containerLabel, date, dateTime, number, shortId, titleCase } from '../c
 import styles from './Detail.module.css'
 
 const DEMO_CARRIER_ID = '1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d'
-const DEMO_DRIVER_ID = '9f8e7d6c-5b4a-3c2d-1e0f-9a8b7c6d5e4f'
 
 const LIFECYCLE = [
   { status: 'BOOKING_REQUESTED', label: 'Requested' },
@@ -33,7 +31,7 @@ const LIFECYCLE = [
 
 type ActionKey =
   | 'submit' | 'confirm' | 'reject' | 'counterOffer' | 'acceptCounter' | 'rejectCounter'
-  | 'sendConfirmation' | 'generateTdo' | 'dispatchTdo' | 'overbook' | 'reinstate' | 'cancel'
+  | 'sendConfirmation' | 'overbook' | 'reinstate' | 'cancel'
 
 /**
  * Mirrors the aggregate's guards so an action can be disabled with the reason
@@ -63,16 +61,6 @@ function unavailableReason(booking: Booking, action: ActionKey): string | null {
         return 'Acknowledge the ETD change with the customer first'
       }
       return null
-    case 'generateTdo':
-      if (status !== 'CONFIRMED_BY_CARRIER' && status !== 'CUSTOMER_CONFIRMED') {
-        return 'A truck order cannot be raised before the carrier confirms'
-      }
-      if (!booking.transportRequired) return 'This booking does not include our trucking'
-      if (booking.truckDeliveryOrder) return 'A truck order already exists'
-      return null
-    case 'dispatchTdo':
-      if (!booking.truckDeliveryOrder) return 'Generate the truck order first'
-      return booking.truckDeliveryOrder.status === 'GENERATED' ? null : 'Already dispatched'
     case 'overbook':
       return status === 'CONFIRMED_BY_CARRIER' || status === 'CUSTOMER_CONFIRMED'
         ? null : 'Only a confirmed booking can be reported as overbooked'
@@ -98,8 +86,6 @@ export function BookingDetailPage() {
   const rejectCounter = useRejectCounterOffer(id)
   const acknowledge = useAcknowledgeEtdVariance(id)
   const sendConfirmation = useSendBookingConfirmation(id)
-  const generateTdo = useGenerateTruckDeliveryOrder(id)
-  const dispatchTdo = useDispatchTruckDeliveryOrder(id)
   const overbook = useRecordVesselOverbooking(id)
   const reinstate = useReinstateBooking(id)
   const cancel = useCancelBooking(id)
@@ -107,7 +93,7 @@ export function BookingDetailPage() {
   const { data: filings } = useFilingsForBooking(id)
   const initiateFiling = useInitiateFiling()
 
-  const [dialog, setDialog] = useState<null | 'submit' | 'confirm' | 'reject' | 'counter' | 'tdo' | 'reinstate' | 'cancel'>(null)
+  const [dialog, setDialog] = useState<null | 'submit' | 'confirm' | 'reject' | 'counter' | 'reinstate' | 'cancel'>(null)
 
   if (isPending) return <div className="card"><Skeleton rows={7} /></div>
   if (error) return <ErrorState error={error} onRetry={() => void refetch()} />
@@ -139,7 +125,6 @@ export function BookingDetailPage() {
   )
 
   const carrier = booking.carrierBooking
-  const tdo = booking.truckDeliveryOrder
   const etdPending = booking.requiresCustomerEtdNotification
     && booking.etdVarianceAcknowledgedAt === null
 
@@ -298,36 +283,20 @@ export function BookingDetailPage() {
           </section>
 
           <section className="card">
-            <div className="card-header">
-              <h2>Truck delivery order</h2>
-              {tdo && <StatusPill status={tdo.status} size="sm" />}
-            </div>
+            <div className="card-header"><h2>Trucking</h2></div>
             <div className="card-body">
               {!booking.transportRequired ? (
                 <p className="muted">Customer arranges their own trucking.</p>
-              ) : !tdo ? (
-                <>
-                  <p className="muted" style={{ marginBottom: 14 }}>
-                    Not raised yet. A driver is never dispatched before the carrier confirms space.
-                  </p>
-                  <Action action="generateTdo" label="Generate truck order"
-                    onClick={() => setDialog('tdo')} />
-                </>
               ) : (
                 <>
                   <dl className="definition-list">
-                    <Item label="Reference" value={tdo.tdoReference} mono />
-                    <Item label="Pickup" value={tdo.pickupAddress} />
-                    <Item label="Delivery" value={tdo.deliveryAddress} />
-                    <Item label="Generated" value={dateTime(tdo.generatedAt)} />
-                    <Item label="Dispatched" value={dateTime(tdo.dispatchedAt)} />
-                    <Item label="Driver" value={shortId(tdo.driverId)} mono />
+                    <Item label="Pickup address" value={booking.pickupAddress ?? '—'} />
                   </dl>
-                  <div style={{ marginTop: 14 }}>
-                    <Action action="dispatchTdo" label="Dispatch driver"
-                      onClick={() => void run('Driver dispatched',
-                        () => dispatchTdo.mutateAsync({ driverId: DEMO_DRIVER_ID, truckingVendorId: null }))} />
-                  </div>
+                  <p className="muted" style={{ marginTop: 14, fontSize: 12.5 }}>
+                    Truck movements are managed in{' '}
+                    <Link to={`/logistics/${booking.id}`}>Container &amp; equipment</Link> —
+                    there are two of them, and the second is gated on the ITN.
+                  </p>
                 </>
               )}
             </div>
@@ -496,14 +465,7 @@ export function BookingDetailPage() {
         <CounterOfferModal busy={counterOffer.isPending} onClose={() => setDialog(null)}
           onSubmit={(input) => void run('Counter-offer recorded', () => counterOffer.mutateAsync(input))} />
       )}
-      {dialog === 'tdo' && (
-        <ReasonModal title="Generate truck delivery order" label="Delivery address"
-          placeholder="Port of Nhava Sheva, Terminal 2" busy={generateTdo.isPending}
-          confirmLabel="Generate" onClose={() => setDialog(null)}
-          onSubmit={(deliveryAddress) => void run('Truck order generated',
-            () => generateTdo.mutateAsync({ deliveryAddress }))} />
-      )}
-      {dialog === 'reinstate' && (
+            {dialog === 'reinstate' && (
         <ReinstateModal busy={reinstate.isPending} itnFiled={booking.itnFiled}
           onClose={() => setDialog(null)}
           onSubmit={(input) => void run('Rolled to the new sailing', () => reinstate.mutateAsync(input))} />

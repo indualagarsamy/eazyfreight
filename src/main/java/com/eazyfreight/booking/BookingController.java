@@ -79,11 +79,6 @@ public class BookingController {
         return bookingService.findApproachingEtd(withinDays);
     }
 
-    @GetMapping("/awaiting-truck-dispatch")
-    public List<BookingResponse> getAwaitingTruckDispatch() {
-        return bookingService.findAwaitingTruckDispatch();
-    }
-
     @PostMapping
     public ResponseEntity<BookingResponse> create(
             @Valid @RequestBody CreateBookingRequest request,
@@ -150,22 +145,6 @@ public class BookingController {
             @PathVariable UUID id,
             @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
         return bookingService.sendConfirmationToCustomer(id, actor);
-    }
-
-    @PostMapping("/{id}/truck-delivery-order")
-    public BookingResponse generateTruckDeliveryOrder(
-            @PathVariable UUID id,
-            @Valid @RequestBody GenerateTruckDeliveryOrderRequest request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return bookingService.generateTruckDeliveryOrder(id, request, actor);
-    }
-
-    @PostMapping("/{id}/truck-delivery-order/dispatch")
-    public BookingResponse dispatchTruckDeliveryOrder(
-            @PathVariable UUID id,
-            @RequestBody DispatchTruckDeliveryOrderRequest request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return bookingService.dispatchTruckDeliveryOrder(id, request, actor);
     }
 
     @PostMapping("/{id}/vessel-overbooking")

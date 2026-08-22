@@ -47,7 +47,6 @@ public record BookingResponse(
         Instant lastModifiedAt,
         String lastModifiedBy,
         CarrierBookingResponse carrierBooking,
-        TruckDeliveryOrderResponse truckDeliveryOrder,
         List<BookingCargoDetailResponse> cargoDetails,
         List<BookingStatusHistoryResponse> statusHistory,
         List<BookingReinstatementResponse> reinstatements
@@ -88,7 +87,6 @@ public record BookingResponse(
                 booking.getLastModifiedAt(),
                 booking.getLastModifiedBy(),
                 CarrierBookingResponse.fromEntity(booking.getCarrierBooking()),
-                TruckDeliveryOrderResponse.fromEntity(booking.getTruckDeliveryOrder()),
                 booking.getCargoDetails().stream().map(BookingCargoDetailResponse::fromEntity).toList(),
                 booking.getStatusHistory().stream().map(BookingStatusHistoryResponse::fromEntity).toList(),
                 booking.getReinstatements().stream().map(BookingReinstatementResponse::fromEntity).toList()

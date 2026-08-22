@@ -24,7 +24,7 @@ class ContainerLogisticsLifecycleTest {
     void theTwoTruckMovementsAreSeparateRecords() {
         ContainerAssignment assignment = sealed();
         assignment.recordItnReceived("X99999999000001", NOW);
-        assignment.dispatchInbound("TDO-2-IN", DRIVER, null, null,
+        assignment.dispatchInbound(() -> "TDO-2-IN", DRIVER, null, null,
                 "Customer premises", "Port terminal", NOW, NOW, NOW, ACTOR);
 
         assertThat(assignment.getDispatches()).hasSize(2);
@@ -41,7 +41,7 @@ class ContainerLogisticsLifecycleTest {
         ContainerAssignment assignment = sealed();
 
         assertThat(assignment.inboundBlockedReason()).contains("ITN not yet received");
-        assertThatThrownBy(() -> assignment.dispatchInbound("TDO-2-IN", DRIVER, null, null,
+        assertThatThrownBy(() -> assignment.dispatchInbound(() -> "TDO-2-IN", DRIVER, null, null,
                 "Customer premises", "Port terminal", NOW, NOW, NOW, ACTOR))
                 .isInstanceOf(DomainRuleViolationException.class)
                 .hasMessageContaining("ITN not yet received");
@@ -51,7 +51,7 @@ class ContainerLogisticsLifecycleTest {
         assignment.recordItnReceived("X99999999000001", NOW);
 
         assertThat(assignment.inboundBlockedReason()).isNull();
-        assignment.dispatchInbound("TDO-2-IN", DRIVER, null, null,
+        assignment.dispatchInbound(() -> "TDO-2-IN", DRIVER, null, null,
                 "Customer premises", "Port terminal", NOW, NOW, NOW, ACTOR);
         assertThat(assignment.getStage()).isEqualTo(LogisticsStage.INBOUND_DISPATCHED);
     }
@@ -186,11 +186,26 @@ class ContainerLogisticsLifecycleTest {
     }
 
     @Test
+    void aRefusedDispatchDoesNotConsumeATdoReference() {
+        ContainerAssignment assignment = sealed();
+        java.util.concurrent.atomic.AtomicInteger drawn =
+                new java.util.concurrent.atomic.AtomicInteger();
+
+        // The ITN gate refuses this, so no reference should be taken.
+        assertThatThrownBy(() -> assignment.dispatchInbound(
+                () -> "TDO-" + drawn.incrementAndGet(), DRIVER, null, null,
+                "Customer premises", "Port terminal", NOW, NOW, NOW, ACTOR))
+                .isInstanceOf(DomainRuleViolationException.class);
+
+        assertThat(drawn.get()).isZero();
+    }
+
+    @Test
     void aVendorDispatchMustCarryAVehicleReferenceForAudit() {
         ContainerAssignment assignment = ContainerAssignment.open(
                 BOOKING, ContainerType.FORTY_HC, NOW);
 
-        assertThatThrownBy(() -> assignment.dispatchOutbound("TDO-1-OUT", null,
+        assertThatThrownBy(() -> assignment.dispatchOutbound(() -> "TDO-1-OUT", null,
                 UUID.randomUUID(), null, "Carrier yard", "Customer premises", NOW, NOW, NOW, ACTOR))
                 .isInstanceOf(DomainRuleViolationException.class)
                 .hasMessageContaining("vehicle reference");
@@ -201,7 +216,7 @@ class ContainerLogisticsLifecycleTest {
         ContainerAssignment assignment = ContainerAssignment.open(
                 BOOKING, ContainerType.FORTY_HC, NOW);
 
-        assertThatThrownBy(() -> assignment.dispatchOutbound("TDO-1-OUT", null, null, null,
+        assertThatThrownBy(() -> assignment.dispatchOutbound(() -> "TDO-1-OUT", null, null, null,
                 "Carrier yard", "Customer premises", NOW, NOW, NOW, ACTOR))
                 .isInstanceOf(DomainRuleViolationException.class)
                 .hasMessageContaining("driver or a trucking vendor");
@@ -211,7 +226,7 @@ class ContainerLogisticsLifecycleTest {
 
     private ContainerAssignment dispatched() {
         ContainerAssignment assignment = ContainerAssignment.open(BOOKING, ContainerType.FORTY_HC, NOW);
-        assignment.dispatchOutbound("TDO-1-OUT", DRIVER, null, null,
+        assignment.dispatchOutbound(() -> "TDO-1-OUT", DRIVER, null, null,
                 "Carrier yard, Nhava Sheva", "Plot 14, MIDC Andheri", NOW, NOW, NOW, ACTOR);
         return assignment;
     }
@@ -229,7 +244,7 @@ class ContainerLogisticsLifecycleTest {
     private ContainerAssignment atTerminalReady() {
         ContainerAssignment assignment = sealed();
         assignment.recordItnReceived("X99999999000001", NOW);
-        assignment.dispatchInbound("TDO-2-IN", DRIVER, null, null,
+        assignment.dispatchInbound(() -> "TDO-2-IN", DRIVER, null, null,
                 "Plot 14, MIDC Andheri", "APM Terminals", NOW, NOW, NOW, ACTOR);
         assignment.recordLoadedContainerPickedUp(NOW);
         return assignment;

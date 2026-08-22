@@ -38,6 +38,11 @@ public class LogisticsController {
         return logisticsService.findBlockedOnItn();
     }
 
+    @GetMapping("/awaiting-outbound-dispatch")
+    public List<LogisticsResponses.AwaitingDispatch> getAwaitingOutboundDispatch() {
+        return logisticsService.findAwaitingOutboundDispatch();
+    }
+
     @GetMapping("/under-examination")
     public List<LogisticsResponses.Logistics> getUnderExamination() {
         return logisticsService.findUnderExamination();

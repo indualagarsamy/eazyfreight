@@ -84,7 +84,6 @@ export type BookingStatus =
 export type BookingShippingMode = 'OCEAN_FCL' | 'OCEAN_LCL'
 export type BookingSourceType = 'DIRECT_CARRIER' | 'CO_LOADER'
 export type ContainerType = 'TWENTY_GP' | 'FORTY_GP' | 'FORTY_HC' | 'FORTY_FIVE_HC'
-export type TruckDeliveryOrderStatus = 'GENERATED' | 'DISPATCHED' | 'PICKED_UP' | 'DELIVERED'
 export type StatusChangeSource = 'MANUAL' | 'INTTRA' | 'SYSTEM'
 export type CancellationInitiator = 'CUSTOMER' | 'CARRIER_OVERBOOKING' | 'OPERATIONS'
 
@@ -103,19 +102,6 @@ export interface CarrierBooking {
   submittedAt: string | null
   confirmedAt: string | null
   confirmedBy: string | null
-}
-
-export interface TruckDeliveryOrder {
-  id: string
-  tdoReference: string
-  pickupAddress: string
-  deliveryAddress: string
-  pickupDateTime: string | null
-  driverId: string | null
-  truckingVendorId: string | null
-  status: TruckDeliveryOrderStatus
-  generatedAt: string
-  dispatchedAt: string | null
 }
 
 export interface BookingStatusHistoryEntry {
@@ -196,7 +182,6 @@ export interface Booking {
   lastModifiedAt: string
   lastModifiedBy: string
   carrierBooking: CarrierBooking | null
-  truckDeliveryOrder: TruckDeliveryOrder | null
   cargoDetails: BookingCargoDetail[]
   statusHistory: BookingStatusHistoryEntry[]
   reinstatements: BookingReinstatement[]
@@ -297,4 +282,129 @@ export interface EEIFiling {
 export interface FilingSystemStatus {
   simulated: boolean
   notice: string
+}
+
+// ---------------------------------------------------------------- logistics
+
+export type MovementType = 'OUTBOUND' | 'INBOUND'
+export type DispatchStatus = 'DISPATCHED' | 'PICKED_UP' | 'DELIVERED' | 'FAILED'
+export type AddressType = 'CARRIER_YARD' | 'CUSTOMER_PREMISES' | 'PORT_TERMINAL'
+export type ContainerSource = 'CARRIER_YARD' | 'MANUAL_ENTRY'
+export type SealSource = 'CUSTOMER_ISSUED' | 'CUSTOMS_ISSUED'
+export type SealDeactivationReason = 'CUSTOMS_INSPECTION' | 'DAMAGED_SEAL'
+export type ExaminationResult = 'RELEASED' | 'ADDITIONAL_HOLD' | 'SEIZED'
+export type LogisticsStage =
+  | 'NOT_STARTED' | 'OUTBOUND_DISPATCHED' | 'AT_CUSTOMER' | 'LOADING_COMPLETE'
+  | 'SEALED' | 'INBOUND_DISPATCHED' | 'AT_TERMINAL' | 'UNDER_CBP_EXAMINATION'
+  | 'LOADED_ON_VESSEL' | 'DEPARTED'
+
+export interface SealRecordView {
+  id: string
+  sealNumber: string
+  sealSource: SealSource
+  active: boolean
+  issuedAt: string
+  deactivatedAt: string | null
+  deactivationReason: SealDeactivationReason | null
+  replacedBySealId: string | null
+  recordedBy: string
+}
+
+export interface DispatchView {
+  id: string
+  movementType: MovementType
+  tdoReference: string
+  driverId: string | null
+  truckingVendorId: string | null
+  vehicleReference: string | null
+  pickupAddress: string
+  pickupAddressType: AddressType
+  deliveryAddress: string
+  deliveryAddressType: AddressType
+  scheduledPickupDate: string | null
+  actualPickupDate: string | null
+  scheduledDeliveryDate: string | null
+  actualDeliveryDate: string | null
+  status: DispatchStatus
+  dispatchedAt: string
+  dispatchedBy: string
+  deliveryReceiptReference: string | null
+  notes: string | null
+}
+
+export interface TerminalView {
+  id: string
+  gateReceiptNumber: string
+  terminalName: string
+  acceptedAt: string
+  earliestAcceptanceDate: string | null
+  vesselCutOffDate: string | null
+  storageFeeApplies: boolean
+  daysEarly: number | null
+  storageFeeDailyRate: number | null
+  estimatedStorageFee: number
+}
+
+export interface ExaminationView {
+  id: string
+  holdPlacedAt: string
+  examinationCompletedAt: string | null
+  result: ExaminationResult | null
+  originalSealId: string | null
+  replacementSealId: string | null
+  cbpOfficerId: string | null
+  notes: string | null
+  open: boolean
+}
+
+export interface ActualCargoView {
+  id: string
+  actualWeightKg: number
+  actualPieces: number
+  actualCbm: number | null
+  bookedWeightKg: number
+  bookedPieces: number
+  bookedCbm: number | null
+  weightVarianceKg: number
+  divergesMaterially: boolean
+  recordedAt: string
+  recordedBy: string
+}
+
+export interface Logistics {
+  id: string
+  bookingId: string
+  containerNumber: string | null
+  containerType: ContainerType | null
+  source: ContainerSource | null
+  assignedAt: string | null
+  assignedBy: string | null
+  stage: LogisticsStage
+  itnReceived: boolean
+  itnNumber: string | null
+  inboundBlockedReason: string | null
+  documentationPreconditionsMet: boolean
+  loadingCompletedAt: string | null
+  loadedOnVesselAt: string | null
+  vesselDepartedAt: string | null
+  createdAt: string
+  activeSealNumber: string | null
+  sealRecords: SealRecordView[]
+  dispatches: DispatchView[]
+  examinations: ExaminationView[]
+  terminalAcceptance: TerminalView | null
+  actualCargoDetails: ActualCargoView | null
+}
+
+export interface AwaitingDispatch {
+  bookingId: string
+  bookingReference: string
+  requestedEtd: string | null
+  confirmedEtd: string | null
+  pickupAddress: string | null
+}
+
+export interface ItnGate {
+  clear: boolean
+  reason: string | null
 }

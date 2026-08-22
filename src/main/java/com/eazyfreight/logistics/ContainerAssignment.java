@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 /**
  * Container logistics aggregate root — one physical container's journey.
@@ -140,23 +141,29 @@ public class ContainerAssignment extends AbstractAggregateRoot<ContainerAssignme
 
     // ------------------------------------------------------ 1. outbound truck
 
+    /**
+     * The reference is supplied lazily and drawn only once the guards pass. The
+     * generator commits in its own transaction, so taking one up front would
+     * consume a TDO number on every rejected attempt.
+     */
     public TruckDispatch dispatchOutbound(
-            String tdoReference, UUID driverId, UUID truckingVendorId, String vehicleReference,
+            Supplier<String> tdoReference, UUID driverId, UUID truckingVendorId, String vehicleReference,
             String yardAddress, String customerAddress,
             Instant scheduledPickup, Instant scheduledDelivery, Instant now, String actor
     ) {
         if (outboundDispatch().isPresent()) {
             throw new DomainRuleViolationException("The outbound truck has already been dispatched");
         }
+        String reference = tdoReference.get();
         TruckDispatch dispatch = TruckDispatch.dispatch(this, bookingId, MovementType.OUTBOUND,
-                tdoReference, driverId, truckingVendorId, vehicleReference,
+                reference, driverId, truckingVendorId, vehicleReference,
                 yardAddress, AddressType.CARRIER_YARD,
                 customerAddress, AddressType.CUSTOMER_PREMISES,
                 scheduledPickup, scheduledDelivery, now, actor);
         dispatches.add(dispatch);
         advanceTo(LogisticsStage.OUTBOUND_DISPATCHED);
         registerEvent(new LogisticsEvent.TruckDeliveryOrderDispatched(
-                bookingId, MovementType.OUTBOUND, tdoReference, now));
+                bookingId, MovementType.OUTBOUND, reference, now));
         return dispatch;
     }
 
@@ -273,7 +280,7 @@ public class ContainerAssignment extends AbstractAggregateRoot<ContainerAssignme
      * This is the gate the monolith does not have.
      */
     public TruckDispatch dispatchInbound(
-            String tdoReference, UUID driverId, UUID truckingVendorId, String vehicleReference,
+            Supplier<String> tdoReference, UUID driverId, UUID truckingVendorId, String vehicleReference,
             String customerAddress, String terminalAddress,
             Instant scheduledPickup, Instant scheduledDelivery, Instant now, String actor
     ) {
@@ -283,15 +290,16 @@ public class ContainerAssignment extends AbstractAggregateRoot<ContainerAssignme
             throw new DomainRuleViolationException("Inbound dispatch refused: " + blocked);
         }
 
+        String reference = tdoReference.get();
         TruckDispatch dispatch = TruckDispatch.dispatch(this, bookingId, MovementType.INBOUND,
-                tdoReference, driverId, truckingVendorId, vehicleReference,
+                reference, driverId, truckingVendorId, vehicleReference,
                 customerAddress, AddressType.CUSTOMER_PREMISES,
                 terminalAddress, AddressType.PORT_TERMINAL,
                 scheduledPickup, scheduledDelivery, now, actor);
         dispatches.add(dispatch);
         advanceTo(LogisticsStage.INBOUND_DISPATCHED);
         registerEvent(new LogisticsEvent.TruckDeliveryOrderDispatched(
-                bookingId, MovementType.INBOUND, tdoReference, now));
+                bookingId, MovementType.INBOUND, reference, now));
         return dispatch;
     }
 

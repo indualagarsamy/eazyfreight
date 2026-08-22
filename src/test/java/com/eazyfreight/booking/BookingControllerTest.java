@@ -40,13 +40,6 @@ class BookingControllerTest {
 
         String bookingId = JsonPath.parse(createResponse).read("$.id");
 
-        // Rule 6: no driver goes out before the carrier has confirmed the space.
-        mockMvc.perform(post("/api/bookings/" + bookingId + "/truck-delivery-order")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"deliveryAddress\": \"Port of Nhava Sheva\"}"))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value(containsString("until the carrier confirms")));
-
         mockMvc.perform(post("/api/bookings/" + bookingId + "/submit")
                         .header("X-Actor", "ops.jane")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -81,26 +74,6 @@ class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CUSTOMER_CONFIRMED"))
                 .andExpect(jsonPath("$.confirmationSentAt").exists());
-
-        String tdoResponse = mockMvc.perform(post("/api/bookings/" + bookingId + "/truck-delivery-order")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"deliveryAddress\": \"Port of Nhava Sheva\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.truckDeliveryOrder.status").value("GENERATED"))
-                .andExpect(jsonPath("$.truckDeliveryOrder.tdoReference").value(
-                        org.hamcrest.Matchers.matchesPattern("TDO-2024-\\d{5}")))
-                .andReturn().getResponse().getContentAsString();
-
-        // The truck order is a record with its own reference, not a boolean flag.
-        String tdoReference = JsonPath.parse(tdoResponse).read("$.truckDeliveryOrder.tdoReference");
-        org.assertj.core.api.Assertions.assertThat(tdoReference).isNotBlank();
-
-        mockMvc.perform(post("/api/bookings/" + bookingId + "/truck-delivery-order/dispatch")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"driverId\": \"9f8e7d6c-5b4a-3c2d-1e0f-9a8b7c6d5e4f\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.truckDeliveryOrder.status").value("DISPATCHED"))
-                .andExpect(jsonPath("$.truckDeliveryOrder.dispatchedAt").exists());
 
         mockMvc.perform(get("/api/bookings/" + bookingId + "/status-history"))
                 .andExpect(status().isOk())
