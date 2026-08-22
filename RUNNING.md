@@ -19,7 +19,14 @@ docker compose up -d      # postgres on 5432, jaeger UI on 16686
 curl localhost:8080/actuator/health
 ```
 
-Run tests instead with `./gradlew build` (37 tests, no Docker needed).
+To restart when an instance is already bound to 8080, kill it first:
+
+```shell
+./gradlew --stop
+./gradlew bootRun
+```
+
+Run tests instead with `./gradlew build` (no Docker needed).
 
 ## 3. Frontend (React + Vite, port 5173)
 
