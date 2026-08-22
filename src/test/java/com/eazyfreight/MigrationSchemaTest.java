@@ -51,7 +51,13 @@ class MigrationSchemaTest {
                 "eei_filings",
                 "itn_records",
                 "eei_filing_history",
-                "export_licenses");
+                "export_licenses",
+                "container_assignments",
+                "seal_records",
+                "truck_dispatches",
+                "terminal_acceptances",
+                "cbp_examinations",
+                "actual_cargo_details");
     }
 
     @Test
@@ -62,6 +68,6 @@ class MigrationSchemaTest {
                         + "WHERE success = TRUE AND version IS NOT NULL ORDER BY installed_rank",
                 String.class);
 
-        assertThat(versions).containsExactly("1", "2", "3", "4");
+        assertThat(versions).containsExactly("1", "2", "3", "4", "6");
     }
 }
