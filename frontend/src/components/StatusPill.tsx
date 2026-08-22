@@ -51,8 +51,24 @@ const DOCUMENTATION_TONES: Record<string, Tone> = {
   PREPAID: 'neutral', COLLECT: 'neutral',
 }
 
+
+/**
+ * Finance only contributes statuses the other contexts do not already own. ISSUED,
+ * APPROVED and PENDING are deliberately absent: a House BOL being issued and an
+ * invoice being issued want the same colour, and re-registering them here would
+ * silently repaint the Documentation screens.
+ */
+const FINANCE_TONES: Record<string, Tone> = {
+  PREPARED: 'neutral', PARTIALLY_PAID: 'info', PAID: 'positive',
+  FREIGHT: 'neutral', STORAGE_FEE: 'warning', CREDIT_NOTE: 'info',
+  AWAITING_INVOICE_MATCH: 'warning',
+  CUSTOMER: 'neutral', EAZY_FREIGHT: 'danger',
+  CARRIER_DISPUTED: 'warning', UNDETERMINED: 'warning',
+  WIRE: 'neutral', CHECK: 'neutral', ACH: 'neutral',
+}
+
 const REGISTRY = {
-  ...QUOTE_TONES, ...BOOKING_TONES, ...SCREENING_TONES, ...TDO_TONES, ...FILING_TONES, ...LOGISTICS_TONES, ...DOCUMENTATION_TONES,
+  ...QUOTE_TONES, ...BOOKING_TONES, ...SCREENING_TONES, ...TDO_TONES, ...FILING_TONES, ...LOGISTICS_TONES, ...DOCUMENTATION_TONES, ...FINANCE_TONES,
 }
 
 interface Props {

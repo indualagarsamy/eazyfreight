@@ -548,3 +548,125 @@ export interface HouseBOL {
   originals: Originals | null
   distributions: Distribution[]
 }
+
+// ------------------------------------------------------------------ finance
+
+export type InvoiceStatus = 'PREPARED' | 'ISSUED' | 'PARTIALLY_PAID' | 'PAID' | 'VOIDED'
+export type InvoiceType = 'FREIGHT' | 'STORAGE_FEE' | 'CREDIT_NOTE'
+export type PaymentTermsType = 'TWO_WEEKS_BEFORE_ARRIVAL' | 'NET_30'
+export type PayableStatus = 'PENDING' | 'AWAITING_INVOICE_MATCH' | 'APPROVED' | 'PAID'
+export type PaymentMethod = 'WIRE' | 'CHECK' | 'ACH'
+export type StorageFeeCause = 'EARLY_PORT_DELIVERY' | 'BOL_INSTRUCTIONS_LATE'
+export type StorageFeeResponsibility =
+  'CUSTOMER' | 'EAZY_FREIGHT' | 'CARRIER_DISPUTED' | 'UNDETERMINED'
+
+export interface InvoiceLineView {
+  id: string
+  lineNumber: number
+  description: string
+  buyAmount: number
+  sellAmount: number
+  quantity: number
+  unit: string | null
+  extendedBuy: number
+  extendedSell: number
+  margin: number
+}
+
+export interface PaymentView {
+  id: string
+  amount: number
+  currency: string
+  paymentDate: string
+  paymentMethod: PaymentMethod
+  reference: string | null
+  recordedAt: string
+  recordedBy: string
+}
+
+export interface InvoiceView {
+  id: string
+  invoiceNumber: string
+  bookingId: string
+  houseBolId: string | null
+  customerId: string
+  status: InvoiceStatus
+  invoiceType: InvoiceType
+  paymentTermsType: PaymentTermsType
+  invoiceDate: string | null
+  paymentDueDate: string | null
+  confirmedEta: string | null
+  totalAmount: number
+  totalBuyAmount: number
+  margin: number
+  currency: string
+  paidAmount: number
+  outstandingAmount: number
+  actualsConfirmed: boolean
+  issueBlockedReason: string | null
+  overdue: boolean
+  daysOverdue: number
+  issuedAt: string | null
+  issuedBy: string | null
+  pdfSentAt: string | null
+  voidedAt: string | null
+  voidedBy: string | null
+  voidReason: string | null
+  creditNoteAgainstInvoiceId: string | null
+  notes: string | null
+  createdAt: string
+  lines: InvoiceLineView[]
+  payments: PaymentView[]
+}
+
+export interface PayableView {
+  id: string
+  bookingId: string
+  invoiceId: string
+  customerPaymentId: string
+  carrierId: string | null
+  amount: number
+  currency: string
+  customerPaymentDate: string
+  dueDate: string
+  status: PayableStatus
+  carrierInvoiceReference: string | null
+  carrierInvoiceAmount: number | null
+  invoiceVariance: number
+  carrierInvoiceReceivedAt: string | null
+  approvedAt: string | null
+  approvedBy: string | null
+  paidOn: string | null
+  paymentReference: string | null
+  overdue: boolean
+  createdAt: string
+}
+
+export interface StorageFeeView {
+  id: string
+  bookingId: string
+  cause: StorageFeeCause
+  responsibility: StorageFeeResponsibility
+  dailyRate: number
+  days: number
+  amount: number
+  currency: string
+  periodFrom: string | null
+  periodTo: string | null
+  invoiceId: string | null
+  invoiceBlockedReason: string | null
+  notes: string | null
+  createdAt: string
+}
+
+export interface CreditHoldView {
+  id: string
+  customerId: string
+  triggeringBookingId: string | null
+  reason: string
+  active: boolean
+  placedAt: string
+  placedBy: string
+  liftedAt: string | null
+  liftedBy: string | null
+}

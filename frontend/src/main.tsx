@@ -17,6 +17,8 @@ import { DocumentationPage } from './pages/DocumentationPage'
 import { DocumentationDetailPage } from './pages/DocumentationDetailPage'
 import { FilingsPage } from './pages/FilingsPage'
 import { FilingDetailPage } from './pages/FilingDetailPage'
+import { FinancePage } from './pages/FinancePage'
+import { FinanceDetailPage } from './pages/FinanceDetailPage'
 import './styles/global.css'
 
 const queryClient = new QueryClient({
@@ -52,6 +54,8 @@ const router = createBrowserRouter([
       { path: 'documentation/:id', element: <DocumentationDetailPage /> },
       { path: 'compliance', element: <FilingsPage /> },
       { path: 'compliance/:id', element: <FilingDetailPage /> },
+      { path: 'finance', element: <FinancePage /> },
+      { path: 'finance/:id', element: <FinanceDetailPage /> },
     ],
   },
 ])

@@ -17,12 +17,13 @@ import { GatedButton } from '../components/GatedButton'
 import { ErrorState, Skeleton } from '../components/States'
 import { useToast } from '../components/Toast'
 import { useFilingsForBooking, useInitiateFiling } from '../api/compliance'
+import { useInvoicesForBooking } from '../api/finance'
 import {
   useApproveInstructions, useCompileInstructions, useGenerateHouseBol,
   useHouseBolsForBooking, useInstructionsForBooking, useMasterBolsForBooking,
   usePreconditions, useRecordMasterBol, useSendInstructions, useVerifyMasterBol,
 } from '../api/documentation'
-import { containerLabel, date, dateTime, number, shortId, titleCase } from '../components/format'
+import { containerLabel, date, dateTime, money, number, shortId, titleCase } from '../components/format'
 import styles from './Detail.module.css'
 
 const DEMO_CARRIER_ID = '1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d'
@@ -96,6 +97,7 @@ export function BookingDetailPage() {
   const cancel = useCancelBooking(id)
 
   const { data: filings } = useFilingsForBooking(id)
+  const { data: invoices } = useInvoicesForBooking(id)
   const initiateFiling = useInitiateFiling()
 
   const { data: preconditions } = usePreconditions(id)
@@ -432,6 +434,39 @@ export function BookingDetailPage() {
                   </Link>
                 ))}
               </>
+            )}
+          </div>
+        </section>
+
+        <section className="card">
+          <div className="card-header">
+            <h2>Finance</h2>
+            <span className="faint" style={{ fontSize: 12 }}>
+              Prepared on confirmation, issuable once the House BOL carries the actuals
+            </span>
+          </div>
+          <div className="card-body stack">
+            {(invoices ?? []).length === 0 ? (
+              <p className="muted">
+                No invoice yet. One is prepared automatically when the carrier confirms.
+              </p>
+            ) : (
+              (invoices ?? []).map((invoice) => (
+                <Link key={invoice.id} to={`/finance/${invoice.id}`} className={styles.filingRow}>
+                  <span className="mono">{invoice.invoiceNumber}</span>
+                  <StatusPill status={invoice.invoiceType} size="sm" />
+                  <StatusPill status={invoice.status} size="sm" />
+                  {invoice.overdue && (
+                    <StatusPill status="OVERDUE" tone="danger" size="sm"
+                      label={`${invoice.daysOverdue}d late`} />
+                  )}
+                  <span className="spacer" />
+                  <span className="numeric">{money(invoice.totalAmount, invoice.currency)}</span>
+                  {invoice.issueBlockedReason && invoice.status === 'PREPARED' && (
+                    <span className="faint">{invoice.issueBlockedReason}</span>
+                  )}
+                </Link>
+              ))
             )}
           </div>
         </section>

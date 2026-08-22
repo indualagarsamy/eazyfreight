@@ -41,3 +41,29 @@
 
 .urgent { color: var(--warning); font-weight: 550; }
 .urgentNote { font-weight: 600; }
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.stat {
+  padding: 14px 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.statLabel {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.statValue { margin-top: 6px; font-size: 19px; font-weight: 600; letter-spacing: -.01em; }
+.statNote { margin-top: 3px; font-size: 11.5px; color: var(--warning); font-weight: 550; }

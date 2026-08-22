@@ -120,3 +120,30 @@
 }
 
 .filingRow:hover { background: var(--bg-hover); text-decoration: none; }
+
+/*
+ * A carrier payable is read as a causal chain: the customer paid on this date, so
+ * the carrier is due on that one. The arrow between them is the point of the card,
+ * so the two dates share a row and everything else wraps beneath rather than
+ * squeezing them.
+ */
+.payable {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 6px 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--bg-sunken);
+  font-size: 12.5px;
+}
+.payableArrow { color: var(--text-faint); font-size: 15px; }
+.payableFoot {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
