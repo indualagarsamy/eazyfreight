@@ -1,0 +1,26 @@
+info:
+  name: Cancel Booking
+  type: http
+  seq: 21
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/bookings/{{bookingId}}/cancel"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: X-Actor
+      value: ops.jane
+  body:
+    type: json
+    data: |-
+      {
+        "reason": "Customer cancelled the order",
+        "initiatedBy": "CUSTOMER"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

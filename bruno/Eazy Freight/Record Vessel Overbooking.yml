@@ -1,0 +1,15 @@
+info:
+  name: Record Vessel Overbooking
+  type: http
+  seq: 19
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/bookings/{{bookingId}}/vessel-overbooking"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

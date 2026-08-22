@@ -1,0 +1,28 @@
+info:
+  name: Record Counter Offer
+  type: http
+  seq: 14
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/bookings/{{bookingId}}/counter-offer"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: X-Actor
+      value: ops.jane
+  body:
+    type: json
+    data: |-
+      {
+        "proposedVessel": "MAERSK KOWLOON",
+        "proposedVoyage": "026W",
+        "proposedEtd": "2026-10-30",
+        "proposedEta": "2026-11-23"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

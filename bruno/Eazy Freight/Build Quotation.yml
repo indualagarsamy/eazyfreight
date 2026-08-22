@@ -1,0 +1,44 @@
+info:
+  name: Build Quotation
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/quotes/{{quoteId}}/build"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "lines": [
+          {
+            "lineType": "BASE_FREIGHT",
+            "description": "Ocean Freight",
+            "buyRate": 850.00,
+            "sellRate": 1100.00,
+            "quantity": 1,
+            "unit": "CBM"
+          },
+          {
+            "lineType": "THC_ORIGIN",
+            "description": "THC - Origin",
+            "buyRate": 100.00,
+            "sellRate": 120.00,
+            "quantity": 1,
+            "unit": "FLAT"
+          }
+        ],
+        "validityDays": 30,
+        "rateValidUntil": "2026-12-31",
+        "spotRate": false,
+        "notes": "Subject to space and equipment availability."
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,15 @@
+info:
+  name: Get Rates For Lane
+  type: http
+  seq: 8
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/quotes/rates?originPortCode=INBOM&destinationPortCode=SGSIN&mode=OCEAN_LCL"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

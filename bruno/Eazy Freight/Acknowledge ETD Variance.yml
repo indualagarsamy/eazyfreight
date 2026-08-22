@@ -1,0 +1,15 @@
+info:
+  name: Acknowledge ETD Variance
+  type: http
+  seq: 15
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/bookings/{{bookingId}}/acknowledge-etd-variance"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

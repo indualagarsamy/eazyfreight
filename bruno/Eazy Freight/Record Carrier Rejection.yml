@@ -1,0 +1,25 @@
+info:
+  name: Record Carrier Rejection
+  type: http
+  seq: 13
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/bookings/{{bookingId}}/carrier-rejection"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: X-Actor
+      value: ops.jane
+  body:
+    type: json
+    data: |-
+      {
+        "reason": "No space on requested sailing"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

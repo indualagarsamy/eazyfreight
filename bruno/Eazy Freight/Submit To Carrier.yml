@@ -1,0 +1,26 @@
+info:
+  name: Submit To Carrier
+  type: http
+  seq: 11
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/bookings/{{bookingId}}/submit"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: X-Actor
+      value: ops.jane
+  body:
+    type: json
+    data: |-
+      {
+        "bookingSourceType": "DIRECT_CARRIER",
+        "carrierId": "{{carrierId}}"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

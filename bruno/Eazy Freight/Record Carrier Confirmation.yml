@@ -1,0 +1,29 @@
+info:
+  name: Record Carrier Confirmation
+  type: http
+  seq: 12
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/bookings/{{bookingId}}/carrier-confirmation"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: X-Actor
+      value: ops.jane
+  body:
+    type: json
+    data: |-
+      {
+        "carrierBookingRef": "MAEU987654",
+        "vesselName": "MAERSK SEALAND",
+        "voyageNumber": "024W",
+        "confirmedEtd": "2026-10-16",
+        "confirmedEta": "2026-11-09"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,34 @@
+opencollection: 1.0.0
+
+info:
+  name: Eazy Freight
+
+request:
+  variables:
+    - name: baseUrl
+      value: http://localhost:8080
+    - name: quoteId
+      value: ""
+    - name: bookingId
+      value: ""
+    - name: customerId
+      value: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+    - name: carrierId
+      value: "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+
+docs:
+  content: |
+    Endpoints exposed by QuoteController (/api/quotes) and BookingController (/api/bookings).
+
+    Run in order: Create Quote -> Build Quotation -> Send Quote -> Accept Quote,
+    then Create Booking -> Submit To Carrier -> Record Carrier Confirmation ->
+    Send Booking Confirmation -> Generate Truck Delivery Order -> Dispatch.
+
+    Copy the `id` from a create response into the quoteId / bookingId variables.
+  type: text/markdown
+bundled: false
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git

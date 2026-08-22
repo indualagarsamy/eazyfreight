@@ -1,0 +1,20 @@
+# Runs the real Flyway migrations and then asks Hibernate to validate the entity
+# mappings against the resulting schema.
+#
+# H2 in PostgreSQL compatibility mode, because Docker is not assumed to be present.
+# This is close enough to catch a column that was renamed, retyped or forgotten —
+# the drift that leaves `ddl-auto: validate` failing on first boot against a real
+# database. It is not a substitute for running against PostgreSQL 16.
+spring:
+  datasource:
+    url: jdbc:h2:mem:migrationsdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration

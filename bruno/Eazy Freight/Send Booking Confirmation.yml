@@ -1,0 +1,15 @@
+info:
+  name: Send Booking Confirmation
+  type: http
+  seq: 16
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/bookings/{{bookingId}}/send-confirmation"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

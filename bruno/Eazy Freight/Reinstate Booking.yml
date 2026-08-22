@@ -1,0 +1,29 @@
+info:
+  name: Reinstate Booking
+  type: http
+  seq: 20
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/bookings/{{bookingId}}/reinstate"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: X-Actor
+      value: ops.jane
+  body:
+    type: json
+    data: |-
+      {
+        "newVesselName": "MAERSK KOWLOON",
+        "newVoyageNumber": "026W",
+        "newEtd": "2026-10-30",
+        "newEta": "2026-11-23",
+        "reason": "VesselOverbooked"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

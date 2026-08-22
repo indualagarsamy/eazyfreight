@@ -1,0 +1,50 @@
+info:
+  name: Create Quote
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/quotes"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "customerId": "{{customerId}}",
+        "shippingMode": "OCEAN_LCL",
+        "originPortCode": "INBOM",
+        "destinationPortCode": "SGSIN",
+        "incoterms": "FOB",
+        "requestedEtd": "2026-10-15",
+        "insuranceRequired": false,
+        "currency": "USD",
+        "shipperName": "Acme Manufacturing",
+        "shipperAddress": "Plot 14, MIDC Andheri",
+        "shipperCountry": "IN",
+        "consigneeName": "Singapore Trading Pte",
+        "consigneeAddress": "9 Raffles Place",
+        "consigneeCountry": "SG",
+        "cargoDetails": [
+          {
+            "description": "Machine parts",
+            "hsCode": "8471.30.0100",
+            "pieces": 2,
+            "weightKg": 500.000,
+            "lengthCm": 100.00,
+            "widthCm": 100.00,
+            "heightCm": 100.00,
+            "hazmat": false,
+            "temperatureControlled": false,
+            "oversized": false
+          }
+        ]
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
