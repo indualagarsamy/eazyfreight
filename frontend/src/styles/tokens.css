@@ -1,0 +1,80 @@
+/* Light palette is the base; only the tokens that change are redefined for dark. */
+:root {
+  --bg-app: #f6f7f9;
+  --bg-surface: #ffffff;
+  --bg-sunken: #f0f2f5;
+  --bg-hover: #f4f6f8;
+  --bg-inverse: #16191d;
+
+  --border: #e2e6eb;
+  --border-strong: #cbd2da;
+
+  --text: #16191d;
+  --text-muted: #5c6672;
+  --text-faint: #8a94a0;
+  --text-inverse: #ffffff;
+
+  --accent: #1f5fd0;
+  --accent-hover: #1a51b3;
+  --accent-soft: #e8f0fd;
+  --accent-text: #1a4fae;
+
+  --positive: #1c7c4a;
+  --positive-soft: #e4f4ea;
+  --warning: #9a6207;
+  --warning-soft: #fdf1dc;
+  --danger: #b3261e;
+  --danger-soft: #fdeceb;
+  --neutral: #5c6672;
+  --neutral-soft: #eceff2;
+
+  --radius-sm: 4px;
+  --radius: 7px;
+  --radius-lg: 11px;
+
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .08);
+  --shadow-md: 0 4px 12px rgba(16, 24, 40, .09), 0 2px 4px rgba(16, 24, 40, .05);
+  --shadow-lg: 0 16px 40px rgba(16, 24, 40, .18);
+
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
+  --sidebar-w: 232px;
+  --topbar-h: 56px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-app: #0f1216;
+    --bg-surface: #171b21;
+    --bg-sunken: #1e232a;
+    --bg-hover: #212730;
+    --bg-inverse: #e8ebef;
+
+    --border: #2a313a;
+    --border-strong: #3a434e;
+
+    --text: #e8ebef;
+    --text-muted: #a2adba;
+    --text-faint: #737f8c;
+    --text-inverse: #0f1216;
+
+    --accent: #5b95f0;
+    --accent-hover: #74a6f5;
+    --accent-soft: #17233a;
+    --accent-text: #9dc0f8;
+
+    --positive: #4cb782;
+    --positive-soft: #12271d;
+    --warning: #d99a2b;
+    --warning-soft: #2a2113;
+    --danger: #e5695f;
+    --danger-soft: #2d1917;
+    --neutral: #a2adba;
+    --neutral-soft: #232932;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, .45);
+    --shadow-lg: 0 16px 40px rgba(0, 0, 0, .6);
+  }
+}

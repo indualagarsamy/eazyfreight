@@ -1,0 +1,106 @@
+.shell { display: flex; min-height: 100%; }
+
+.sidebar {
+  width: var(--sidebar-w);
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: var(--topbar-h);
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mark {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.brandName { font-size: 14px; font-weight: 600; }
+
+.nav { display: flex; flex-direction: column; gap: 2px; padding: 12px 10px; }
+
+.navLink {
+  padding: 7px 10px;
+  border-radius: var(--radius);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.navLink:hover { background: var(--bg-hover); color: var(--text); text-decoration: none; }
+.active { background: var(--accent-soft); color: var(--accent-text); font-weight: 600; }
+
+.sidebarFoot { margin-top: auto; padding: 16px; border-top: 1px solid var(--border); }
+.footLine { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+.footHint { margin-top: 4px; font-size: 11.5px; line-height: 1.45; color: var(--text-faint); }
+
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--topbar-h);
+  padding: 0 24px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.env {
+  padding: 2px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.user { display: flex; align-items: center; gap: 8px; }
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.userName { font-size: 13px; color: var(--text-muted); }
+
+.content { padding: 24px; max-width: 1180px; width: 100%; }
+
+@media (max-width: 800px) {
+  .shell { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: static; }
+  .nav { flex-direction: row; }
+  .sidebarFoot { display: none; }
+  .content { padding: 16px; }
+}

@@ -1,0 +1,43 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.filters { display: flex; gap: 3px; flex-wrap: wrap; }
+
+.filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.filter:hover { background: var(--bg-hover); color: var(--text); }
+.filterActive { background: var(--accent-soft); color: var(--accent-text); font-weight: 600; }
+
+.count {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--bg-sunken);
+  color: var(--text-faint);
+}
+
+.filterActive .count { background: rgba(255, 255, 255, .35); color: inherit; }
+
+.search { max-width: 260px; margin-left: auto; }
+
+.urgent { color: var(--warning); font-weight: 550; }
+.urgentNote { font-weight: 600; }
