@@ -9,10 +9,21 @@ package com.eazyfreight.alerts;
  * deployment has; the domain only knows the role.
  */
 public enum RecipientRole {
-    OPERATIONS_STAFF,
-    COMPLIANCE_STAFF,
-    ACCOUNTING_STAFF,
-    OPERATIONS_MANAGEMENT,
-    FINANCE_MANAGEMENT,
-    MANAGEMENT
+    OPERATIONS_STAFF("Operations Staff"),
+    COMPLIANCE_STAFF("Compliance Staff"),
+    ACCOUNTING_STAFF("Accounting Staff"),
+    OPERATIONS_MANAGEMENT("Operations Management"),
+    FINANCE_MANAGEMENT("Finance Management"),
+    MANAGEMENT("Management");
+
+    private final String label;
+
+    RecipientRole(String label) {
+        this.label = label;
+    }
+
+    /** For audit notes, which are read by people rather than parsed. */
+    public String label() {
+        return label;
+    }
 }

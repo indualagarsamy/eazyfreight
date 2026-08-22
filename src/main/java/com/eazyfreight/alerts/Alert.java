@@ -249,7 +249,8 @@ public class Alert extends AbstractAggregateRoot<Alert> implements Persistable<U
             this.category = escalatedCategory;
         }
         record(AlertHistoryAction.ESCALATED, now, "SYSTEM",
-                "To %s%s".formatted(to, previous == category ? "" : ", now " + category));
+                "To %s%s".formatted(to.label(),
+                        previous == category ? "" : ", now " + category.name().toLowerCase()));
         registerEvent(new AlertEvent.AlertEscalated(
                 id, bookingId, bookingReference, alertType, category, to,
                 Duration.between(createdAt, now).toHours(), deadlineAt, now));
@@ -330,7 +331,7 @@ public class Alert extends AbstractAggregateRoot<Alert> implements Persistable<U
         }
         this.category = newCategory;
         record(AlertHistoryAction.DEADLINE_RECALCULATED, now, "SYSTEM",
-                "Category raised to " + newCategory);
+                "Category raised to " + newCategory.name().toLowerCase());
     }
 
     AlertNotification recordNotification(NotificationChannel channel, RecipientRole role,
@@ -339,7 +340,7 @@ public class Alert extends AbstractAggregateRoot<Alert> implements Persistable<U
                 AlertNotification.sent(this, channel, role, now, simulated);
         notifications.add(notification);
         record(AlertHistoryAction.NOTIFICATION_SENT, now, "SYSTEM",
-                "%s to %s".formatted(channel, role));
+                "%s to %s".formatted(channel.label(), role.label()));
         registerEvent(new AlertEvent.AlertNotificationSent(
                 id, bookingId, alertType, channel, role, now));
         return notification;
