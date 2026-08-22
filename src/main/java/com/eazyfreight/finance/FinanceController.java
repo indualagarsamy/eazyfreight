@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -101,6 +103,12 @@ public class FinanceController {
     }
 
     /** 4. SendInvoicePDF */
+    /** Renders the invoice as a download. Pure read — nothing is recorded. */
+    @GetMapping(value = "/invoices/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<Resource> invoicePdf(@PathVariable UUID id) {
+        return financeService.pdf(id).asAttachment();
+    }
+
     @PostMapping("/invoices/{id}/send")
     public FinanceResponses.InvoiceView sendPdf(@PathVariable UUID id) {
         return financeService.sendPdf(id);

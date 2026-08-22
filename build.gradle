@@ -25,6 +25,11 @@ dependencies {
 	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.flywaydb:flyway-database-postgresql'
 
+	// PDFBox renders the House BOL and the invoice. Apache 2.0, and it pulls in
+	// nothing beyond commons-logging and fontbox — a document renderer should not
+	// bring a servlet stack with it.
+	implementation 'org.apache.pdfbox:pdfbox:3.0.3'
+
 	implementation 'io.micrometer:micrometer-tracing-bridge-otel'
 	implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
 

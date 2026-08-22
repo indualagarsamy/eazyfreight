@@ -98,6 +98,13 @@ export const useIssueInvoice = () =>
   useFinanceMutation<string, InvoiceView>((id) =>
     api.post(`/api/finance/invoices/${id}/issue`))
 
+/**
+ * Downloads the invoice. Not a mutation — rendering a document the customer could
+ * already have changes nothing, and an invoice's lines are frozen once it is issued.
+ */
+export const useDownloadInvoicePdf = () =>
+  useMutation({ mutationFn: (id: string) => api.download(`/api/finance/invoices/${id}/pdf`) })
+
 export const useSendInvoicePdf = () =>
   useFinanceMutation<string, InvoiceView>((id) =>
     api.post(`/api/finance/invoices/${id}/send`))

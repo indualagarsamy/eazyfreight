@@ -2,7 +2,9 @@ package com.eazyfreight.documentation;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -157,10 +159,22 @@ public class DocumentationController {
                 .body(documentationService.generateHouseBol(id, request, actor));
     }
 
-    /** 13. GenerateHouseBOLPDF */
-    @PostMapping("/house-bols/{id}/pdf")
-    public DocumentationResponses.House generatePdf(@PathVariable UUID id) {
-        return documentationService.generateHouseBolPdf(id);
+    /**
+     * 13. GenerateHouseBOLPDF — renders the document and returns it as a download.
+     *
+     * <p>The command and the file are one round trip. Splitting them into "generate"
+     * and "then fetch" would leave the caller holding a reference to a document the
+     * server did not keep.
+     */
+    @PostMapping(value = "/house-bols/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<Resource> generatePdf(@PathVariable UUID id) {
+        return documentationService.generateHouseBolPdf(id).asAttachment();
+    }
+
+    /** Re-download of a document already produced. Renders again; records nothing. */
+    @GetMapping(value = "/house-bols/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<Resource> downloadPdf(@PathVariable UUID id) {
+        return documentationService.houseBolPdf(id).asAttachment();
     }
 
     /** 14-16. SendHouseBOLToShipper / Consignee / NotifyParty */

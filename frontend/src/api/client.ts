@@ -70,8 +70,68 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   return payload as T
 }
 
+/**
+ * Fetches a generated document and hands it to the browser to save.
+ *
+ * <p>Deliberately not {@link request}: that one parses JSON, and a PDF is not JSON.
+ * The two failure modes still have to behave the same way, though — a refused command
+ * comes back as an ApiError with the server's reason, not as a corrupt download.
+ *
+ * <p>The filename comes from Content-Disposition rather than being rebuilt here.
+ * Reconstructing "HBL-2026-00001-rev0.pdf" on the client means two places that have to
+ * agree about revision numbering, and they will stop agreeing.
+ */
+async function download(method: string, path: string): Promise<string> {
+  let response: Response
+  try {
+    response = await fetch(path, { method, headers: { 'X-Actor': 'ops.jane' } })
+  } catch {
+    throw new ApiError(0, 'Cannot reach the Eazy Freight service. Is it running on port 8080?')
+  }
+
+  if (!response.ok) {
+    // An error response is JSON even though the request asked for a PDF.
+    const text = await response.text()
+    let message = `Request failed with status ${response.status}`
+    let fieldErrors: Record<string, string> | undefined
+    try {
+      const error = JSON.parse(text) as ApiErrorBody
+      message = error.message ?? message
+      fieldErrors = error.fieldErrors ?? undefined
+    } catch {
+      // Not JSON either. Keep the status-based message.
+    }
+    throw new ApiError(response.status, message, fieldErrors)
+  }
+
+  const blob = await response.blob()
+  const fileName = fileNameFrom(response.headers.get('Content-Disposition')) ?? 'document.pdf'
+
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  // Revoked on the next tick: revoking synchronously can beat the click in Safari.
+  setTimeout(() => URL.revokeObjectURL(url), 0)
+
+  return fileName
+}
+
+/** Reads the filename out of a Content-Disposition header, quoted or not. */
+function fileNameFrom(header: string | null): string | null {
+  if (!header) return null
+  const encoded = /filename\*=UTF-8''([^;]+)/i.exec(header)
+  if (encoded) return decodeURIComponent(encoded[1])
+  const plain = /filename="?([^";]+)"?/i.exec(header)
+  return plain ? plain[1] : null
+}
+
 export const api = {
   get: <T>(path: string) => request<T>('GET', path),
   post: <T>(path: string, body?: unknown) => request<T>('POST', path, body),
   put: <T>(path: string, body?: unknown) => request<T>('PUT', path, body),
+  download: (path: string, method: 'GET' | 'POST' = 'GET') => download(method, path),
 }

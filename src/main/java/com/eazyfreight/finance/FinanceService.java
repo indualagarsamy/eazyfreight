@@ -3,6 +3,7 @@ package com.eazyfreight.finance;
 import com.eazyfreight.booking.Booking;
 import com.eazyfreight.booking.BookingRepository;
 import com.eazyfreight.common.ReferenceGenerator;
+import com.eazyfreight.common.pdf.RenderedDocument;
 import com.eazyfreight.exception.BookingNotFoundException;
 import com.eazyfreight.exception.DomainRuleViolationException;
 import com.eazyfreight.finance.FinanceEnums.InvoiceStatus;
@@ -36,6 +37,7 @@ public class FinanceService {
     private final StorageFeeRepository storageFeeRepository;
     private final CreditHoldRepository creditHoldRepository;
     private final BookingRepository bookingRepository;
+    private final InvoicePdfRenderer pdfRenderer;
     private final ReferenceGenerator referenceGenerator;
     private final Clock clock;
 
@@ -85,6 +87,17 @@ public class FinanceService {
         Invoice invoice = invoice(invoiceId);
         invoice.issue(LocalDate.now(clock), clock.instant(), actor);
         return view(invoiceRepository.save(invoice));
+    }
+
+    /**
+     * Renders the invoice for download. Records nothing — reading a document is not a
+     * business event, and an invoice's lines are frozen once it is issued, so the same
+     * record renders the same file every time.
+     */
+    @Transactional(readOnly = true)
+    public RenderedDocument pdf(UUID invoiceId) {
+        Invoice invoice = invoice(invoiceId);
+        return new RenderedDocument(pdfRenderer.fileName(invoice), pdfRenderer.render(invoice));
     }
 
     /** 4. SendInvoicePDF */

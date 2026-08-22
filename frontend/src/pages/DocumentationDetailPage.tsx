@@ -142,8 +142,8 @@ export function DocumentationDetailPage() {
         }
         actions={
           <>
-            <Action action="pdf" label="Generate PDF"
-              onClick={() => void run('PDF generated', () => pdf.mutateAsync(bol.id))} />
+            <Action action="pdf" label="Download PDF"
+              onClick={() => void run('PDF downloaded', () => pdf.mutateAsync(bol.id))} />
             <Action action="distribute" label="Send" variant="btn-primary"
               onClick={() => setDialog('distribute')} />
           </>
@@ -242,7 +242,7 @@ export function DocumentationDetailPage() {
                   value={bol.weightKg === null ? '—' : `${number(bol.weightKg, 3)} kg`} />
                 <Item label="Pieces" value={bol.pieces === null ? '—' : String(bol.pieces)} />
                 <Item label="Freight terms" value={titleCase(bol.freightTerms)} />
-                <Item label="PDF" value={bol.pdfReference ?? 'Not generated'} mono />
+                <Item label="PDF" value={bol.pdfReference ?? 'Not yet generated'} mono />
               </dl>
             </div>
           </section>

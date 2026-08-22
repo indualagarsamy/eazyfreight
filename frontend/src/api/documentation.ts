@@ -134,9 +134,16 @@ export const useGenerateHouseBol = () =>
   useDocMutation<{ id: string; releaseType: ReleaseType }, HouseBOL>(({ id, ...body }) =>
     api.post(`/api/documentation/master-bols/${id}/house-bol`, body))
 
+/**
+ * Renders the House BOL and saves it locally.
+ *
+ * <p>Still a mutation: the command records that the document was produced, which the
+ * detail page shows and the distribution history refers to. The invalidation matters —
+ * without it the page keeps saying the PDF has not been generated after it plainly has.
+ */
 export const useGeneratePdf = () =>
-  useDocMutation<string, HouseBOL>((id) =>
-    api.post(`/api/documentation/house-bols/${id}/pdf`))
+  useDocMutation<string, string>((id) =>
+    api.download(`/api/documentation/house-bols/${id}/pdf`, 'POST'))
 
 export const useDistribute = () =>
   useDocMutation<{

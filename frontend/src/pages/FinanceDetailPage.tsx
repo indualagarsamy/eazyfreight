@@ -2,9 +2,10 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
-  useApplyActuals, useApprovePayable, useCreditHolds, useInvoice, useIssueCreditNote,
-  useIssueInvoice, usePayablesForBooking, usePlaceCreditHold, useRecordCarrierInvoice,
-  useRecordCarrierPaid, useRecordPayment, useSendInvoicePdf, useVoidInvoice,
+  useApplyActuals, useApprovePayable, useCreditHolds, useDownloadInvoicePdf, useInvoice,
+  useIssueCreditNote, useIssueInvoice, usePayablesForBooking, usePlaceCreditHold,
+  useRecordCarrierInvoice, useRecordCarrierPaid, useRecordPayment, useSendInvoicePdf,
+  useVoidInvoice,
 } from '../api/finance'
 import type { InvoiceView, PaymentMethod } from '../api/types'
 import { PageHeader } from '../components/PageHeader'
@@ -73,6 +74,7 @@ export function FinanceDetailPage() {
   const applyActuals = useApplyActuals()
   const issue = useIssueInvoice()
   const sendPdf = useSendInvoicePdf()
+  const downloadPdf = useDownloadInvoicePdf()
   const recordPayment = useRecordPayment()
   const voidInvoice = useVoidInvoice()
   const creditNote = useIssueCreditNote()
@@ -187,8 +189,10 @@ export function FinanceDetailPage() {
             <span className={styles.actionGroupLabel}>Invoice</span>
             <Action action="actuals" label="Set lines from actuals"
               onClick={() => setDialog('actuals')} />
-            <Action action="send" label="Send PDF"
-              onClick={() => void run('Invoice sent', () => sendPdf.mutateAsync(invoice.id))} />
+            <button className="btn btn-sm" onClick={() => void run('Invoice downloaded',
+              () => downloadPdf.mutateAsync(invoice.id))}>Download PDF</button>
+            <Action action="send" label="Mark as sent"
+              onClick={() => void run('Recorded as sent', () => sendPdf.mutateAsync(invoice.id))} />
             <Action action="creditNote" label="Raise credit note"
               onClick={() => setDialog('creditNote')} />
             <Action action="void" label="Void" variant="btn-danger"

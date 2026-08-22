@@ -4,6 +4,7 @@ import com.eazyfreight.booking.Booking;
 import com.eazyfreight.booking.BookingCargoDetail;
 import com.eazyfreight.booking.BookingRepository;
 import com.eazyfreight.common.ReferenceGenerator;
+import com.eazyfreight.common.pdf.RenderedDocument;
 import com.eazyfreight.compliance.EEIFiling;
 import com.eazyfreight.compliance.EEIFilingRepository;
 import com.eazyfreight.compliance.FilingStatus;
@@ -48,6 +49,7 @@ public class DocumentationService {
     private final BookingRepository bookingRepository;
     private final ContainerAssignmentRepository logisticsRepository;
     private final EEIFilingRepository filingRepository;
+    private final HouseBOLPdfRenderer pdfRenderer;
     private final ReferenceGenerator referenceGenerator;
     private final Clock clock;
 
@@ -240,13 +242,28 @@ public class DocumentationService {
         return DocumentationResponses.House.from(houseRepository.save(house));
     }
 
+    /**
+     * Renders the House BOL and records that the document was produced.
+     *
+     * <p>The bytes are not stored. A revision is immutable once issued — an amendment
+     * creates a new one rather than editing this — so the document is a pure function of
+     * the record and rendering it again produces the same file. What is worth recording
+     * is that it was produced at all, because the distribution history refers to it.
+     */
     @Transactional
-    public DocumentationResponses.House generateHouseBolPdf(UUID houseBolId) {
+    public RenderedDocument generateHouseBolPdf(UUID houseBolId) {
         HouseBOL house = house(houseBolId);
-        // Rendering is not implemented; the reference records that a PDF was produced.
-        house.recordPdfGenerated("%s-rev%d.pdf".formatted(
-                house.getHouseBolNumber(), house.getRevisionNumber()));
-        return DocumentationResponses.House.from(houseRepository.save(house));
+        byte[] pdf = pdfRenderer.render(house);
+        house.recordPdfGenerated(pdfRenderer.fileName(house));
+        houseRepository.save(house);
+        return new RenderedDocument(pdfRenderer.fileName(house), pdf);
+    }
+
+    /** Re-renders without recording anything. Downloading a document is not an event. */
+    @Transactional(readOnly = true)
+    public RenderedDocument houseBolPdf(UUID houseBolId) {
+        HouseBOL house = house(houseBolId);
+        return new RenderedDocument(pdfRenderer.fileName(house), pdfRenderer.render(house));
     }
 
     // ------------------------------------------------- 14-16. distribution
