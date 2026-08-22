@@ -10,3 +10,10 @@ spring:
     show-sql: true
   flyway:
     enabled: false
+
+eazyfreight:
+  alerts:
+    scheduler:
+      # The tests use a fixed clock. A background sweep running against it would
+      # race with whatever the test is asserting about the alert list.
+      enabled: false

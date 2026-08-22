@@ -12,7 +12,8 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({QuoteNotFoundException.class, BookingNotFoundException.class})
+    @ExceptionHandler({QuoteNotFoundException.class, BookingNotFoundException.class,
+            AlertNotFoundException.class})
     public ResponseEntity<ApiError> handleNotFound(RuntimeException ex) {
         ApiError error = new ApiError(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND.getReasonPhrase(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);

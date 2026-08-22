@@ -32,3 +32,13 @@ management:
   otlp:
     tracing:
       endpoint: http://${JAEGER_HOST:localhost}:4318/v1/traces
+
+eazyfreight:
+  alerts:
+    scheduler:
+      enabled: true
+      # Half-hourly, per the Alerts specification. Every threshold in the system is
+      # measured in days or hours, so this is well inside the resolution of anything
+      # being watched.
+      interval-ms: 1800000
+      initial-delay-ms: 30000

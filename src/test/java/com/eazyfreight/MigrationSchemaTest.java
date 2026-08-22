@@ -68,7 +68,11 @@ class MigrationSchemaTest {
                 "customer_payments",
                 "carrier_payables",
                 "storage_fees",
-                "credit_holds");
+                "credit_holds",
+                "alerts",
+                "alert_history",
+                "alert_notifications",
+                "alert_configurations");
     }
 
     @Test
@@ -79,6 +83,6 @@ class MigrationSchemaTest {
                         + "WHERE success = TRUE AND version IS NOT NULL ORDER BY installed_rank",
                 String.class);
 
-        assertThat(versions).containsExactly("1", "2", "3", "4", "6", "8", "10", "11");
+        assertThat(versions).containsExactly("1", "2", "3", "4", "6", "8", "10", "11", "13");
     }
 }
