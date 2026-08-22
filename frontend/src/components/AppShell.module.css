@@ -104,3 +104,20 @@
   .sidebarFoot { display: none; }
   .content { padding: 16px; }
 }
+
+/*
+ * Only Critical and High reach the badge. A count of every open alert would sit at a
+ * permanent double-digit number and stop meaning anything.
+ */
+.navBadge {
+  float: right;
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 18px;
+  text-align: center;
+}

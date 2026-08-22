@@ -18,6 +18,7 @@ import { ErrorState, Skeleton } from '../components/States'
 import { useToast } from '../components/Toast'
 import { useFilingsForBooking, useInitiateFiling } from '../api/compliance'
 import { useInvoicesForBooking } from '../api/finance'
+import { useAlertsForBooking } from '../api/alerts'
 import {
   useApproveInstructions, useCompileInstructions, useGenerateHouseBol,
   useHouseBolsForBooking, useInstructionsForBooking, useMasterBolsForBooking,
@@ -98,6 +99,7 @@ export function BookingDetailPage() {
 
   const { data: filings } = useFilingsForBooking(id)
   const { data: invoices } = useInvoicesForBooking(id)
+  const { data: alerts } = useAlertsForBooking(id)
   const initiateFiling = useInitiateFiling()
 
   const { data: preconditions } = usePreconditions(id)
@@ -467,6 +469,40 @@ export function BookingDetailPage() {
                   )}
                 </Link>
               ))
+            )}
+          </div>
+        </section>
+
+        <section className="card">
+          <div className="card-header">
+            <h2>Alerts</h2>
+            <span className="faint" style={{ fontSize: 12 }}>
+              Raised by the system, closed when the condition clears
+            </span>
+          </div>
+          <div className="card-body stack">
+            {(alerts ?? []).filter((alert) => alert.status !== 'RESOLVED').length === 0 ? (
+              <p className="muted">
+                Nothing outstanding.{' '}
+                {(alerts ?? []).length > 0 && `${(alerts ?? []).length} have been raised and closed on this booking.`}
+              </p>
+            ) : (
+              (alerts ?? [])
+                .filter((alert) => alert.status !== 'RESOLVED')
+                .map((alert) => (
+                  <Link key={alert.id} to={`/alerts/${alert.id}`} className={styles.filingRow}>
+                    <span className="mono">{alert.alertCode}</span>
+                    <StatusPill status={alert.category} size="sm" />
+                    {alert.status !== 'ACTIVE' && (
+                      <StatusPill status={alert.status} size="sm" />
+                    )}
+                    <span style={{ flex: 1, minWidth: 0 }}>{alert.title}</span>
+                    {alert.overdue && (
+                      <StatusPill status="PAST_DEADLINE" tone="danger" size="sm"
+                        label="Past deadline" />
+                    )}
+                  </Link>
+                ))
             )}
           </div>
         </section>

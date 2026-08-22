@@ -670,3 +670,96 @@ export interface CreditHoldView {
   liftedAt: string | null
   liftedBy: string | null
 }
+
+// ---------------------------------------------------------------------- alerts
+
+export type AlertCategory = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
+export type AlertStatus =
+  'ACTIVE' | 'ACKNOWLEDGED' | 'SNOOZED' | 'ESCALATED' | 'RESOLVED'
+export type AlertTrack =
+  'LOGISTICS' | 'COMPLIANCE' | 'FINANCE' | 'BOOKING' | 'DOCUMENTATION'
+export type RecipientRole =
+  | 'OPERATIONS_STAFF' | 'COMPLIANCE_STAFF' | 'ACCOUNTING_STAFF'
+  | 'OPERATIONS_MANAGEMENT' | 'FINANCE_MANAGEMENT' | 'MANAGEMENT'
+export type NotificationChannel = 'IN_APP' | 'EMAIL' | 'SMS'
+export type DeliveryStatus = 'PENDING' | 'DELIVERED' | 'FAILED'
+export type AlertHistoryAction =
+  | 'CREATED' | 'NOTIFICATION_SENT' | 'ACKNOWLEDGED' | 'SNOOZED'
+  | 'REACTIVATED' | 'ESCALATED' | 'DEADLINE_RECALCULATED' | 'RESOLVED'
+
+export interface AlertHistoryEntry {
+  id: string
+  sequenceNumber: number
+  action: AlertHistoryAction
+  occurredAt: string
+  actor: string
+  notes: string | null
+}
+
+export interface AlertNotificationView {
+  id: string
+  channel: NotificationChannel
+  recipientRole: RecipientRole
+  sentAt: string
+  deliveredAt: string | null
+  deliveryStatus: DeliveryStatus
+  failureReason: string | null
+  simulated: boolean
+}
+
+export interface AlertView {
+  id: string
+  bookingId: string
+  bookingReference: string
+  alertType: string
+  alertCode: string
+  track: AlertTrack
+  category: AlertCategory
+  status: AlertStatus
+  title: string
+  message: string
+  recommendedAction: string
+  recipients: RecipientRole[]
+  createdAt: string
+  deadlineAt: string | null
+  lastEvaluatedAt: string
+  overdue: boolean
+  acknowledgedAt: string | null
+  acknowledgedBy: string | null
+  snoozedUntil: string | null
+  snoozedBy: string | null
+  escalatedAt: string | null
+  escalatedTo: RecipientRole | null
+  resolvedAt: string | null
+  resolvedBy: string | null
+  resolutionReason: string | null
+  maxSnoozeHours: number
+  history: AlertHistoryEntry[]
+  notifications: AlertNotificationView[]
+}
+
+export interface AlertDashboard {
+  open: number
+  byCategory: Record<AlertCategory, number>
+  byTrack: Record<AlertTrack, number>
+  unacknowledged: number
+  escalated: number
+  overdue: number
+  bookingsAffected: number
+}
+
+export interface AlertConfigurationView {
+  alertType: string
+  alertCode: string
+  track: AlertTrack
+  title: string
+  category: AlertCategory
+  enabled: boolean
+  thresholdDays: number | null
+  escalationHours: number
+  channels: NotificationChannel[]
+  snoozeMaxHours: number
+  snoozeCeilingHours: number
+  customMessage: string | null
+  recipients: RecipientRole[]
+}

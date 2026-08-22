@@ -19,6 +19,9 @@ import { FilingsPage } from './pages/FilingsPage'
 import { FilingDetailPage } from './pages/FilingDetailPage'
 import { FinancePage } from './pages/FinancePage'
 import { FinanceDetailPage } from './pages/FinanceDetailPage'
+import { AlertsPage } from './pages/AlertsPage'
+import { AlertDetailPage } from './pages/AlertDetailPage'
+import { AlertSettingsPage } from './pages/AlertSettingsPage'
 import './styles/global.css'
 
 const queryClient = new QueryClient({
@@ -56,6 +59,10 @@ const router = createBrowserRouter([
       { path: 'compliance/:id', element: <FilingDetailPage /> },
       { path: 'finance', element: <FinancePage /> },
       { path: 'finance/:id', element: <FinanceDetailPage /> },
+      { path: 'alerts', element: <AlertsPage /> },
+      // Ahead of :id so the literal wins — otherwise "settings" is an alert id.
+      { path: 'alerts/settings', element: <AlertSettingsPage /> },
+      { path: 'alerts/:id', element: <AlertDetailPage /> },
     ],
   },
 ])

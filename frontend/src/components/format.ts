@@ -8,7 +8,7 @@
 const ACRONYMS = new Set([
   'AES', 'BAF', 'BOL', 'CAF', 'CBM', 'CBP', 'EEI', 'ETA', 'ETD', 'FCL', 'GP',
   'HC', 'HS', 'INTTRA', 'ISF', 'ITN', 'KG', 'LCL', 'OFAC', 'OOG', 'PSS', 'SDN',
-  'TDO', 'TEU', 'THC',
+  'SMS', 'TDO', 'TEU', 'THC',
 ])
 
 export function titleCase(value: string): string {
@@ -21,6 +21,18 @@ export function titleCase(value: string): string {
     })
     .join(' ')
 }
+
+/**
+ * Notification channels. IN_APP is the one titleCase cannot help with — "In App" is
+ * not a thing anyone writes.
+ */
+const CHANNEL_LABELS: Record<string, string> = {
+  IN_APP: 'In-app',
+  EMAIL: 'Email',
+  SMS: 'SMS',
+}
+
+export const channelLabel = (channel: string) => CHANNEL_LABELS[channel] ?? titleCase(channel)
 
 const CONTAINER_LABELS: Record<string, string> = {
   TWENTY_GP: "20' GP",
@@ -53,6 +65,20 @@ export function date(value: string | null | undefined): string {
   if (!y || !m || !d) return value
   return new Date(y, m - 1, d).toLocaleDateString('en-US', {
     day: 'numeric', month: 'short', year: 'numeric',
+  })
+}
+
+/**
+ * An instant that is really a whole day, shown as that day.
+ *
+ * <p>Alert deadlines are stored as midnight UTC. Rendering them with dateTime turns a
+ * deadline of "the 24th" into "Aug 23, 05:00 PM" for anyone west of Greenwich, which
+ * reads as a different — and earlier — deadline than the one the system is enforcing.
+ */
+export function utcDate(value: string | null | undefined): string {
+  if (!value) return '—'
+  return new Date(value).toLocaleDateString('en-US', {
+    day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC',
   })
 }
 

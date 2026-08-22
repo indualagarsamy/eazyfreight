@@ -67,8 +67,21 @@ const FINANCE_TONES: Record<string, Tone> = {
   WIRE: 'neutral', CHECK: 'neutral', ACH: 'neutral',
 }
 
+
+/**
+ * Alert severities and statuses. CRITICAL and HIGH are the only two that should read
+ * as alarming — if Medium were red too, nothing would stand out.
+ */
+const ALERT_TONES: Record<string, Tone> = {
+  CRITICAL: 'danger', HIGH: 'warning', MEDIUM: 'info', LOW: 'neutral',
+  ACTIVE: 'info', ACKNOWLEDGED: 'neutral', SNOOZED: 'neutral',
+  ESCALATED: 'danger',
+  DELIVERED: 'positive', FAILED: 'danger',
+  IN_APP: 'neutral', SMS: 'warning',
+}
+
 const REGISTRY = {
-  ...QUOTE_TONES, ...BOOKING_TONES, ...SCREENING_TONES, ...TDO_TONES, ...FILING_TONES, ...LOGISTICS_TONES, ...DOCUMENTATION_TONES, ...FINANCE_TONES,
+  ...QUOTE_TONES, ...BOOKING_TONES, ...SCREENING_TONES, ...TDO_TONES, ...FILING_TONES, ...LOGISTICS_TONES, ...DOCUMENTATION_TONES, ...FINANCE_TONES, ...ALERT_TONES,
 }
 
 interface Props {

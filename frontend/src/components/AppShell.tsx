@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { useAlertDashboard } from '../api/alerts'
 import styles from './AppShell.module.css'
 
 const NAV = [
@@ -8,9 +9,19 @@ const NAV = [
   { to: '/compliance', label: 'Compliance' },
   { to: '/documentation', label: 'Documentation' },
   { to: '/finance', label: 'Finance' },
+  { to: '/alerts', label: 'Alerts' },
 ]
 
 export function AppShell() {
+  const { data: alerts } = useAlertDashboard()
+
+  /**
+   * Only the two severities that mean "act today" reach the sidebar. A badge counting
+   * every open alert would sit permanently at some double-digit number and stop being
+   * information.
+   */
+  const urgent = (alerts?.byCategory.CRITICAL ?? 0) + (alerts?.byCategory.HIGH ?? 0)
+
   return (
     <div className={styles.shell}>
       <aside className={styles.sidebar}>
@@ -27,6 +38,11 @@ export function AppShell() {
               className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}
             >
               {item.label}
+              {item.to === '/alerts' && urgent > 0 && (
+                <span className={styles.navBadge} aria-label={`${urgent} urgent`}>
+                  {urgent}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -34,7 +50,8 @@ export function AppShell() {
         <div className={styles.sidebarFoot}>
           <p className={styles.footLine}>Ocean Export</p>
           <p className={styles.footHint}>
-            Quote, Booking, Container & Equipment, Export Compliance, Documentation and Finance. Alerts are still to come.
+            Quote, Booking, Container & Equipment, Export Compliance, Documentation,
+            Finance and Alerts.
           </p>
         </div>
       </aside>
