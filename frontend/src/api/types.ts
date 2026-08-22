@@ -408,3 +408,143 @@ export interface ItnGate {
   clear: boolean
   reason: string | null
 }
+
+// ------------------------------------------------------------- documentation
+
+export type InstructionsStatus = 'DRAFT' | 'APPROVED' | 'SENT' | 'QUERIED' | 'SUPERSEDED'
+export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'DISCREPANCY_RAISED' | 'CORRECTED'
+export type HouseBOLStatus = 'ISSUED' | 'VOIDED'
+export type ReleaseType = 'ORIGINAL_BOL' | 'TELEX_RELEASE' | 'SEA_WAYBILL'
+export type FreightTerms = 'PREPAID' | 'COLLECT'
+export type DistributionRecipient = 'SHIPPER' | 'CONSIGNEE_AGENT' | 'NOTIFY_PARTY'
+export type DistributionChannel = 'EMAIL' | 'PORTAL' | 'COURIER'
+
+export interface Preconditions {
+  bookingId: string
+  met: boolean
+  containerNumber: string | null
+  sealNumber: string | null
+  itnNumber: string | null
+  carrierBookingRef: string | null
+  missing: string[]
+}
+
+export interface Instructions {
+  id: string
+  bookingId: string
+  instructionsReference: string
+  status: InstructionsStatus
+  supersedesInstructionsId: string | null
+  carrierBookingRef: string | null
+  containerNumber: string
+  sealNumber: string
+  itnNumber: string
+  shipperName: string
+  shipperAddress: string | null
+  consigneeName: string
+  consigneeAddress: string | null
+  notifyPartyName: string | null
+  notifyPartyAddress: string | null
+  portOfLoadingCode: string
+  portOfDischargeCode: string
+  vesselName: string | null
+  voyageNumber: string | null
+  cargoDescription: string
+  hsCode: string | null
+  actualWeightKg: number | null
+  actualPieces: number | null
+  actualCbm: number | null
+  marksAndNumbers: string | null
+  freightTerms: FreightTerms
+  draftedAt: string
+  draftedBy: string
+  approvedAt: string | null
+  approvedBy: string | null
+  sentAt: string | null
+  documentationCutOffDate: string | null
+  sentAfterCutOff: boolean
+  carrierQuery: string | null
+}
+
+export interface MasterBOL {
+  id: string
+  bookingId: string
+  instructionsId: string
+  masterBolNumber: string
+  issuedByCarrierAt: string | null
+  receivedAt: string
+  receivedBy: string
+  verificationStatus: VerificationStatus
+  verifiedAt: string | null
+  verifiedBy: string | null
+  discrepancyFields: string[]
+  discrepancyRaisedAt: string | null
+  discrepancyResolvedAt: string | null
+  documentFileReference: string | null
+  verified: boolean
+}
+
+export interface Originals {
+  id: string
+  originalsIssued: number
+  originalsSurrendered: number
+  outstanding: number
+  allSurrendered: boolean
+  releasedAt: string | null
+  releasedTo: string | null
+  courierReference: string | null
+  surrenderedAt: string | null
+}
+
+export interface Distribution {
+  id: string
+  recipient: DistributionRecipient
+  recipientName: string | null
+  recipientAddress: string | null
+  channel: DistributionChannel
+  revisionNumber: number
+  sentAt: string
+  sentBy: string
+  reference: string | null
+}
+
+export interface HouseBOL {
+  id: string
+  bookingId: string
+  masterBolId: string
+  houseBolNumber: string
+  revisionNumber: number
+  active: boolean
+  status: HouseBOLStatus
+  releaseType: ReleaseType
+  releaseTypeConfirmedAt: string | null
+  releaseTypeConfirmedBy: string | null
+  shipperNameSnapshot: string
+  shipperAddressSnapshot: string | null
+  consigneeNameSnapshot: string
+  consigneeAddressSnapshot: string | null
+  notifyPartyNameSnapshot: string | null
+  notifyPartyAddressSnapshot: string | null
+  portOfLoadingCode: string
+  portOfDischargeCode: string
+  vesselName: string | null
+  voyageNumber: string | null
+  containerNumber: string
+  sealNumber: string
+  cargoDescription: string
+  hsCode: string | null
+  weightKg: number | null
+  pieces: number | null
+  cbm: number | null
+  marksAndNumbers: string | null
+  freightTerms: FreightTerms
+  issuedAt: string
+  issuedBy: string
+  voidedAt: string | null
+  supersededByHouseBolId: string | null
+  amendmentReason: string | null
+  pdfReference: string | null
+  amendmentBlockedReason: string | null
+  originals: Originals | null
+  distributions: Distribution[]
+}

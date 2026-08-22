@@ -43,8 +43,16 @@ const LOGISTICS_TONES: Record<string, Tone> = {
   PICKED_UP: 'info', RELEASED: 'positive', ADDITIONAL_HOLD: 'danger', SEIZED: 'danger',
 }
 
+const DOCUMENTATION_TONES: Record<string, Tone> = {
+  APPROVED: 'info', QUERIED: 'warning', SUPERSEDED: 'neutral',
+  PENDING: 'neutral', VERIFIED: 'positive', DISCREPANCY_RAISED: 'danger', CORRECTED: 'info',
+  ISSUED: 'positive', VOIDED: 'neutral',
+  ORIGINAL_BOL: 'warning', TELEX_RELEASE: 'info', SEA_WAYBILL: 'neutral',
+  PREPAID: 'neutral', COLLECT: 'neutral',
+}
+
 const REGISTRY = {
-  ...QUOTE_TONES, ...BOOKING_TONES, ...SCREENING_TONES, ...TDO_TONES, ...FILING_TONES, ...LOGISTICS_TONES,
+  ...QUOTE_TONES, ...BOOKING_TONES, ...SCREENING_TONES, ...TDO_TONES, ...FILING_TONES, ...LOGISTICS_TONES, ...DOCUMENTATION_TONES,
 }
 
 interface Props {

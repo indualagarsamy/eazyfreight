@@ -17,6 +17,11 @@ import { GatedButton } from '../components/GatedButton'
 import { ErrorState, Skeleton } from '../components/States'
 import { useToast } from '../components/Toast'
 import { useFilingsForBooking, useInitiateFiling } from '../api/compliance'
+import {
+  useApproveInstructions, useCompileInstructions, useGenerateHouseBol,
+  useHouseBolsForBooking, useInstructionsForBooking, useMasterBolsForBooking,
+  usePreconditions, useRecordMasterBol, useSendInstructions, useVerifyMasterBol,
+} from '../api/documentation'
 import { containerLabel, date, dateTime, number, shortId, titleCase } from '../components/format'
 import styles from './Detail.module.css'
 
@@ -93,6 +98,17 @@ export function BookingDetailPage() {
   const { data: filings } = useFilingsForBooking(id)
   const initiateFiling = useInitiateFiling()
 
+  const { data: preconditions } = usePreconditions(id)
+  const { data: instructions } = useInstructionsForBooking(id)
+  const { data: masterBols } = useMasterBolsForBooking(id)
+  const { data: houseBols } = useHouseBolsForBooking(id)
+  const compileInstructions = useCompileInstructions(id)
+  const approveInstructions = useApproveInstructions()
+  const sendInstructions = useSendInstructions()
+  const recordMasterBol = useRecordMasterBol()
+  const verifyMasterBol = useVerifyMasterBol()
+  const generateHouseBol = useGenerateHouseBol()
+
   const [dialog, setDialog] = useState<null | 'submit' | 'confirm' | 'reject' | 'counter' | 'reinstate' | 'cancel'>(null)
 
   if (isPending) return <div className="card"><Skeleton rows={7} /></div>
@@ -153,45 +169,7 @@ export function BookingDetailPage() {
         badges={
           <>
             <StatusPill status={booking.status} />
-            <section className="card">
-          <div className="card-header">
-            <h2>Export compliance</h2>
-            {(filings ?? []).length === 0 && (
-              <button
-                className="btn btn-sm"
-                disabled={initiateFiling.isPending}
-                onClick={() => void run('EEI filing opened',
-                  () => initiateFiling.mutateAsync(booking.id))}
-              >
-                Open EEI filing
-              </button>
-            )}
-          </div>
-          <div className="card-body">
-            {(filings ?? []).length === 0 ? (
-              <p className="muted">
-                No EEI filing yet. The ITN gates both the inbound truck dispatch and the
-                Master BOL instructions, so it is the first thing to raise after confirmation.
-              </p>
-            ) : (
-              <div className="stack" style={{ gap: 10 }}>
-                {(filings ?? []).map((filing) => (
-                  <Link key={filing.id} to={`/compliance/${filing.id}`} className={styles.filingRow}>
-                    <span className="mono">{filing.filingReference}</span>
-                    <StatusPill status={filing.filingType} size="sm" />
-                    <StatusPill status={filing.status} size="sm" />
-                    <span className="spacer" />
-                    {filing.activeItnNumber
-                      ? <span className="mono">{filing.activeItnNumber}</span>
-                      : <span className="faint">no ITN</span>}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {booking.reinstatements.length > 0 && (
+            {booking.reinstatements.length > 0 && (
               <StatusPill status="ROLLED" tone="info"
                 label={`Rolled ×${booking.reinstatements.length}`} />
             )}
@@ -337,6 +315,123 @@ export function BookingDetailPage() {
                   </Link>
                 ))}
               </div>
+            )}
+          </div>
+        </section>
+
+        <section className="card">
+          <div className="card-header">
+            <h2>Documentation</h2>
+            <span className="faint" style={{ fontSize: 12 }}>
+              Needs container, seal, ITN and the carrier reference
+            </span>
+          </div>
+          <div className="card-body stack">
+            {preconditions && !preconditions.met ? (
+              <>
+                <p className="muted">
+                  Waiting on {preconditions.missing.length} of 4 preconditions before shipping
+                  instructions can be compiled.
+                </p>
+                <div className={styles.sailing} style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+                  {([
+                    ['Container', preconditions.containerNumber],
+                    ['Seal', preconditions.sealNumber],
+                    ['ITN', preconditions.itnNumber],
+                    ['Carrier ref', preconditions.carrierBookingRef],
+                  ] as Array<[string, string | null]>).map(([label, value]) => (
+                    <div key={label}>
+                      <div className={styles.sailingLabel}>{label}</div>
+                      {value
+                        ? <div className={`mono ${styles.sailingValue}`}>{value}</div>
+                        : <StatusPill status="WAIT" tone="warning" size="sm" label="Waiting" />}
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                {(instructions ?? []).length === 0 ? (
+                  <div className="row-wrap">
+                    <span className="muted" style={{ flex: 1 }}>
+                      All four preconditions met. Shipping instructions can go to the carrier.
+                    </span>
+                    <button className="btn btn-sm btn-primary"
+                      disabled={compileInstructions.isPending}
+                      onClick={() => void run('Shipping instructions compiled',
+                        () => compileInstructions.mutateAsync({
+                          shipperName: 'Acme Manufacturing', shipperAddress: null,
+                          consigneeName: 'Singapore Trading Pte', consigneeAddress: null,
+                          notifyPartyName: null, notifyPartyAddress: null,
+                          marksAndNumbers: null, freightTerms: 'PREPAID',
+                          documentationCutOffDate: null,
+                        }))}>
+                      Compile instructions
+                    </button>
+                  </div>
+                ) : (
+                  (instructions ?? []).map((si) => (
+                    <div key={si.id} className={styles.filingRow}>
+                      <span className="mono">{si.instructionsReference}</span>
+                      <StatusPill status={si.status} size="sm" />
+                      {si.sentAfterCutOff && (
+                        <StatusPill status="LATE" tone="danger" size="sm" label="After cut-off" />
+                      )}
+                      <span className="spacer" />
+                      {si.status === 'DRAFT' && (
+                        <button className="btn btn-sm"
+                          onClick={() => void run('Instructions approved',
+                            () => approveInstructions.mutateAsync(si.id))}>Approve</button>
+                      )}
+                      {si.status === 'APPROVED' && (
+                        <button className="btn btn-sm btn-primary"
+                          onClick={() => void run('Sent to carrier',
+                            () => sendInstructions.mutateAsync(si.id))}>Send to carrier</button>
+                      )}
+                      {si.status === 'SENT' && (masterBols ?? []).length === 0 && (
+                        <button className="btn btn-sm"
+                          onClick={() => void run('Master BOL recorded',
+                            () => recordMasterBol.mutateAsync({
+                              id: si.id,
+                              masterBolNumber: `MAEU-MBL-${Math.floor(Math.random() * 900000 + 100000)}`,
+                              documentFileReference: null,
+                            }))}>Record Master BOL</button>
+                      )}
+                    </div>
+                  ))
+                )}
+
+                {(masterBols ?? []).map((mbl) => (
+                  <div key={mbl.id} className={styles.filingRow}>
+                    <span className="mono">{mbl.masterBolNumber}</span>
+                    <StatusPill status={mbl.verificationStatus} size="sm" />
+                    <span className="spacer" />
+                    {!mbl.verified && (
+                      <button className="btn btn-sm"
+                        onClick={() => void run('Master BOL verified',
+                          () => verifyMasterBol.mutateAsync(mbl.id))}>Verify</button>
+                    )}
+                    {mbl.verified && (houseBols ?? []).length === 0 && (
+                      <button className="btn btn-sm btn-primary"
+                        onClick={() => void run('House BOL issued',
+                          () => generateHouseBol.mutateAsync({
+                            id: mbl.id, releaseType: 'TELEX_RELEASE',
+                          }))}>Issue House BOL</button>
+                    )}
+                  </div>
+                ))}
+
+                {(houseBols ?? []).filter((h) => h.active).map((hbl) => (
+                  <Link key={hbl.id} to={`/documentation/${hbl.id}`} className={styles.filingRow}>
+                    <span className="mono">{hbl.houseBolNumber}</span>
+                    <StatusPill status="REV" tone="info" size="sm"
+                      label={`Rev ${hbl.revisionNumber}`} />
+                    <StatusPill status={hbl.releaseType} size="sm" />
+                    <span className="spacer" />
+                    <span className="faint">{hbl.distributions.length} sent</span>
+                  </Link>
+                ))}
+              </>
             )}
           </div>
         </section>

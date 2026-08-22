@@ -6,6 +6,7 @@ const NAV = [
   { to: '/bookings', label: 'Bookings' },
   { to: '/logistics', label: 'Container & equipment' },
   { to: '/compliance', label: 'Compliance' },
+  { to: '/documentation', label: 'Documentation' },
 ]
 
 export function AppShell() {
@@ -32,7 +33,7 @@ export function AppShell() {
         <div className={styles.sidebarFoot}>
           <p className={styles.footLine}>Ocean Export</p>
           <p className={styles.footHint}>
-            Quote, Booking, Container & Equipment and Export Compliance. Documentation, Finance and Alerts are still to come.
+            Quote, Booking, Container & Equipment, Export Compliance and Documentation. Finance and Alerts are still to come.
           </p>
         </div>
       </aside>
