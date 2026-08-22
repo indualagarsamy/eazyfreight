@@ -16,7 +16,7 @@ const DEMO = {
 }
 
 const emptyCargo = (): BookingCargoInput => ({
-  description: '', hsCode: '', pieces: 1, weightKg: 0,
+  description: '', hsCode: '', pieces: 1, weightKg: 0, valueUsd: 0,
   lengthCm: 0, widthCm: 0, heightCm: 0,
   hazmat: false, temperatureControlled: false, oversized: false, marksAndNumbers: null,
 })
@@ -64,7 +64,7 @@ export function NewBookingPage() {
     if (sourceQuote.cargoDetails.length > 0) {
       setCargo(sourceQuote.cargoDetails.map((detail) => ({
         description: detail.description, hsCode: detail.hsCode, pieces: detail.pieces,
-        weightKg: detail.weightKg, lengthCm: detail.lengthCm,
+        weightKg: detail.weightKg, valueUsd: 0, lengthCm: detail.lengthCm,
         widthCm: detail.widthCm, heightCm: detail.heightCm,
         hazmat: detail.hazmat, temperatureControlled: detail.temperatureControlled,
         oversized: detail.oversized, marksAndNumbers: null,
@@ -244,6 +244,12 @@ export function NewBookingPage() {
                     hint="Checked against container payload at submission">
                     <input type="number" min={0} step="0.001" className="input numeric" value={line.weightKg}
                       onChange={(e) => setCargoField(index, 'weightKg', Number(e.target.value))} />
+                  </FormField>
+                  <FormField label="Declared value (USD)"
+                    error={errorFor(`cargoDetails[${index}].valueUsd`)}
+                    hint="Filed on the EEI; over $2,500 makes a filing mandatory">
+                    <input type="number" min={0} step="0.01" className="input numeric" value={line.valueUsd}
+                      onChange={(e) => setCargoField(index, 'valueUsd', Number(e.target.value))} />
                   </FormField>
                   <FormField label="Length (cm)">
                     <input type="number" min={0} step="0.01" className="input numeric" value={line.lengthCm}

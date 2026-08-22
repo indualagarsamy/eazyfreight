@@ -65,6 +65,17 @@ public class BookingCargoDetail {
     @Column(name = "cbm", precision = 12, scale = 4)
     private BigDecimal cbm;
 
+    /**
+     * Declared value of the goods in USD.
+     *
+     * <p>Required for export compliance: the EEI filing carries it, and the
+     * obligation to file at all turns on value exceeding $2,500 per Schedule B
+     * number. Nullable in the schema because bookings created before the column
+     * existed have none; required on new bookings by request validation.
+     */
+    @Column(name = "value_usd", precision = 14, scale = 2)
+    private BigDecimal valueUsd;
+
     @Column(name = "is_hazmat", nullable = false)
     private boolean hazmat;
 

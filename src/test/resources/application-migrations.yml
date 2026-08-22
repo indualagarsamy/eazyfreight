@@ -17,4 +17,6 @@ spring:
     show-sql: false
   flyway:
     enabled: true
+    # Portable migrations only — db/migration-postgres is verified against
+    # a real PostgreSQL instance instead.
     locations: classpath:db/migration

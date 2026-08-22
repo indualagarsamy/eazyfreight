@@ -64,6 +64,7 @@ public class BookingService {
                 .lengthCm(detail.lengthCm())
                 .widthCm(detail.widthCm())
                 .heightCm(detail.heightCm())
+                .valueUsd(detail.valueUsd())
                 .hazmat(detail.hazmat())
                 .temperatureControlled(detail.temperatureControlled())
                 .oversized(detail.oversized())
@@ -205,13 +206,6 @@ public class BookingService {
     public BookingResponse cancel(UUID bookingId, CancelBookingRequest request, String actor) {
         Booking booking = getBookingOrThrow(bookingId);
         booking.cancel(request.reason(), request.initiatedBy(), clock.instant(), actor);
-        return BookingResponse.fromEntity(bookingRepository.save(booking));
-    }
-
-    @Transactional
-    public BookingResponse markItnFiled(UUID bookingId, String actor) {
-        Booking booking = getBookingOrThrow(bookingId);
-        booking.markItnFiled(clock.instant(), actor);
         return BookingResponse.fromEntity(bookingRepository.save(booking));
     }
 

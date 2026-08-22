@@ -11,6 +11,8 @@ import { QuoteDetailPage } from './pages/QuoteDetailPage'
 import { BookingsPage } from './pages/BookingsPage'
 import { NewBookingPage } from './pages/NewBookingPage'
 import { BookingDetailPage } from './pages/BookingDetailPage'
+import { FilingsPage } from './pages/FilingsPage'
+import { FilingDetailPage } from './pages/FilingDetailPage'
 import './styles/global.css'
 
 const queryClient = new QueryClient({
@@ -40,6 +42,8 @@ const router = createBrowserRouter([
       { path: 'bookings', element: <BookingsPage /> },
       { path: 'bookings/new', element: <NewBookingPage /> },
       { path: 'bookings/:id', element: <BookingDetailPage /> },
+      { path: 'compliance', element: <FilingsPage /> },
+      { path: 'compliance/:id', element: <FilingDetailPage /> },
     ],
   },
 ])

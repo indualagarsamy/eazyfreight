@@ -1,7 +1,8 @@
 # Eazy Freight Service
 
 Spring Boot service implementing the **target model** from the Eazy Freight workshop
-specifications. Two bounded contexts so far: **Quote** and **Booking**.
+specifications. Three bounded contexts so far: **Quote**, **Booking** and
+**Export Compliance**.
 
 Tech stack and project layout follow `ddd26_claude_skills`. The domain design follows
 `eazyfreight-generator/docs/target-model/` — deliberately *not* the monolith patterns
@@ -16,7 +17,7 @@ those specs describe.
 | Java | 17 (Gradle toolchain) |
 | Framework | Spring Boot 3.3.2 — Web, Data JPA, Validation, Actuator |
 | Database | PostgreSQL 16, schema managed by Flyway (`ddl-auto: validate`) |
-| Tests | JUnit 5 + MockMvc against in-memory H2 (37 tests) |
+| Tests | JUnit 5 + MockMvc against in-memory H2 (65 tests) |
 | Tracing | Micrometer Tracing → OTLP → Jaeger |
 | Boilerplate | Lombok |
 | API client | Bruno collection in `bruno/Eazy Freight` |
@@ -31,7 +32,7 @@ export PATH="$JAVA_HOME/bin:$PATH"
 ```
 
 ```shell
-./gradlew build               # compiles and runs all 37 tests; no docker needed
+./gradlew build               # compiles and runs all 65 tests; no docker needed
 ```
 
 ```shell
@@ -60,7 +61,8 @@ com.eazyfreight
 ├── common/         ReferenceGenerator, BusinessDays, Clock bean
 ├── exception/      ApiError, GlobalExceptionHandler, not-found + domain-rule exceptions
 ├── quote/          Quote aggregate, Rate aggregate, screening port
-└── booking/        Booking aggregate
+├── booking/        Booking aggregate
+└── compliance/     EEI filing aggregate, ITN records, simulated AES boundary
 ```
 
 One flat package per bounded context, holding its entities, enums, events, DTO
@@ -104,6 +106,12 @@ lane is stale.
 `BookingStatusHistory[]` (append-only), `TruckDeliveryOrder`,
 `BookingReinstatement[]` (append-only).
 
+**EEIFiling** — root `EEIFiling`, children `ItnRecord[]` (append-only),
+`EEIFilingHistory[]` (append-only), `ExportLicense`. Two rules shape it: a filing is
+immutable once CBP has seen it, so a correction or amendment is a *new* filing
+pointing at its parent; and an amendment supersedes the previous ITN rather than
+replacing it, leaving both on file for the five-year retention period.
+
 `Lane`, `Carrier` and party identifiers are referenced by id, not owned.
 
 ### Domain events
@@ -143,6 +151,36 @@ Error responses use the shared `ApiError` shape:
 
 ---
 
+## Export compliance — the CBP boundary
+
+**No filing reaches CBP.** Submitting Electronic Export Information is a report to
+the United States government, lawful only for a party holding an AES filer
+certification. The `AesFilingClient` port has exactly one implementation,
+`SimulatedAesFilingClient`, which fabricates responses locally. There is no endpoint
+configured anywhere and no property that would switch a live adapter on, because no
+live adapter exists.
+
+Four things keep it that way:
+
+* `AesBoundaryTest` fails the build if a second `AesFilingClient` appears, if the
+  wired one stops reporting itself simulated, or if an AES endpoint property shows
+  up. Adding a real client is a deliberate act with a failing test attached.
+* A startup `WARN` states that filings are simulated.
+* `GET /api/compliance/filing-system` reports it, and the UI shows a standing banner
+  driven by that answer rather than a hard-coded string.
+* Simulated ITNs use `X99999999…` where a genuine ITN carries the filing date, so a
+  demo ITN can never be mistaken for one CBP issued.
+
+The eleven commands from the specification are all implemented. Notably:
+
+* **Correction vs amendment** are distinct. A correction replaces a filing CBP never
+  accepted, so no ITN exists and the replacement is an Original. An amendment
+  changes an accepted filing, so an ITN exists and is superseded on acceptance.
+* **`ItnNumberReceived`** is consumed by the Booking context, which is how
+  `Booking.itnFiled` gets set — the manual "mark ITN filed" endpoint is gone.
+* **`BookingEvent.ItnAmendmentRequired`**, raised on reinstatement since the booking
+  work, finally has a consumer.
+
 ## Known gaps
 
 * **Not yet implemented:** the five post-booking tracks — Container & Equipment,
@@ -156,6 +194,16 @@ Error responses use the shared `ApiError` shape:
 * **Simplified:** `BusinessDays` skips weekends only — no public holiday calendar.
 * **No payload limit for 45HC** is published in the spec, so payload validation is
   skipped for that container type rather than guessed at.
+* **Postgres-only constraints are not covered by the H2 test.**
+  `db/migration-postgres` holds a partial unique index (one active ITN per booking)
+  and a regex CHECK that H2 cannot parse, so `MigrationSchemaTest` never sees them.
+  They are exercised only by running against real PostgreSQL — which is how a write
+  ordering bug in ITN supersession was found, after the H2 test passed.
+* **HS code is not translated to Schedule B.** `ScheduleBCode` marks the Conformist
+  boundary and flags the code as untranslated rather than pretending the two are
+  interchangeable. A real translation needs the Census Bureau table.
+* **Shipper EIN, carrier SCAC and consignee country are keyed by hand** on the
+  filing, because no Party or Carrier context exists.
 * **Migrations are verified two ways.** `MigrationSchemaTest` runs Flyway against H2
   in PostgreSQL mode with `ddl-auto: validate`, so schema drift fails the build with
   no Docker needed. `V1`/`V2` have also been applied to a real PostgreSQL 16.15

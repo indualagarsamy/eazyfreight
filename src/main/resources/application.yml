@@ -12,7 +12,8 @@ spring:
     show-sql: true
   flyway:
     enabled: true
-    locations: classpath:db/migration
+    # migration-postgres holds constraints H2 cannot parse; see V5.
+    locations: classpath:db/migration,classpath:db/migration-postgres
 
 server:
   port: 8080

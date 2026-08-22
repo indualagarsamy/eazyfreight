@@ -21,6 +21,8 @@ public record BookingCargoDetailRequest(
         @DecimalMin(value = "0.01", message = "widthCm must be greater than 0") BigDecimal widthCm,
         @NotNull(message = "heightCm is required")
         @DecimalMin(value = "0.01", message = "heightCm must be greater than 0") BigDecimal heightCm,
+        @NotNull(message = "valueUsd is required")
+        @DecimalMin(value = "0.00", message = "valueUsd cannot be negative") BigDecimal valueUsd,
         boolean hazmat,
         boolean temperatureControlled,
         boolean oversized,

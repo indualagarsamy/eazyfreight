@@ -218,6 +218,7 @@ class BookingLifecycleTest {
                 .hsCode("8471.30.0100")
                 .pieces(10)
                 .weightKg(weightKg)
+                .valueUsd(new BigDecimal("50000"))
                 .lengthCm(new BigDecimal("100"))
                 .widthCm(new BigDecimal("100"))
                 .heightCm(new BigDecimal("100"))

@@ -567,6 +567,14 @@ public class Booking extends AbstractAggregateRoot<Booking> implements Persistab
         return Collections.unmodifiableList(reinstatements);
     }
 
+    /** Declared cargo value, which the EEI filing threshold is assessed against. */
+    public BigDecimal totalValueUsd() {
+        return cargoDetails.stream()
+                .map(BookingCargoDetail::getValueUsd)
+                .filter(java.util.Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     public BigDecimal totalWeightKg() {
         return cargoDetails.stream()
                 .map(BookingCargoDetail::getWeightKg)

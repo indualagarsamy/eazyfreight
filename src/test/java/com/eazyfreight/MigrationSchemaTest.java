@@ -47,17 +47,21 @@ class MigrationSchemaTest {
                 "bookings",
                 "booking_cargo_details",
                 "booking_status_history",
-                "booking_reinstatements");
+                "booking_reinstatements",
+                "eei_filings",
+                "itn_records",
+                "eei_filing_history",
+                "export_licenses");
     }
 
     @Test
-    void bothMigrationsApplied() {
+    void allPortableMigrationsApplied() {
         // Flyway records a null-version row for creating the schema itself; skip it.
         List<String> versions = jdbcTemplate.queryForList(
                 "SELECT version FROM flyway_schema_history "
                         + "WHERE success = TRUE AND version IS NOT NULL ORDER BY installed_rank",
                 String.class);
 
-        assertThat(versions).containsExactly("1", "2");
+        assertThat(versions).containsExactly("1", "2", "3", "4");
     }
 }
