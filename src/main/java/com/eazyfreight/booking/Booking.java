@@ -167,10 +167,6 @@ public class Booking extends AbstractAggregateRoot<Booking> implements Persistab
     @JoinColumn(name = "carrier_booking_id")
     private CarrierBooking carrierBooking;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "truck_delivery_order_id")
-    private TruckDeliveryOrder truckDeliveryOrder;
-
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<BookingCargoDetail> cargoDetails = new ArrayList<>();
 
@@ -421,51 +417,6 @@ public class Booking extends AbstractAggregateRoot<Booking> implements Persistab
         }
         registerEvent(new BookingEvent.BookingConfirmationSentToCustomer(
                 id, bookingReference, customerId, reissued, now));
-    }
-
-    // ------------------------------------------------------------- trucking
-
-    /**
-     * Rule 6: no driver is dispatched before the carrier has confirmed the space.
-     *
-     * <p>The reference is supplied lazily and drawn only once the preconditions
-     * pass. The generator commits independently, so taking a reference up front
-     * would consume one on every rejected attempt and leave gaps in the TDO series.
-     */
-    public void generateTruckDeliveryOrder(
-            Supplier<String> tdoReferenceSupplier,
-            String deliveryAddress,
-            Instant now,
-            String actor
-    ) {
-        requireStatus("A truck delivery order cannot be generated until the carrier confirms",
-                BookingStatus.CONFIRMED_BY_CARRIER, BookingStatus.CUSTOMER_CONFIRMED);
-        if (!transportRequired) {
-            throw new DomainRuleViolationException(
-                    "Booking " + bookingReference + " does not include Eazy Freight transport");
-        }
-        if (truckDeliveryOrder != null) {
-            throw new DomainRuleViolationException(
-                    "Truck delivery order " + truckDeliveryOrder.getTdoReference() + " already exists");
-        }
-
-        String tdoReference = tdoReferenceSupplier.get();
-        this.truckDeliveryOrder = TruckDeliveryOrder.generate(
-                tdoReference, pickupAddress, deliveryAddress, pickupDateTime, now);
-        touch(now, actor);
-        registerEvent(new BookingEvent.TruckDeliveryOrderGenerated(
-                id, bookingReference, tdoReference, pickupAddress, now));
-    }
-
-    public void dispatchTruckDeliveryOrder(UUID driverId, UUID truckingVendorId, Instant now, String actor) {
-        if (truckDeliveryOrder == null) {
-            throw new DomainRuleViolationException(
-                    "No truck delivery order has been generated for booking " + bookingReference);
-        }
-        truckDeliveryOrder.dispatch(driverId, truckingVendorId, now);
-        touch(now, actor);
-        registerEvent(new BookingEvent.TruckDeliveryOrderDispatched(
-                id, truckDeliveryOrder.getTdoReference(), driverId, truckingVendorId, now));
     }
 
     // ------------------------------------------------ overbooking & lifecycle

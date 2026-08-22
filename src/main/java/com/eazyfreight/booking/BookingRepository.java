@@ -25,9 +25,8 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
     List<Booking> findByStatusInAndCarrierBooking_ConfirmedEtdLessThanEqual(
             List<BookingStatus> statuses, LocalDate etd);
 
-    /** Confirmed bookings needing transport that have no truck delivery order yet. */
-    List<Booking> findByStatusInAndTransportRequiredTrueAndTruckDeliveryOrderIsNull(
-            List<BookingStatus> statuses);
+    /** Confirmed bookings where Eazy Freight arranges the trucking. */
+    List<Booking> findByStatusInAndTransportRequiredTrue(List<BookingStatus> statuses);
 
     List<Booking> findByStatusAndCancelledAtIsNotNull(BookingStatus status);
 }

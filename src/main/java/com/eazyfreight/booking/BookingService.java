@@ -158,28 +158,6 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingResponse generateTruckDeliveryOrder(
-            UUID bookingId, GenerateTruckDeliveryOrderRequest request, String actor) {
-        Booking booking = getBookingOrThrow(bookingId);
-        booking.generateTruckDeliveryOrder(
-                () -> referenceGenerator.next(ReferenceGenerator.TRUCK_DELIVERY_ORDER_PREFIX),
-                request.deliveryAddress(),
-                clock.instant(),
-                actor
-        );
-        return BookingResponse.fromEntity(bookingRepository.save(booking));
-    }
-
-    @Transactional
-    public BookingResponse dispatchTruckDeliveryOrder(
-            UUID bookingId, DispatchTruckDeliveryOrderRequest request, String actor) {
-        Booking booking = getBookingOrThrow(bookingId);
-        booking.dispatchTruckDeliveryOrder(
-                request.driverId(), request.truckingVendorId(), clock.instant(), actor);
-        return BookingResponse.fromEntity(bookingRepository.save(booking));
-    }
-
-    @Transactional
     public BookingResponse recordVesselOverbooking(UUID bookingId, String actor) {
         Booking booking = getBookingOrThrow(bookingId);
         booking.recordVesselOverbooking(clock.instant(), actor);
@@ -257,14 +235,6 @@ public class BookingService {
         LocalDate cutoff = LocalDate.now(clock).plusDays(withinDays);
         return bookingRepository
                 .findByStatusInAndCarrierBooking_ConfirmedEtdLessThanEqual(ACTIVE_CONFIRMED, cutoff).stream()
-                .map(BookingResponse::fromEntity)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<BookingResponse> findAwaitingTruckDispatch() {
-        return bookingRepository
-                .findByStatusInAndTransportRequiredTrueAndTruckDeliveryOrderIsNull(ACTIVE_CONFIRMED).stream()
                 .map(BookingResponse::fromEntity)
                 .toList();
     }

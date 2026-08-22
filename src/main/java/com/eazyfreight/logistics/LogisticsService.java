@@ -43,7 +43,7 @@ public class LogisticsService {
                         clock.instant()));
 
         assignment.dispatchOutbound(
-                dispatchReference(MovementType.OUTBOUND),
+                () -> dispatchReference(MovementType.OUTBOUND),
                 request.driverId(), request.truckingVendorId(), request.vehicleReference(),
                 request.pickupAddress(), request.deliveryAddress(),
                 request.scheduledPickupDate(), request.scheduledDeliveryDate(),
@@ -103,7 +103,7 @@ public class LogisticsService {
             UUID bookingId, LogisticsRequests.DispatchTruck request, String actor) {
         ContainerAssignment assignment = get(bookingId);
         assignment.dispatchInbound(
-                dispatchReference(MovementType.INBOUND),
+                () -> dispatchReference(MovementType.INBOUND),
                 request.driverId(), request.truckingVendorId(), request.vehicleReference(),
                 request.pickupAddress(), request.deliveryAddress(),
                 request.scheduledPickupDate(), request.scheduledDeliveryDate(),
@@ -251,6 +251,29 @@ public class LogisticsService {
     public List<LogisticsResponses.Logistics> findBlockedOnItn() {
         return repository.findByStageAndItnReceivedFalse(LogisticsStage.SEALED).stream()
                 .map(LogisticsResponses.Logistics::from)
+                .toList();
+    }
+
+    /**
+     * Confirmed bookings that need a truck and have no outbound dispatch.
+     *
+     * <p>This lives here rather than on the booking, because trucking belongs to
+     * this context — the booking only records that we arrange it and where from.
+     */
+    @Transactional(readOnly = true)
+    public List<LogisticsResponses.AwaitingDispatch> findAwaitingOutboundDispatch() {
+        return bookingRepository
+                .findByStatusInAndTransportRequiredTrue(List.of(
+                        BookingStatus.CONFIRMED_BY_CARRIER, BookingStatus.CUSTOMER_CONFIRMED))
+                .stream()
+                .filter(booking -> repository.findByBookingId(booking.getId())
+                        .flatMap(ContainerAssignment::outboundDispatch).isEmpty())
+                .map(booking -> new LogisticsResponses.AwaitingDispatch(
+                        booking.getId(), booking.getBookingReference(),
+                        booking.getRequestedEtd(),
+                        booking.getCarrierBooking() == null
+                                ? null : booking.getCarrierBooking().getConfirmedEtd(),
+                        booking.getPickupAddress()))
                 .toList();
     }
 

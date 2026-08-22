@@ -22,27 +22,6 @@ class BookingLifecycleTest {
     private static final String ACTOR = "ops.jane";
 
     @Test
-    void aTruckOrderCannotBeGeneratedBeforeTheCarrierConfirms() {
-        Booking booking = requestedBooking(true);
-
-        assertThatThrownBy(() -> booking.generateTruckDeliveryOrder(() -> "TDO-1", "Port of LA", NOW, ACTOR))
-                .isInstanceOf(DomainRuleViolationException.class)
-                .hasMessageContaining("until the carrier confirms");
-    }
-
-    @Test
-    void aRejectedTruckOrderDoesNotConsumeAReference() {
-        Booking booking = requestedBooking(true);
-        java.util.concurrent.atomic.AtomicInteger drawn = new java.util.concurrent.atomic.AtomicInteger();
-
-        assertThatThrownBy(() -> booking.generateTruckDeliveryOrder(
-                () -> "TDO-" + drawn.incrementAndGet(), "Port of LA", NOW, ACTOR))
-                .isInstanceOf(DomainRuleViolationException.class);
-
-        assertThat(drawn.get()).isZero();
-    }
-
-    @Test
     void aCarrierReferenceCannotBeRecordedBeforeSubmission() {
         Booking booking = requestedBooking(false);
 

@@ -111,14 +111,6 @@ export const useAcknowledgeEtdVariance = (id: string) =>
 export const useSendBookingConfirmation = (id: string) =>
   useBookingMutation<void>(id, () => api.post<Booking>(`/api/bookings/${id}/send-confirmation`))
 
-export const useGenerateTruckDeliveryOrder = (id: string) =>
-  useBookingMutation<{ deliveryAddress: string }>(id, (input) =>
-    api.post<Booking>(`/api/bookings/${id}/truck-delivery-order`, input))
-
-export const useDispatchTruckDeliveryOrder = (id: string) =>
-  useBookingMutation<{ driverId: string | null; truckingVendorId: string | null }>(id, (input) =>
-    api.post<Booking>(`/api/bookings/${id}/truck-delivery-order/dispatch`, input))
-
 export const useRecordVesselOverbooking = (id: string) =>
   useBookingMutation<void>(id, () => api.post<Booking>(`/api/bookings/${id}/vessel-overbooking`))
 

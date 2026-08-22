@@ -43,7 +43,6 @@ class MigrationSchemaTest {
                 "quote_lines",
                 "quote_cargo_details",
                 "carrier_bookings",
-                "truck_delivery_orders",
                 "bookings",
                 "booking_cargo_details",
                 "booking_status_history",
@@ -74,6 +73,6 @@ class MigrationSchemaTest {
                         + "WHERE success = TRUE AND version IS NOT NULL ORDER BY installed_rank",
                 String.class);
 
-        assertThat(versions).containsExactly("1", "2", "3", "4", "6", "8");
+        assertThat(versions).containsExactly("1", "2", "3", "4", "6", "8", "10");
     }
 }

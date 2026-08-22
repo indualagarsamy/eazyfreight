@@ -14,6 +14,16 @@ public final class LogisticsResponses {
     private LogisticsResponses() {
     }
 
+    /** A confirmed booking that needs a truck but has no outbound dispatch yet. */
+    public record AwaitingDispatch(
+            java.util.UUID bookingId,
+            String bookingReference,
+            java.time.LocalDate requestedEtd,
+            java.time.LocalDate confirmedEtd,
+            String pickupAddress
+    ) {
+    }
+
     public record Seal(
             UUID id, String sealNumber, SealSource sealSource, boolean active,
             Instant issuedAt, Instant deactivatedAt, SealDeactivationReason deactivationReason,

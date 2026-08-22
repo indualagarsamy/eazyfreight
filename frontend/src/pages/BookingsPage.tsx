@@ -156,12 +156,9 @@ export function BookingsPage() {
                               <StatusPill status="ROLLED" tone="info" size="sm"
                                 label={`Rolled ×${booking.reinstatements.length}`} />
                             )}
-                            {booking.truckDeliveryOrder && (
-                              <StatusPill status={booking.truckDeliveryOrder.status} size="sm" />
-                            )}
                             {!booking.requiresCustomerEtdNotification
                               && booking.reinstatements.length === 0
-                              && !booking.truckDeliveryOrder && <span className="faint">—</span>}
+                              && <span className="faint">—</span>}
                           </div>
                         </td>
                       </tr>

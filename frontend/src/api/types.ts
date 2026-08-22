@@ -84,7 +84,6 @@ export type BookingStatus =
 export type BookingShippingMode = 'OCEAN_FCL' | 'OCEAN_LCL'
 export type BookingSourceType = 'DIRECT_CARRIER' | 'CO_LOADER'
 export type ContainerType = 'TWENTY_GP' | 'FORTY_GP' | 'FORTY_HC' | 'FORTY_FIVE_HC'
-export type TruckDeliveryOrderStatus = 'GENERATED' | 'DISPATCHED' | 'PICKED_UP' | 'DELIVERED'
 export type StatusChangeSource = 'MANUAL' | 'INTTRA' | 'SYSTEM'
 export type CancellationInitiator = 'CUSTOMER' | 'CARRIER_OVERBOOKING' | 'OPERATIONS'
 
@@ -103,19 +102,6 @@ export interface CarrierBooking {
   submittedAt: string | null
   confirmedAt: string | null
   confirmedBy: string | null
-}
-
-export interface TruckDeliveryOrder {
-  id: string
-  tdoReference: string
-  pickupAddress: string
-  deliveryAddress: string
-  pickupDateTime: string | null
-  driverId: string | null
-  truckingVendorId: string | null
-  status: TruckDeliveryOrderStatus
-  generatedAt: string
-  dispatchedAt: string | null
 }
 
 export interface BookingStatusHistoryEntry {
@@ -196,7 +182,6 @@ export interface Booking {
   lastModifiedAt: string
   lastModifiedBy: string
   carrierBooking: CarrierBooking | null
-  truckDeliveryOrder: TruckDeliveryOrder | null
   cargoDetails: BookingCargoDetail[]
   statusHistory: BookingStatusHistoryEntry[]
   reinstatements: BookingReinstatement[]
