@@ -62,7 +62,13 @@ class MigrationSchemaTest {
                 "master_bol_discrepancies",
                 "house_bols",
                 "house_bol_distributions",
-                "original_bol_tracking");
+                "original_bol_tracking",
+                "invoices",
+                "invoice_lines",
+                "customer_payments",
+                "carrier_payables",
+                "storage_fees",
+                "credit_holds");
     }
 
     @Test
@@ -73,6 +79,6 @@ class MigrationSchemaTest {
                         + "WHERE success = TRUE AND version IS NOT NULL ORDER BY installed_rank",
                 String.class);
 
-        assertThat(versions).containsExactly("1", "2", "3", "4", "6", "8", "10");
+        assertThat(versions).containsExactly("1", "2", "3", "4", "6", "8", "10", "11");
     }
 }

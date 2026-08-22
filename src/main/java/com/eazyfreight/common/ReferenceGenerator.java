@@ -28,6 +28,8 @@ public class ReferenceGenerator {
     public static final String DISPATCH_PREFIX = "TDO";
     public static final String INSTRUCTIONS_PREFIX = "SI";
     public static final String HOUSE_BOL_PREFIX = "HBL";
+    public static final String INVOICE_PREFIX = "INV";
+    public static final String CREDIT_NOTE_PREFIX = "CN";
 
     private final ReferenceSequenceRepository repository;
     private final Clock clock;
