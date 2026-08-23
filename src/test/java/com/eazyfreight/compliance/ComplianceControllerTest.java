@@ -26,6 +26,13 @@ class ComplianceControllerTest {
     private MockMvc mockMvc;
 
     @Test
+    void unknownFilingReturnsNotFound() throws Exception {
+        mockMvc.perform(get("/api/compliance/filings/3fa85f64-5717-4562-b3fc-2c963f66afa6"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
     void theApiDeclaresThatFilingsAreSimulated() throws Exception {
         mockMvc.perform(get("/api/compliance/filing-system"))
                 .andExpect(status().isOk())

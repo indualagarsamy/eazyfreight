@@ -29,6 +29,13 @@ class DocumentationControllerTest {
     private MockMvc mockMvc;
 
     @Test
+    void unknownHouseBolReturnsNotFound() throws Exception {
+        mockMvc.perform(get("/api/documentation/house-bols/3fa85f64-5717-4562-b3fc-2c963f66afa6"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
     void preconditionsReportExactlyWhatIsStillMissing() throws Exception {
         String bookingId = confirmedBooking();
 

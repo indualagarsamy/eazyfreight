@@ -27,6 +27,13 @@ class LogisticsControllerTest {
     private MockMvc mockMvc;
 
     @Test
+    void unknownBookingReturnsNotFound() throws Exception {
+        mockMvc.perform(get("/api/logistics/bookings/3fa85f64-5717-4562-b3fc-2c963f66afa6"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
     void noTruckGoesOutBeforeTheCarrierConfirms() throws Exception {
         String bookingId = requestedBooking();
 

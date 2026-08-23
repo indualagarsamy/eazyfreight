@@ -3,7 +3,6 @@ package com.eazyfreight.alerts;
 import com.eazyfreight.booking.Booking;
 import com.eazyfreight.booking.BookingRepository;
 import com.eazyfreight.booking.BookingStatus;
-import com.eazyfreight.exception.AlertNotFoundException;
 import com.eazyfreight.exception.DomainRuleViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

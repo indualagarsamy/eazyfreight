@@ -3,7 +3,6 @@ package com.eazyfreight.quote;
 import com.eazyfreight.common.BusinessDays;
 import com.eazyfreight.common.ReferenceGenerator;
 import com.eazyfreight.exception.DomainRuleViolationException;
-import com.eazyfreight.exception.QuoteNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

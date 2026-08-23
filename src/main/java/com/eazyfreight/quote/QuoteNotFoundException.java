@@ -1,4 +1,4 @@
-package com.eazyfreight.exception;
+package com.eazyfreight.quote;
 
 import java.util.UUID;
 
