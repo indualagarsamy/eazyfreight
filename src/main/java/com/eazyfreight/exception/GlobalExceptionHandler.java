@@ -1,11 +1,12 @@
 package com.eazyfreight.exception;
 
-import com.eazyfreight.alerts.AlertNotFoundException;
-import com.eazyfreight.compliance.FilingNotFoundException;
-import com.eazyfreight.documentation.DocumentationNotFoundException;
-import com.eazyfreight.finance.FinanceNotFoundException;
-import com.eazyfreight.logistics.LogisticsNotFoundException;
-import com.eazyfreight.quote.QuoteNotFoundException;
+import com.eazyfreight.alerts.exception.AlertNotFoundException;
+import com.eazyfreight.compliance.exception.FilingNotFoundException;
+import com.eazyfreight.documentation.exception.DocumentationNotFoundException;
+import com.eazyfreight.finance.exception.FinanceNotFoundException;
+import com.eazyfreight.logistics.exception.LogisticsNotFoundException;
+import com.eazyfreight.quote.exception.QuoteNotFoundException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
