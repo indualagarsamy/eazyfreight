@@ -1,0 +1,856 @@
+openapi: 3.0.3
+info:
+  title: EazyFreight Booking API
+  version: "1.0.0"
+  description: >
+    Booking endpoints. There is no PUT — every change is a named command
+    against the aggregate, recorded in the status history. The X-Actor
+    header names who is acting and is written into the audit trail.
+servers:
+  - url: /api/bookings
+tags:
+  - name: booking
+paths:
+  /api/bookings:
+    get:
+      tags: [booking]
+      operationId: getAllBookings
+      summary: List all bookings
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingResponse'
+    post:
+      tags: [booking]
+      operationId: createBooking
+      summary: Create a booking request
+      parameters:
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/{id}:
+    get:
+      tags: [booking]
+      operationId: getBookingById
+      summary: Get a booking by id
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/by-reference/{bookingReference}:
+    get:
+      tags: [booking]
+      operationId: getBookingByReference
+      summary: Get a booking by its reference
+      parameters:
+        - name: bookingReference
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/{id}/status-history:
+    get:
+      tags: [booking]
+      operationId: getBookingStatusHistory
+      summary: List the status history of a booking
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingStatusHistoryResponse'
+  /api/bookings/by-customer/{customerId}:
+    get:
+      tags: [booking]
+      operationId: getBookingsByCustomer
+      summary: List bookings for a customer, optionally filtered by status
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/BookingStatus'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/by-carrier/{carrierId}:
+    get:
+      tags: [booking]
+      operationId: getBookingsByCarrier
+      summary: List bookings for a carrier
+      parameters:
+        - name: carrierId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/pending-carrier-confirmation:
+    get:
+      tags: [booking]
+      operationId: getBookingsPendingCarrierConfirmation
+      summary: List bookings submitted to a carrier but not yet confirmed
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/approaching-etd:
+    get:
+      tags: [booking]
+      operationId: getBookingsApproachingEtd
+      summary: List bookings whose ETD is approaching
+      parameters:
+        - name: withinDays
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 7
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/{id}/submit:
+    post:
+      tags: [booking]
+      operationId: submitBooking
+      summary: Submit the booking to a carrier or co-loader
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitBookingRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/{id}/carrier-confirmation:
+    post:
+      tags: [booking]
+      operationId: recordCarrierConfirmation
+      summary: Record the carrier's confirmation
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordCarrierConfirmationRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/{id}/carrier-rejection:
+    post:
+      tags: [booking]
+      operationId: recordCarrierRejection
+      summary: Record the carrier's rejection
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordCarrierRejectionRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/{id}/counter-offer:
+    post:
+      tags: [booking]
+      operationId: recordCounterOffer
+      summary: Record a carrier counter-offer
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordCounterOfferRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/{id}/counter-offer/accept:
+    post:
+      tags: [booking]
+      operationId: acceptCounterOffer
+      summary: Accept the outstanding counter-offer
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/{id}/counter-offer/reject:
+    post:
+      tags: [booking]
+      operationId: rejectCounterOffer
+      summary: Reject the outstanding counter-offer
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/{id}/acknowledge-etd-variance:
+    post:
+      tags: [booking]
+      operationId: acknowledgeEtdVariance
+      summary: Acknowledge a material ETD change to the customer
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/{id}/send-confirmation:
+    post:
+      tags: [booking]
+      operationId: sendConfirmation
+      summary: Send the booking confirmation to the customer
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/{id}/vessel-overbooking:
+    post:
+      tags: [booking]
+      operationId: recordVesselOverbooking
+      summary: Record that the carrier reported vessel overbooking
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/{id}/reinstate:
+    post:
+      tags: [booking]
+      operationId: reinstateBooking
+      summary: Reinstate the booking onto a later sailing
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReinstateBookingRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /api/bookings/{id}/cancel:
+    post:
+      tags: [booking]
+      operationId: cancelBooking
+      summary: Cancel the booking
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelBookingRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+components:
+  parameters:
+    BookingId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ActorHeader:
+      name: X-Actor
+      in: header
+      required: false
+      schema:
+        type: string
+        default: operations
+      description: Actor recorded in the audit trail.
+  schemas:
+    BookingStatus:
+      type: string
+      enum: [BOOKING_REQUESTED, SUBMITTED_TO_CARRIER, REJECTED_BY_CARRIER, COUNTER_OFFER_RECEIVED, CONFIRMED_BY_CARRIER, CUSTOMER_CONFIRMED, VESSEL_OVERBOOKED, CANCELLED]
+    ShippingMode:
+      type: string
+      description: Ocean only — this context does not handle air.
+      enum: [OCEAN_FCL, OCEAN_LCL]
+    CancellationInitiator:
+      type: string
+      enum: [CUSTOMER, CARRIER_OVERBOOKING, OPERATIONS]
+    StatusChangeSource:
+      type: string
+      enum: [MANUAL, INTTRA, SYSTEM]
+    BookingSourceType:
+      type: string
+      enum: [DIRECT_CARRIER, CO_LOADER]
+    ContainerType:
+      type: string
+      enum: [TWENTY_GP, FORTY_GP, FORTY_HC, FORTY_FIVE_HC]
+    BookingCargoDetailRequest:
+      type: object
+      required:
+        - description
+        - hsCode
+        - pieces
+        - weightKg
+        - lengthCm
+        - widthCm
+        - heightCm
+        - valueUsd
+      properties:
+        description:
+          type: string
+          minLength: 1
+        hsCode:
+          type: string
+          minLength: 1
+          pattern: '\d{4}\.\d{2}\.\d{4}'
+        pieces:
+          type: integer
+          minimum: 1
+        weightKg:
+          type: number
+          minimum: 0.001
+        lengthCm:
+          type: number
+          minimum: 0.01
+        widthCm:
+          type: number
+          minimum: 0.01
+        heightCm:
+          type: number
+          minimum: 0.01
+        valueUsd:
+          type: number
+          minimum: 0.00
+        hazmat:
+          type: boolean
+        temperatureControlled:
+          type: boolean
+        oversized:
+          type: boolean
+        marksAndNumbers:
+          type: string
+    BookingCargoDetailResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        hsCode:
+          type: string
+        pieces:
+          type: integer
+        weightKg:
+          type: number
+        lengthCm:
+          type: number
+        widthCm:
+          type: number
+        heightCm:
+          type: number
+        cbm:
+          type: number
+        valueUsd:
+          type: number
+        hazmat:
+          type: boolean
+        temperatureControlled:
+          type: boolean
+        oversized:
+          type: boolean
+        marksAndNumbers:
+          type: string
+    BookingReinstatementResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        previousVessel:
+          type: string
+        previousVoyage:
+          type: string
+        previousEtd:
+          type: string
+          format: date
+        previousEta:
+          type: string
+          format: date
+        newVesselName:
+          type: string
+        newVoyageNumber:
+          type: string
+        newEtd:
+          type: string
+          format: date
+        newEta:
+          type: string
+          format: date
+        reinstatedAt:
+          type: string
+          format: date-time
+        reinstatedBy:
+          type: string
+        reason:
+          type: string
+    BookingStatusHistoryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sequenceNumber:
+          type: integer
+        fromStatus:
+          $ref: '#/components/schemas/BookingStatus'
+        toStatus:
+          $ref: '#/components/schemas/BookingStatus'
+        changedAt:
+          type: string
+          format: date-time
+        changedBy:
+          type: string
+        reason:
+          type: string
+        source:
+          $ref: '#/components/schemas/StatusChangeSource'
+    CarrierBookingResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingSourceType:
+          $ref: '#/components/schemas/BookingSourceType'
+        carrierId:
+          type: string
+          format: uuid
+        carrierBookingRef:
+          type: string
+        coLoaderBookingRef:
+          type: string
+        vesselName:
+          type: string
+        voyageNumber:
+          type: string
+        confirmedEtd:
+          type: string
+          format: date
+        confirmedEta:
+          type: string
+          format: date
+        containerType:
+          $ref: '#/components/schemas/ContainerType'
+        numberOfContainers:
+          type: integer
+        submittedAt:
+          type: string
+          format: date-time
+        confirmedAt:
+          type: string
+          format: date-time
+        confirmedBy:
+          type: string
+    BookingResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingReference:
+          type: string
+        quoteId:
+          type: string
+          format: uuid
+        customerId:
+          type: string
+          format: uuid
+        shipperId:
+          type: string
+          format: uuid
+        consigneeId:
+          type: string
+          format: uuid
+        notifyPartyId:
+          type: string
+          format: uuid
+        alsoNotifyId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/BookingStatus'
+        shippingMode:
+          $ref: '#/components/schemas/ShippingMode'
+        originPortCode:
+          type: string
+        destinationPortCode:
+          type: string
+        incoterms:
+          type: string
+        requestedEtd:
+          type: string
+          format: date
+        requestedEta:
+          type: string
+          format: date
+        transportRequired:
+          type: boolean
+        pickupAddress:
+          type: string
+        pickupDateTime:
+          type: string
+          format: date-time
+        specialInstructions:
+          type: string
+        marksAndNumbers:
+          type: string
+        cancellationReason:
+          type: string
+        cancellationInitiatedBy:
+          $ref: '#/components/schemas/CancellationInitiator'
+        cancelledAt:
+          type: string
+          format: date-time
+        requiresCustomerEtdNotification:
+          type: boolean
+          description: >
+            True when the confirmed ETD moved more than two business days
+            from what the customer asked for; the confirmation is blocked
+            until acknowledged.
+        etdVarianceAcknowledgedAt:
+          type: string
+          format: date-time
+        confirmationSentAt:
+          type: string
+          format: date-time
+        itnFiled:
+          type: boolean
+        totalWeightKg:
+          type: number
+        totalValueUsd:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        lastModifiedAt:
+          type: string
+          format: date-time
+        lastModifiedBy:
+          type: string
+        carrierBooking:
+          $ref: '#/components/schemas/CarrierBookingResponse'
+        cargoDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingCargoDetailResponse'
+        statusHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingStatusHistoryResponse'
+        reinstatements:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingReinstatementResponse'
+    CreateBookingRequest:
+      type: object
+      required:
+        - customerId
+        - shipperId
+        - consigneeId
+        - shippingMode
+        - originPortCode
+        - destinationPortCode
+        - incoterms
+        - requestedEtd
+        - cargoDetails
+      properties:
+        quoteId:
+          type: string
+          format: uuid
+        customerId:
+          type: string
+          format: uuid
+        shipperId:
+          type: string
+          format: uuid
+        consigneeId:
+          type: string
+          format: uuid
+        notifyPartyId:
+          type: string
+          format: uuid
+        alsoNotifyId:
+          type: string
+          format: uuid
+        shippingMode:
+          $ref: '#/components/schemas/ShippingMode'
+        originPortCode:
+          type: string
+          minLength: 1
+        destinationPortCode:
+          type: string
+          minLength: 1
+        incoterms:
+          type: string
+          minLength: 1
+        requestedEtd:
+          type: string
+          format: date
+        requestedEta:
+          type: string
+          format: date
+        transportRequired:
+          type: boolean
+        pickupAddress:
+          type: string
+        pickupDateTime:
+          type: string
+          format: date-time
+        specialInstructions:
+          type: string
+        marksAndNumbers:
+          type: string
+        cargoDetails:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/BookingCargoDetailRequest'
+    SubmitBookingRequest:
+      type: object
+      required:
+        - bookingSourceType
+        - carrierId
+      properties:
+        bookingSourceType:
+          $ref: '#/components/schemas/BookingSourceType'
+        carrierId:
+          type: string
+          format: uuid
+        containerType:
+          $ref: '#/components/schemas/ContainerType'
+        numberOfContainers:
+          type: integer
+          minimum: 1
+    RecordCarrierConfirmationRequest:
+      type: object
+      required:
+        - carrierBookingRef
+        - vesselName
+        - voyageNumber
+        - confirmedEtd
+        - confirmedEta
+      properties:
+        carrierBookingRef:
+          type: string
+          minLength: 1
+        coLoaderBookingRef:
+          type: string
+        vesselName:
+          type: string
+          minLength: 1
+        voyageNumber:
+          type: string
+          minLength: 1
+        confirmedEtd:
+          type: string
+          format: date
+        confirmedEta:
+          type: string
+          format: date
+        containerType:
+          $ref: '#/components/schemas/ContainerType'
+        confirmedAt:
+          type: string
+          format: date-time
+    RecordCarrierRejectionRequest:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+          minLength: 1
+    RecordCounterOfferRequest:
+      type: object
+      required:
+        - proposedVessel
+        - proposedVoyage
+        - proposedEtd
+        - proposedEta
+      properties:
+        proposedVessel:
+          type: string
+          minLength: 1
+        proposedVoyage:
+          type: string
+          minLength: 1
+        proposedEtd:
+          type: string
+          format: date
+        proposedEta:
+          type: string
+          format: date
+    ReinstateBookingRequest:
+      type: object
+      required:
+        - newVesselName
+        - newVoyageNumber
+        - newEtd
+        - newEta
+      properties:
+        newVesselName:
+          type: string
+          minLength: 1
+        newVoyageNumber:
+          type: string
+          minLength: 1
+        newEtd:
+          type: string
+          format: date
+        newEta:
+          type: string
+          format: date
+        reason:
+          type: string
+    CancelBookingRequest:
+      type: object
+      required:
+        - reason
+        - initiatedBy
+      properties:
+        reason:
+          type: string
+          minLength: 1
+        initiatedBy:
+          $ref: '#/components/schemas/CancellationInitiator'

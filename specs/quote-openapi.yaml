@@ -1,0 +1,655 @@
+openapi: 3.0.3
+info:
+  title: EazyFreight Quote API
+  version: "1.0.0"
+  description: >
+    Quote endpoints. Lifecycle changes are POSTs to named sub-resources
+    (/send, /accept, /decline) rather than a PUT that lets a caller set
+    status to anything.
+servers:
+  - url: /api/quotes
+tags:
+  - name: quote
+paths:
+  /api/quotes:
+    get:
+      tags: [quote]
+      operationId: getAllQuotes
+      summary: List all quotes
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuoteResponse'
+    post:
+      tags: [quote]
+      operationId: createQuote
+      summary: Create a quote request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuoteRequest'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+  /api/quotes/{id}:
+    get:
+      tags: [quote]
+      operationId: getQuoteById
+      summary: Get a quote by id
+      parameters:
+        - $ref: '#/components/parameters/QuoteId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+  /api/quotes/by-reference/{quoteReference}:
+    get:
+      tags: [quote]
+      operationId: getQuoteByReference
+      summary: Get a quote by its reference
+      parameters:
+        - name: quoteReference
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+  /api/quotes/open:
+    get:
+      tags: [quote]
+      operationId: getOpenQuotes
+      summary: List open quotes
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuoteResponse'
+  /api/quotes/expiring:
+    get:
+      tags: [quote]
+      operationId: getExpiringQuotes
+      summary: List quotes expiring within a window
+      parameters:
+        - name: withinDays
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 3
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuoteResponse'
+  /api/quotes/by-customer/{customerId}:
+    get:
+      tags: [quote]
+      operationId: getQuotesByCustomer
+      summary: List quotes for a customer, optionally filtered by status
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/QuoteStatus'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuoteResponse'
+  /api/quotes/rates:
+    get:
+      tags: [quote]
+      operationId: getRatesForLane
+      summary: List carrier rates for a lane and mode
+      parameters:
+        - name: originPortCode
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: destinationPortCode
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: mode
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/ShippingMode'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RateResponse'
+  /api/quotes/{id}/rescreen:
+    post:
+      tags: [quote]
+      operationId: rescreenQuote
+      summary: Re-run denied-party screening for a quote
+      parameters:
+        - $ref: '#/components/parameters/QuoteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuoteRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+  /api/quotes/{id}/build:
+    post:
+      tags: [quote]
+      operationId: buildQuotation
+      summary: Build the priced quotation lines
+      parameters:
+        - $ref: '#/components/parameters/QuoteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuildQuotationRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+  /api/quotes/{id}/send:
+    post:
+      tags: [quote]
+      operationId: sendQuote
+      summary: Send the quote to the customer
+      parameters:
+        - $ref: '#/components/parameters/QuoteId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+  /api/quotes/{id}/accept:
+    post:
+      tags: [quote]
+      operationId: acceptQuote
+      summary: Accept the quote and select the carrier
+      parameters:
+        - $ref: '#/components/parameters/QuoteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptQuoteRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+  /api/quotes/{id}/decline:
+    post:
+      tags: [quote]
+      operationId: declineQuote
+      summary: Decline the quote
+      parameters:
+        - $ref: '#/components/parameters/QuoteId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeclineQuoteRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+  /api/quotes/{id}/expire:
+    post:
+      tags: [quote]
+      operationId: expireQuote
+      summary: Expire the quote
+      parameters:
+        - $ref: '#/components/parameters/QuoteId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+components:
+  parameters:
+    QuoteId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    QuoteStatus:
+      type: string
+      enum: [DRAFT, SENT, ACCEPTED, DECLINED, EXPIRED]
+    ShippingMode:
+      type: string
+      enum: [OCEAN_FCL, OCEAN_LCL, AIR]
+    ChargeUnit:
+      type: string
+      enum: [TEU, CBM, KG, FLAT]
+    QuoteLineType:
+      type: string
+      enum: [BASE_FREIGHT, BAF, CAF, PSS, THC_ORIGIN, THC_DESTINATION, DOC_FEE, INSURANCE]
+    RateType:
+      type: string
+      enum: [CONTRACT, SPOT]
+    ScreeningStatus:
+      type: string
+      enum: [PENDING, CLEARED, FLAGGED]
+    SurchargeType:
+      type: string
+      enum: [BAF, CAF, PSS, THC_ORIGIN, THC_DESTINATION, DOC_FEE]
+    CargoDetailRequest:
+      type: object
+      required:
+        - description
+        - hsCode
+        - pieces
+        - weightKg
+        - lengthCm
+        - widthCm
+        - heightCm
+      properties:
+        description:
+          type: string
+          minLength: 1
+        hsCode:
+          type: string
+          minLength: 1
+          pattern: '\d{4}\.\d{2}\.\d{4}'
+        pieces:
+          type: integer
+          minimum: 1
+        weightKg:
+          type: number
+        lengthCm:
+          type: number
+        widthCm:
+          type: number
+        heightCm:
+          type: number
+        hazmat:
+          type: boolean
+        temperatureControlled:
+          type: boolean
+        oversized:
+          type: boolean
+    CargoDetailResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        hsCode:
+          type: string
+        pieces:
+          type: integer
+        weightKg:
+          type: number
+        lengthCm:
+          type: number
+        widthCm:
+          type: number
+        heightCm:
+          type: number
+        volumetricWeightCbm:
+          type: number
+        volumetricWeightKg:
+          type: number
+        chargeableWeight:
+          type: number
+        chargeableUnit:
+          $ref: '#/components/schemas/ChargeUnit'
+        hazmat:
+          type: boolean
+        temperatureControlled:
+          type: boolean
+        oversized:
+          type: boolean
+    CreateQuoteRequest:
+      type: object
+      required:
+        - customerId
+        - shippingMode
+        - originPortCode
+        - destinationPortCode
+        - incoterms
+        - cargoDetails
+        - currency
+        - shipperName
+        - consigneeName
+      properties:
+        customerId:
+          type: string
+          format: uuid
+        shippingMode:
+          $ref: '#/components/schemas/ShippingMode'
+        originPortCode:
+          type: string
+          minLength: 1
+        destinationPortCode:
+          type: string
+          minLength: 1
+        incoterms:
+          type: string
+          minLength: 1
+        cargoDetails:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/CargoDetailRequest'
+        requestedEtd:
+          type: string
+          format: date
+        specialHandling:
+          type: string
+        insuranceRequired:
+          type: boolean
+        currency:
+          type: string
+          minLength: 1
+          pattern: '[A-Z]{3}'
+        shipperName:
+          type: string
+          minLength: 1
+        shipperAddress:
+          type: string
+        shipperCountry:
+          type: string
+        consigneeName:
+          type: string
+          minLength: 1
+        consigneeAddress:
+          type: string
+        consigneeCountry:
+          type: string
+    QuoteLineRequest:
+      type: object
+      required:
+        - lineType
+        - description
+        - buyRate
+        - sellRate
+        - quantity
+        - unit
+      properties:
+        lineType:
+          $ref: '#/components/schemas/QuoteLineType'
+        description:
+          type: string
+          minLength: 1
+        buyRate:
+          type: number
+          minimum: 0.00
+        sellRate:
+          type: number
+          minimum: 0.00
+        quantity:
+          type: number
+          minimum: 0.0001
+        unit:
+          $ref: '#/components/schemas/ChargeUnit'
+    BuildQuotationRequest:
+      type: object
+      required:
+        - lines
+        - validityDays
+      properties:
+        lines:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/QuoteLineRequest'
+        validityDays:
+          type: integer
+          minimum: 1
+        rateValidUntil:
+          type: string
+          format: date
+          description: >
+            Earliest expiry among the carrier rates these lines were priced
+            from; acceptance is refused once it passes.
+        spotRate:
+          type: boolean
+        notes:
+          type: string
+    AcceptQuoteRequest:
+      type: object
+      required:
+        - selectedCarrierId
+      properties:
+        selectedCarrierId:
+          type: string
+          format: uuid
+    DeclineQuoteRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+    QuoteLineResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        lineType:
+          $ref: '#/components/schemas/QuoteLineType'
+        description:
+          type: string
+        buyRate:
+          type: number
+        sellRate:
+          type: number
+        currency:
+          type: string
+        quantity:
+          type: number
+        unit:
+          $ref: '#/components/schemas/ChargeUnit'
+        amount:
+          type: number
+    QuoteResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        quoteReference:
+          type: string
+        customerId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/QuoteStatus'
+        shippingMode:
+          $ref: '#/components/schemas/ShippingMode'
+        originPortCode:
+          type: string
+        destinationPortCode:
+          type: string
+        incoterms:
+          type: string
+        selectedCarrierId:
+          type: string
+          format: uuid
+        screeningStatus:
+          $ref: '#/components/schemas/ScreeningStatus'
+        screeningReferenceId:
+          type: string
+        requestedEtd:
+          type: string
+          format: date
+        validFrom:
+          type: string
+          format: date
+        validUntil:
+          type: string
+          format: date
+        rateValidUntil:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        sentAt:
+          type: string
+          format: date-time
+        acceptedAt:
+          type: string
+          format: date-time
+        declinedAt:
+          type: string
+          format: date-time
+        expiredAt:
+          type: string
+          format: date-time
+        declineReason:
+          type: string
+        notes:
+          type: string
+        totalBuyRate:
+          type: number
+        totalSellRate:
+          type: number
+        margin:
+          type: number
+        currency:
+          type: string
+        spotRate:
+          type: boolean
+        specialHandling:
+          type: string
+        insuranceRequired:
+          type: boolean
+        quoteLines:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuoteLineResponse'
+        cargoDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/CargoDetailResponse'
+    SurchargeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        surchargeType:
+          $ref: '#/components/schemas/SurchargeType'
+        amount:
+          type: number
+        currency:
+          type: string
+        validFrom:
+          type: string
+          format: date
+        validUntil:
+          type: string
+          format: date
+        expired:
+          type: boolean
+    RateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        laneId:
+          type: string
+          format: uuid
+        carrierId:
+          type: string
+          format: uuid
+        buyRate:
+          type: number
+        currency:
+          type: string
+        rateType:
+          $ref: '#/components/schemas/RateType'
+        unit:
+          $ref: '#/components/schemas/ChargeUnit'
+        transitDays:
+          type: integer
+        validFrom:
+          type: string
+          format: date
+        validUntil:
+          type: string
+          format: date
+        expired:
+          type: boolean
+          description: >
+            True when this rate has lapsed as of the lookup date. Expired
+            rates are returned rather than hidden.
+        surcharges:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurchargeResponse'

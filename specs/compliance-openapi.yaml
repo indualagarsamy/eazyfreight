@@ -1,0 +1,626 @@
+openapi: 3.0.3
+info:
+  title: EazyFreight Compliance API
+  version: "1.0.0"
+  description: >
+    Export compliance endpoints — the eleven commands, each a named
+    sub-resource. GET /api/compliance/filing-system reports whether filings
+    are simulated: the UI reads it to show a standing banner, so no one can
+    look at this screen and believe a report has reached CBP.
+servers:
+  - url: /api/compliance
+tags:
+  - name: compliance
+paths:
+  /api/compliance/filing-system:
+    get:
+      tags: [compliance]
+      operationId: filingSystem
+      summary: Report whether filings are simulated
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              # Ad-hoc shape: { simulated: boolean, notice: string } — not a fixed DTO.
+              schema:
+                type: object
+                properties:
+                  simulated:
+                    type: boolean
+                  notice:
+                    type: string
+  /api/compliance/filings:
+    get:
+      tags: [compliance]
+      operationId: getAllFilings
+      summary: List all EEI filings
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EEIFilingResponse'
+  /api/compliance/filings/awaiting-cbp:
+    get:
+      tags: [compliance]
+      operationId: getFilingsAwaitingCbp
+      summary: List filings submitted and awaiting a CBP response
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EEIFilingResponse'
+  /api/compliance/filings/{id}:
+    get:
+      tags: [compliance]
+      operationId: getFilingById
+      summary: Get a filing by id
+      parameters:
+        - $ref: '#/components/parameters/FilingId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EEIFilingResponse'
+  /api/compliance/filings/by-reference/{filingReference}:
+    get:
+      tags: [compliance]
+      operationId: getFilingByReference
+      summary: Get a filing by its reference
+      parameters:
+        - name: filingReference
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EEIFilingResponse'
+  /api/compliance/bookings/{bookingId}/filings:
+    get:
+      tags: [compliance]
+      operationId: getFilingsByBooking
+      summary: List filings for a booking
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EEIFilingResponse'
+    post:
+      tags: [compliance]
+      operationId: initiateFiling
+      summary: Initiate an EEI filing for a booking
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EEIFilingResponse'
+  /api/compliance/filings/{id}/compile:
+    post:
+      tags: [compliance]
+      operationId: compileEeiData
+      summary: Compile the EEI data for a filing
+      parameters:
+        - $ref: '#/components/parameters/FilingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompileEEIDataRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EEIFilingResponse'
+  /api/compliance/filings/{id}/submit:
+    post:
+      tags: [compliance]
+      operationId: submitToCbp
+      summary: Submit the EEI filing to CBP (or the amendment, same transition)
+      parameters:
+        - $ref: '#/components/parameters/FilingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EEIFilingResponse'
+  /api/compliance/filings/{id}/acceptance:
+    post:
+      tags: [compliance]
+      operationId: recordAcceptance
+      summary: Record CBP acceptance (or amendment acceptance)
+      parameters:
+        - $ref: '#/components/parameters/FilingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordAcceptanceRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EEIFilingResponse'
+  /api/compliance/filings/{id}/rejection:
+    post:
+      tags: [compliance]
+      operationId: recordRejection
+      summary: Record CBP rejection
+      parameters:
+        - $ref: '#/components/parameters/FilingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordRejectionRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EEIFilingResponse'
+  /api/compliance/filings/{id}/correct:
+    post:
+      tags: [compliance]
+      operationId: submitCorrectedEei
+      summary: Submit a corrected EEI filing
+      parameters:
+        - $ref: '#/components/parameters/FilingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EEIFilingResponse'
+  /api/compliance/filings/{id}/amend:
+    post:
+      tags: [compliance]
+      operationId: initiateAmendment
+      summary: Initiate an EEI amendment
+      parameters:
+        - $ref: '#/components/parameters/FilingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AmendFilingRequest'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EEIFilingResponse'
+  /api/compliance/filings/{id}/cancel:
+    post:
+      tags: [compliance]
+      operationId: cancelFiling
+      summary: Cancel the EEI filing
+      parameters:
+        - $ref: '#/components/parameters/FilingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelFilingRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EEIFilingResponse'
+  /api/compliance/filings/{id}/export-license:
+    post:
+      tags: [compliance]
+      operationId: recordExportLicense
+      summary: Record an export license against the filing
+      parameters:
+        - $ref: '#/components/parameters/FilingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordExportLicenseRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EEIFilingResponse'
+components:
+  parameters:
+    FilingId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    BookingId:
+      name: bookingId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ActorHeader:
+      name: X-Actor
+      in: header
+      required: false
+      schema:
+        type: string
+        default: compliance
+      description: Actor recorded in the audit trail.
+  schemas:
+    FilingStatus:
+      type: string
+      enum: [DRAFT, SUBMITTED, ACCEPTED, REJECTED, CANCELLED]
+    FilingType:
+      type: string
+      enum: [ORIGINAL, AMENDMENT, CANCELLATION]
+    CompileEEIDataRequest:
+      type: object
+      required:
+        - shipperName
+        - shipperEin
+        - consigneeName
+        - consigneeCountry
+        - commodityDescription
+        - quantityValue
+        - quantityUnit
+        - valueUsd
+        - carrierScac
+        - portOfExportCode
+        - countryOfDestination
+        - estimatedEtd
+      properties:
+        shipperName:
+          type: string
+          minLength: 1
+        shipperEin:
+          type: string
+          minLength: 1
+        shipperAddress:
+          type: string
+        consigneeName:
+          type: string
+          minLength: 1
+        consigneeAddress:
+          type: string
+        consigneeCountry:
+          type: string
+          minLength: 1
+          pattern: '[A-Z]{2}'
+        scheduleBNumber:
+          type: string
+          description: >
+            Leave blank to carry the booking's HS code across the boundary
+            untranslated; it will be flagged as unmapped.
+          pattern: '\d{4}\.\d{2}\.\d{4}|'
+        commodityDescription:
+          type: string
+          minLength: 1
+          maxLength: 150
+        quantityValue:
+          type: number
+          minimum: 0.001
+        quantityUnit:
+          type: string
+          minLength: 1
+        valueUsd:
+          type: number
+          minimum: 0.00
+        carrierScac:
+          type: string
+          minLength: 1
+          pattern: '[A-Z]{2,4}'
+        vesselName:
+          type: string
+        voyageNumber:
+          type: string
+        portOfExportCode:
+          type: string
+          minLength: 1
+        countryOfDestination:
+          type: string
+          minLength: 1
+          pattern: '[A-Z]{2}'
+        estimatedEtd:
+          type: string
+          format: date
+        licenseRequired:
+          type: boolean
+    RecordAcceptanceRequest:
+      type: object
+      required:
+        - itnNumber
+      properties:
+        itnNumber:
+          type: string
+          minLength: 1
+        aesSubmissionReference:
+          type: string
+        acceptedAt:
+          type: string
+          format: date-time
+    RecordRejectionRequest:
+      type: object
+      required:
+        - rejectionCode
+        - rejectionDescription
+      properties:
+        rejectionCode:
+          type: string
+          minLength: 1
+        rejectionDescription:
+          type: string
+          minLength: 1
+        rejectedAt:
+          type: string
+          format: date-time
+    AmendFilingRequest:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+          minLength: 1
+    CancelFilingRequest:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+          minLength: 1
+    RecordExportLicenseRequest:
+      type: object
+      required:
+        - licenseNumber
+        - issuingAuthority
+        - licenseType
+        - validFrom
+        - validUntil
+      properties:
+        licenseNumber:
+          type: string
+          minLength: 1
+        issuingAuthority:
+          type: string
+          minLength: 1
+        licenseType:
+          type: string
+          minLength: 1
+        commodityEccn:
+          type: string
+        validFrom:
+          type: string
+          format: date
+        validUntil:
+          type: string
+          format: date
+        valueAuthorized:
+          type: number
+    ExportLicenseResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        licenseNumber:
+          type: string
+        issuingAuthority:
+          type: string
+        licenseType:
+          type: string
+        commodityEccn:
+          type: string
+        validFrom:
+          type: string
+          format: date
+        validUntil:
+          type: string
+          format: date
+        valueAuthorized:
+          type: number
+    ItnRecordResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        itnNumber:
+          type: string
+        issuedAt:
+          type: string
+          format: date-time
+        active:
+          type: boolean
+        simulated:
+          type: boolean
+        supersededByItnId:
+          type: string
+          format: uuid
+        recordedAt:
+          type: string
+          format: date-time
+        recordedBy:
+          type: string
+    EEIFilingHistoryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sequenceNumber:
+          type: integer
+        fromStatus:
+          $ref: '#/components/schemas/FilingStatus'
+        toStatus:
+          $ref: '#/components/schemas/FilingStatus'
+        occurredAt:
+          type: string
+          format: date-time
+        actor:
+          type: string
+        detail:
+          type: string
+    EEIFilingResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingId:
+          type: string
+          format: uuid
+        filingReference:
+          type: string
+        filingType:
+          $ref: '#/components/schemas/FilingType'
+        parentFilingId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/FilingStatus'
+        shipperName:
+          type: string
+        shipperEin:
+          type: string
+        shipperAddress:
+          type: string
+        consigneeName:
+          type: string
+        consigneeAddress:
+          type: string
+        consigneeCountry:
+          type: string
+        scheduleBNumber:
+          type: string
+        scheduleBTranslated:
+          type: boolean
+          description: >
+            False when the Schedule B number is an untranslated HS code
+            carried across the CBP boundary as-is.
+        commodityDescription:
+          type: string
+        quantityValue:
+          type: number
+        quantityUnit:
+          type: string
+        valueUsd:
+          type: number
+        carrierScac:
+          type: string
+        vesselName:
+          type: string
+        voyageNumber:
+          type: string
+        portOfExportCode:
+          type: string
+        countryOfDestination:
+          type: string
+        estimatedEtd:
+          type: string
+          format: date
+        submittedAt:
+          type: string
+          format: date-time
+        submittedBy:
+          type: string
+        acceptedAt:
+          type: string
+          format: date-time
+        rejectedAt:
+          type: string
+          format: date-time
+        rejectionReasonCode:
+          type: string
+        rejectionReasonDescription:
+          type: string
+        cancelledAt:
+          type: string
+          format: date-time
+        cancellationReason:
+          type: string
+        aesSubmissionReference:
+          type: string
+        simulated:
+          type: boolean
+          description: True when the accepted ITN came from the local simulator rather than CBP.
+        amendmentReason:
+          type: string
+        licenseRequired:
+          type: boolean
+        filingRequired:
+          type: boolean
+        missingRequiredFields:
+          type: array
+          items:
+            type: string
+          description: CBP-mandated fields still blank; submission is refused while this is non-empty.
+        activeItnNumber:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        exportLicense:
+          $ref: '#/components/schemas/ExportLicenseResponse'
+        itnRecords:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItnRecordResponse'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/EEIFilingHistoryResponse'

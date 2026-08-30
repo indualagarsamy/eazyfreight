@@ -1,0 +1,786 @@
+openapi: 3.0.3
+info:
+  title: EazyFreight Logistics API
+  version: "1.0.0"
+  description: Container and equipment endpoints, keyed by booking.
+servers:
+  - url: /api/logistics
+tags:
+  - name: logistics
+paths:
+  /api/logistics:
+    get:
+      tags: [logistics]
+      operationId: getAllLogistics
+      summary: List all container assignments
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Logistics'
+  /api/logistics/blocked-on-itn:
+    get:
+      tags: [logistics]
+      operationId: getBlockedOnItn
+      summary: List container assignments blocked pending an ITN
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Logistics'
+  /api/logistics/awaiting-outbound-dispatch:
+    get:
+      tags: [logistics]
+      operationId: getAwaitingOutboundDispatch
+      summary: List confirmed bookings needing an outbound truck but with no dispatch yet
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AwaitingDispatch'
+  /api/logistics/under-examination:
+    get:
+      tags: [logistics]
+      operationId: getUnderExamination
+      summary: List container assignments currently under CBP examination
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}:
+    get:
+      tags: [logistics]
+      operationId: getLogisticsByBooking
+      summary: Get the container assignment for a booking
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}/itn-gate:
+    get:
+      tags: [logistics]
+      operationId: checkItnGate
+      summary: Report whether the inbound movement may be authorised
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              # Ad-hoc shape: { clear: boolean, reason: string|null }
+              schema:
+                type: object
+                properties:
+                  clear:
+                    type: boolean
+                  reason:
+                    type: string
+  /api/logistics/bookings/{bookingId}/outbound-dispatch:
+    post:
+      tags: [logistics]
+      operationId: dispatchOutbound
+      summary: Dispatch the outbound truck (empty container to the customer)
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DispatchTruck'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}/container-number:
+    post:
+      tags: [logistics]
+      operationId: recordContainerNumber
+      summary: Record the container number
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordContainerNumber'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}/delivered-to-customer:
+    post:
+      tags: [logistics]
+      operationId: recordDeliveredToCustomer
+      summary: Record that the container was delivered to the customer
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}/loading-complete:
+    post:
+      tags: [logistics]
+      operationId: recordLoadingComplete
+      summary: Record that the customer finished loading the container
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}/seal:
+    post:
+      tags: [logistics]
+      operationId: recordSeal
+      summary: Record the seal number
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordSeal'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}/seal/replace:
+    post:
+      tags: [logistics]
+      operationId: replaceSeal
+      summary: Replace the seal, outside a CBP examination (e.g. a damaged seal)
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordSeal'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}/inbound-dispatch:
+    post:
+      tags: [logistics]
+      operationId: dispatchInbound
+      summary: Dispatch the inbound truck (refused until the ITN gate is clear)
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DispatchTruck'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}/loaded-container-picked-up:
+    post:
+      tags: [logistics]
+      operationId: recordLoadedContainerPickedUp
+      summary: Record that the loaded container was picked up
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}/delivered-to-port:
+    post:
+      tags: [logistics]
+      operationId: recordDeliveredToPort
+      summary: Record that the container was delivered to the port
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}/terminal-receipt:
+    post:
+      tags: [logistics]
+      operationId: recordTerminalGateReceipt
+      summary: Record the terminal gate receipt
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TerminalGateReceipt'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}/terminal-rejection:
+    post:
+      tags: [logistics]
+      operationId: recordTerminalGateRejection
+      summary: Record a terminal gate rejection
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TerminalGateRejection'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}/examination-hold:
+    post:
+      tags: [logistics]
+      operationId: recordExaminationHold
+      summary: Record a CBP examination hold
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExaminationHold'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}/examination-release:
+    post:
+      tags: [logistics]
+      operationId: recordExaminationRelease
+      summary: Record a CBP examination release (always issues a replacement seal)
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExaminationRelease'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}/loaded-on-vessel:
+    post:
+      tags: [logistics]
+      operationId: recordLoadedOnVessel
+      summary: Record that the container was loaded on the vessel
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoadedOnVessel'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}/vessel-departed:
+    post:
+      tags: [logistics]
+      operationId: recordVesselDeparted
+      summary: Record the vessel's departure
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /api/logistics/bookings/{bookingId}/actual-cargo:
+    post:
+      tags: [logistics]
+      operationId: recordActualCargo
+      summary: Record actual cargo details
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActualCargoRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+components:
+  parameters:
+    BookingId:
+      name: bookingId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ActorHeader:
+      name: X-Actor
+      in: header
+      required: false
+      schema:
+        type: string
+        default: operations
+      description: Actor recorded in the audit trail.
+  schemas:
+    ContainerType:
+      type: string
+      description: >
+        Shared with the booking context (com.eazyfreight.booking.domain.ContainerType).
+      enum: [TWENTY_GP, FORTY_GP, FORTY_HC, FORTY_FIVE_HC]
+    ContainerSource:
+      type: string
+      enum: [CARRIER_YARD, MANUAL_ENTRY]
+    ExaminationResult:
+      type: string
+      enum: [RELEASED, ADDITIONAL_HOLD, SEIZED]
+    AddressType:
+      type: string
+      enum: [CARRIER_YARD, CUSTOMER_PREMISES, PORT_TERMINAL]
+    DispatchStatus:
+      type: string
+      enum: [DISPATCHED, PICKED_UP, DELIVERED, FAILED]
+    LogisticsStage:
+      type: string
+      enum: [NOT_STARTED, OUTBOUND_DISPATCHED, AT_CUSTOMER, LOADING_COMPLETE, SEALED, INBOUND_DISPATCHED, AT_TERMINAL, UNDER_CBP_EXAMINATION, LOADED_ON_VESSEL, DEPARTED]
+    MovementType:
+      type: string
+      enum: [OUTBOUND, INBOUND]
+    SealDeactivationReason:
+      type: string
+      enum: [CUSTOMS_INSPECTION, DAMAGED_SEAL]
+    SealSource:
+      type: string
+      enum: [CUSTOMER_ISSUED, CUSTOMS_ISSUED]
+    DispatchTruck:
+      type: object
+      required:
+        - pickupAddress
+        - deliveryAddress
+      properties:
+        driverId:
+          type: string
+          format: uuid
+        truckingVendorId:
+          type: string
+          format: uuid
+        vehicleReference:
+          type: string
+        pickupAddress:
+          type: string
+          minLength: 1
+        deliveryAddress:
+          type: string
+          minLength: 1
+        scheduledPickupDate:
+          type: string
+          format: date-time
+        scheduledDeliveryDate:
+          type: string
+          format: date-time
+    RecordContainerNumber:
+      type: object
+      required:
+        - containerNumber
+      properties:
+        containerNumber:
+          type: string
+          minLength: 1
+        containerType:
+          $ref: '#/components/schemas/ContainerType'
+        source:
+          $ref: '#/components/schemas/ContainerSource'
+    RecordSeal:
+      type: object
+      required:
+        - sealNumber
+      properties:
+        sealNumber:
+          type: string
+          minLength: 1
+    TerminalGateReceipt:
+      type: object
+      required:
+        - gateReceiptNumber
+        - terminalName
+      properties:
+        gateReceiptNumber:
+          type: string
+          minLength: 1
+        terminalName:
+          type: string
+          minLength: 1
+        earliestAcceptanceDate:
+          type: string
+          format: date
+        vesselCutOffDate:
+          type: string
+          format: date
+        storageFeeDailyRate:
+          type: number
+    TerminalGateRejection:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+          minLength: 1
+    ExaminationHold:
+      type: object
+      properties:
+        cbpOfficerId:
+          type: string
+        notes:
+          type: string
+    ExaminationRelease:
+      type: object
+      required:
+        - result
+      properties:
+        result:
+          $ref: '#/components/schemas/ExaminationResult'
+        replacementSealNumber:
+          type: string
+        notes:
+          type: string
+    LoadedOnVessel:
+      type: object
+      properties:
+        vesselName:
+          type: string
+    ActualCargoRequest:
+      type: object
+      required:
+        - actualWeightKg
+        - actualPieces
+      properties:
+        actualWeightKg:
+          type: number
+          minimum: 0.001
+        actualPieces:
+          type: integer
+          minimum: 1
+        actualCbm:
+          type: number
+    AwaitingDispatch:
+      type: object
+      properties:
+        bookingId:
+          type: string
+          format: uuid
+        bookingReference:
+          type: string
+        requestedEtd:
+          type: string
+          format: date
+        confirmedEtd:
+          type: string
+          format: date
+        pickupAddress:
+          type: string
+    Seal:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sealNumber:
+          type: string
+        sealSource:
+          $ref: '#/components/schemas/SealSource'
+        active:
+          type: boolean
+        issuedAt:
+          type: string
+          format: date-time
+        deactivatedAt:
+          type: string
+          format: date-time
+        deactivationReason:
+          $ref: '#/components/schemas/SealDeactivationReason'
+        replacedBySealId:
+          type: string
+          format: uuid
+        recordedBy:
+          type: string
+    Dispatch:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        movementType:
+          $ref: '#/components/schemas/MovementType'
+        tdoReference:
+          type: string
+        driverId:
+          type: string
+          format: uuid
+        truckingVendorId:
+          type: string
+          format: uuid
+        vehicleReference:
+          type: string
+        pickupAddress:
+          type: string
+        pickupAddressType:
+          $ref: '#/components/schemas/AddressType'
+        deliveryAddress:
+          type: string
+        deliveryAddressType:
+          $ref: '#/components/schemas/AddressType'
+        scheduledPickupDate:
+          type: string
+          format: date-time
+        actualPickupDate:
+          type: string
+          format: date-time
+        scheduledDeliveryDate:
+          type: string
+          format: date-time
+        actualDeliveryDate:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/DispatchStatus'
+        dispatchedAt:
+          type: string
+          format: date-time
+        dispatchedBy:
+          type: string
+        deliveryReceiptReference:
+          type: string
+        notes:
+          type: string
+    Terminal:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        gateReceiptNumber:
+          type: string
+        terminalName:
+          type: string
+        acceptedAt:
+          type: string
+          format: date-time
+        earliestAcceptanceDate:
+          type: string
+          format: date
+        vesselCutOffDate:
+          type: string
+          format: date
+        storageFeeApplies:
+          type: boolean
+        daysEarly:
+          type: integer
+        storageFeeDailyRate:
+          type: number
+        estimatedStorageFee:
+          type: number
+    Examination:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        holdPlacedAt:
+          type: string
+          format: date-time
+        examinationCompletedAt:
+          type: string
+          format: date-time
+        result:
+          $ref: '#/components/schemas/ExaminationResult'
+        originalSealId:
+          type: string
+          format: uuid
+        replacementSealId:
+          type: string
+          format: uuid
+        cbpOfficerId:
+          type: string
+        notes:
+          type: string
+        open:
+          type: boolean
+    ActualCargoView:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        actualWeightKg:
+          type: number
+        actualPieces:
+          type: integer
+        actualCbm:
+          type: number
+        bookedWeightKg:
+          type: number
+        bookedPieces:
+          type: integer
+        bookedCbm:
+          type: number
+        weightVarianceKg:
+          type: number
+        divergesMaterially:
+          type: boolean
+        recordedAt:
+          type: string
+          format: date-time
+        recordedBy:
+          type: string
+    Logistics:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingId:
+          type: string
+          format: uuid
+        containerNumber:
+          type: string
+        containerType:
+          $ref: '#/components/schemas/ContainerType'
+        source:
+          $ref: '#/components/schemas/ContainerSource'
+        assignedAt:
+          type: string
+          format: date-time
+        assignedBy:
+          type: string
+        stage:
+          $ref: '#/components/schemas/LogisticsStage'
+        itnReceived:
+          type: boolean
+        itnNumber:
+          type: string
+        inboundBlockedReason:
+          type: string
+          description: Why the inbound truck cannot go yet, or null when it can.
+        documentationPreconditionsMet:
+          type: boolean
+        loadingCompletedAt:
+          type: string
+          format: date-time
+        loadedOnVesselAt:
+          type: string
+          format: date-time
+        vesselDepartedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        activeSealNumber:
+          type: string
+        sealRecords:
+          type: array
+          items:
+            $ref: '#/components/schemas/Seal'
+        dispatches:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dispatch'
+        examinations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Examination'
+        terminalAcceptance:
+          $ref: '#/components/schemas/Terminal'
+        actualCargoDetails:
+          $ref: '#/components/schemas/ActualCargoView'

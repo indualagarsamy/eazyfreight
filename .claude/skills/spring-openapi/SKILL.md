@@ -94,37 +94,42 @@ says otherwise.
 Default to OpenAPI 3.0.3 YAML. Build a spec for every controller on the
 step-1 list, scoped by what the user asked for:
 - One controller/feature named explicitly → narrow the step-1 list to just
-  that controller, and build a spec (or fragment) covering just its paths
-  and the schemas its DTOs reference, transitively.
+  that controller.
 - Anything broader — "the whole API", "all the controllers", "document the
   API", or no controller named at all — don't narrow the list at all: build
-  and include every controller step 1 found, not just the ones already
-  discussed in the conversation or the first few found. If a controller's
-  paths/DTOs don't fit the patterns in steps 2–3 (an unusual return type, a
-  missing DTO, etc.), still include it — note the irregularity inline as a
-  YAML comment rather than dropping the operation.
+  every controller step 1 found, not just the ones already discussed in the
+  conversation or the first few found.
 - When in doubt about which case applies, don't narrow: a missing controller
   in the output is a worse failure than an unrequested one.
 
+Always write one spec file per controller, never a combined multi-controller
+file — even when the ask is "the whole API" or "all the controllers". Each
+controller's spec covers just its own paths and the schemas its DTOs
+reference, transitively. If a controller's paths/DTOs don't fit the patterns
+in steps 2–3 (an unusual return type, a missing DTO, etc.), still include it
+in its own spec — note the irregularity inline as a YAML comment rather than
+dropping the operation.
+
 Write every generated spec to a file under `./specs` (relative to the repo
 root), creating the directory if it doesn't exist — never write a spec
-inline-only or to the repo root/elsewhere, even for a single-controller ask.
-Name each file after its scope, kebab-case, `.yaml` extension:
-- One controller/feature → `specs/<feature>-openapi.yaml`, e.g.
-  `specs/quote-openapi.yaml`, `specs/booking-openapi.yaml`.
-- The whole API (every controller from step 1) → a single combined
-  `specs/openapi.yaml` covering every controller's paths and schemas, not one
-  file per controller.
+inline-only or to the repo root/elsewhere. Name each file after its feature,
+kebab-case, `.yaml` extension: `specs/<feature>-openapi.yaml`, e.g.
+`specs/quote-openapi.yaml`, `specs/booking-openapi.yaml`. A "whole API" ask
+produces one such file per controller from the step-1 list, not a single
+`specs/openapi.yaml`.
+
 Redeploying/regenerating a spec overwrites its existing file at the same
-path rather than creating a new one. After writing, tell the user the path
-written (and briefly summarize what's in it) rather than pasting the full
+path rather than creating a new one. After writing, tell the user the paths
+written (and briefly summarize what's in each) rather than pasting the full
 YAML into the response.
 
 Prefer `components.schemas` with one entry per DTO record (named after the
 record, e.g. `CreateBookingRequest`) referenced via
 `$ref: '#/components/schemas/...'` from paths, rather than inlining schemas —
 this repo has enough shared DTOs (e.g. `BookingCargoDetailRequest` reused
-across requests) that inlining would duplicate them.
+across requests) that inlining would duplicate them. A DTO shared across
+features (e.g. `ContainerType`) gets its schema duplicated into each
+controller's own spec file — each spec must stand alone.
 
 ## 4. Self-verify before presenting
 

@@ -1,0 +1,513 @@
+openapi: 3.0.3
+info:
+  title: EazyFreight Alerts API
+  version: "1.0.0"
+  description: Alerting endpoints across the thirty-one alert definitions.
+servers:
+  - url: /api/alerts
+tags:
+  - name: alerts
+paths:
+  /api/alerts:
+    get:
+      tags: [alerts]
+      operationId: getOpenAlerts
+      summary: List open alerts, optionally filtered by category and/or track
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/AlertCategory'
+        - name: track
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/AlertTrack'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertView'
+  /api/alerts/dashboard:
+    get:
+      tags: [alerts]
+      operationId: getDashboard
+      summary: Get the alerts dashboard summary
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+  /api/alerts/overdue:
+    get:
+      tags: [alerts]
+      operationId: getOverdueAlerts
+      summary: List overdue alerts
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertView'
+  /api/alerts/{id}:
+    get:
+      tags: [alerts]
+      operationId: getAlertById
+      summary: Get an alert by id
+      parameters:
+        - $ref: '#/components/parameters/AlertId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertView'
+  /api/alerts/bookings/{bookingId}:
+    get:
+      tags: [alerts]
+      operationId: getAlertsForBooking
+      summary: List alerts for a booking
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertView'
+  /api/alerts/configurations:
+    get:
+      tags: [alerts]
+      operationId: getConfigurations
+      summary: List alert type configurations
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConfigurationView'
+  /api/alerts/evaluate:
+    post:
+      tags: [alerts]
+      operationId: evaluateAll
+      summary: Force the alert sweep the scheduler runs every half hour
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              # Ad-hoc shape: { changes: <alertService.evaluateAll() result>, open: integer }
+              schema:
+                type: object
+                properties:
+                  changes:
+                    type: array
+                    items: {}
+                  open:
+                    type: integer
+  /api/alerts/bookings/{bookingId}/evaluate:
+    post:
+      tags: [alerts]
+      operationId: evaluateBooking
+      summary: Force alert evaluation for a single booking
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              # Ad-hoc shape: { changes: <alertService.evaluateBooking() result> }
+              schema:
+                type: object
+                properties:
+                  changes:
+                    type: array
+                    items: {}
+  /api/alerts/{id}/acknowledge:
+    post:
+      tags: [alerts]
+      operationId: acknowledgeAlert
+      summary: Acknowledge an alert
+      parameters:
+        - $ref: '#/components/parameters/AlertId'
+        - $ref: '#/components/parameters/ActorHeader'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertView'
+  /api/alerts/{id}/snooze:
+    post:
+      tags: [alerts]
+      operationId: snoozeAlert
+      summary: Snooze an alert until a given time
+      parameters:
+        - $ref: '#/components/parameters/AlertId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Snooze'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertView'
+  /api/alerts/{id}/resolve:
+    post:
+      tags: [alerts]
+      operationId: resolveAlert
+      summary: Resolve an alert
+      parameters:
+        - $ref: '#/components/parameters/AlertId'
+        - $ref: '#/components/parameters/ActorHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Resolve'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertView'
+  /api/alerts/configurations/{alertType}:
+    put:
+      tags: [alerts]
+      operationId: updateConfiguration
+      summary: Replace the configuration for an alert type
+      parameters:
+        - name: alertType
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/AlertType'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateConfiguration'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationView'
+components:
+  parameters:
+    AlertId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    BookingId:
+      name: bookingId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ActorHeader:
+      name: X-Actor
+      in: header
+      required: false
+      schema:
+        type: string
+        default: operations
+      description: Actor recorded in the audit trail.
+  schemas:
+    AlertCategory:
+      type: string
+      enum: [CRITICAL, HIGH, MEDIUM, LOW]
+    AlertTrack:
+      type: string
+      enum: [LOGISTICS, COMPLIANCE, FINANCE, BOOKING, DOCUMENTATION]
+    AlertStatus:
+      type: string
+      enum: [ACTIVE, ACKNOWLEDGED, SNOOZED, ESCALATED, RESOLVED]
+    RecipientRole:
+      type: string
+      enum: [OPERATIONS_STAFF, COMPLIANCE_STAFF, ACCOUNTING_STAFF, OPERATIONS_MANAGEMENT, FINANCE_MANAGEMENT, MANAGEMENT]
+    NotificationChannel:
+      type: string
+      enum: [IN_APP, EMAIL, SMS]
+    DeliveryStatus:
+      type: string
+      enum: [PENDING, DELIVERED, FAILED]
+    AlertHistoryAction:
+      type: string
+      enum: [CREATED, NOTIFICATION_SENT, ACKNOWLEDGED, SNOOZED, REACTIVATED, ESCALATED, DEADLINE_RECALCULATED, RESOLVED]
+    AlertType:
+      type: string
+      enum:
+        - L001_CONTAINER_NOT_DISPATCHED
+        - L002_CONTAINER_NOT_DELIVERED_TO_CUSTOMER
+        - L003_CUSTOMER_LOADING_OVERDUE
+        - L004_INBOUND_BLOCKED_NO_ITN
+        - L005_EARLY_PORT_DELIVERY_RISK
+        - L006_CBP_HOLD_CUTOFF_AT_RISK
+        - L007_SEAL_NUMBER_NOT_RECORDED
+        - L008_CONTAINER_NOT_DELIVERED_TO_PORT
+        - C001_EEI_NOT_INITIATED
+        - C002_EEI_NOT_SUBMITTED
+        - C003_EEI_REJECTED
+        - C004_ITN_NOT_RECEIVED_APPROACHING_CUTOFF
+        - C005_ITN_MISSING_CUTOFF_BREACHED
+        - C006_EEI_AMENDMENT_REQUIRED
+        - C007_LEGAL_DEADLINE_APPROACHING
+        - F001_INVOICE_NOT_ISSUED
+        - F002_PAYMENT_APPROACHING_DUE
+        - F003_PAYMENT_OVERDUE
+        - F004_CREDIT_HOLD_THRESHOLD
+        - F005_CARRIER_PAYMENT_DUE
+        - F006_CARRIER_PAYMENT_OVERDUE
+        - F007_CARRIER_INVOICE_DISCREPANCY
+        - F008_STORAGE_FEE_ACCRUING
+        - B001_CARRIER_CONFIRMATION_NOT_RECEIVED
+        - B002_VESSEL_OVERBOOKING
+        - B003_REINSTATEMENT_RECALCULATION
+        - B004_ETD_CHANGED_BY_CARRIER
+        - D001_CUTOFF_APPROACHING_PRECONDITIONS_UNMET
+        - D002_INSTRUCTIONS_NOT_SENT
+        - D003_MASTER_BOL_NOT_RECEIVED
+        - D004_HOUSE_BOL_NOT_GENERATED
+    Snooze:
+      type: object
+      required:
+        - until
+      properties:
+        until:
+          type: string
+          format: date-time
+    Resolve:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+          minLength: 1
+    UpdateConfiguration:
+      type: object
+      required:
+        - escalationHours
+        - channels
+        - snoozeMaxHours
+      properties:
+        enabled:
+          type: boolean
+        thresholdDays:
+          type: integer
+        escalationHours:
+          type: integer
+          minimum: 1
+        channels:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/NotificationChannel'
+        snoozeMaxHours:
+          type: integer
+          minimum: 1
+        customMessage:
+          type: string
+    AlertHistoryEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sequenceNumber:
+          type: integer
+        action:
+          $ref: '#/components/schemas/AlertHistoryAction'
+        occurredAt:
+          type: string
+          format: date-time
+        actor:
+          type: string
+        notes:
+          type: string
+    AlertNotificationView:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        channel:
+          $ref: '#/components/schemas/NotificationChannel'
+        recipientRole:
+          $ref: '#/components/schemas/RecipientRole'
+        sentAt:
+          type: string
+          format: date-time
+        deliveredAt:
+          type: string
+          format: date-time
+        deliveryStatus:
+          $ref: '#/components/schemas/DeliveryStatus'
+        failureReason:
+          type: string
+        simulated:
+          type: boolean
+    AlertView:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingId:
+          type: string
+          format: uuid
+        bookingReference:
+          type: string
+        alertType:
+          $ref: '#/components/schemas/AlertType'
+        alertCode:
+          type: string
+        track:
+          $ref: '#/components/schemas/AlertTrack'
+        category:
+          $ref: '#/components/schemas/AlertCategory'
+        status:
+          $ref: '#/components/schemas/AlertStatus'
+        title:
+          type: string
+        message:
+          type: string
+        recommendedAction:
+          type: string
+        recipients:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipientRole'
+        createdAt:
+          type: string
+          format: date-time
+        deadlineAt:
+          type: string
+          format: date-time
+        lastEvaluatedAt:
+          type: string
+          format: date-time
+        overdue:
+          type: boolean
+        acknowledgedAt:
+          type: string
+          format: date-time
+        acknowledgedBy:
+          type: string
+        snoozedUntil:
+          type: string
+          format: date-time
+        snoozedBy:
+          type: string
+        escalatedAt:
+          type: string
+          format: date-time
+        escalatedTo:
+          $ref: '#/components/schemas/RecipientRole'
+        resolvedAt:
+          type: string
+          format: date-time
+        resolvedBy:
+          type: string
+        resolutionReason:
+          type: string
+        maxSnoozeHours:
+          type: integer
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertHistoryEntry'
+        notifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertNotificationView'
+    Dashboard:
+      type: object
+      properties:
+        open:
+          type: integer
+        byCategory:
+          type: object
+          description: Count of open alerts keyed by AlertCategory.
+          additionalProperties:
+            type: integer
+        byTrack:
+          type: object
+          description: Count of open alerts keyed by AlertTrack.
+          additionalProperties:
+            type: integer
+        unacknowledged:
+          type: integer
+        escalated:
+          type: integer
+        overdue:
+          type: integer
+        bookingsAffected:
+          type: integer
+    ConfigurationView:
+      type: object
+      properties:
+        alertType:
+          $ref: '#/components/schemas/AlertType'
+        alertCode:
+          type: string
+        track:
+          $ref: '#/components/schemas/AlertTrack'
+        title:
+          type: string
+        category:
+          $ref: '#/components/schemas/AlertCategory'
+        enabled:
+          type: boolean
+        thresholdDays:
+          type: integer
+        escalationHours:
+          type: integer
+        channels:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationChannel'
+        snoozeMaxHours:
+          type: integer
+        snoozeCeilingHours:
+          type: integer
+        customMessage:
+          type: string
+        recipients:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipientRole'
