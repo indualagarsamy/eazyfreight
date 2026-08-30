@@ -9,11 +9,22 @@ There is no springdoc/springfox dependency in this project (see `build.gradle`)
 and no `/v3/api-docs` endpoint, so the spec has to be derived by reading source
 — controllers for paths/operations, DTOs for schemas.
 
-## 1. Find the controllers
+## 1. Find, list, and scope the controllers
 
 See `../spring-controllers/references/discover-controllers.md` for how to
 locate controller files and extract their HTTP verb + path + params. Follow
 that first; the rest of this skill covers turning what it finds into OpenAPI.
+
+Before writing any YAML:
+- Run the discovery grep/find and enumerate every match — one line each with
+  the file path, the controller class name, and its base `@RequestMapping`
+  path. This list is the build plan; don't skip straight to generating from
+  memory or from controllers named earlier in the conversation.
+- State that list (briefly) before generating, so it's clear which
+  controllers are in scope.
+- Every controller on that list gets a spec built for it per steps 2–4 below
+  — not just the ones the user happened to name. See Output for how the
+  user's ask narrows or doesn't narrow that list.
 
 ## 2. Map a handler method to an OpenAPI operation
 
@@ -80,14 +91,53 @@ says otherwise.
 
 ## Output
 
-Default to OpenAPI 3.0.3 YAML. Scope to whatever the user asked for:
-- One controller/feature → a spec (or fragment) covering just its paths and
-  the schemas its DTOs reference, transitively.
-- "the whole API" → walk every controller found in step 1.
+Default to OpenAPI 3.0.3 YAML. Build a spec for every controller on the
+step-1 list, scoped by what the user asked for:
+- One controller/feature named explicitly → narrow the step-1 list to just
+  that controller, and build a spec (or fragment) covering just its paths
+  and the schemas its DTOs reference, transitively.
+- Anything broader — "the whole API", "all the controllers", "document the
+  API", or no controller named at all — don't narrow the list at all: build
+  and include every controller step 1 found, not just the ones already
+  discussed in the conversation or the first few found. If a controller's
+  paths/DTOs don't fit the patterns in steps 2–3 (an unusual return type, a
+  missing DTO, etc.), still include it — note the irregularity inline as a
+  YAML comment rather than dropping the operation.
+- When in doubt about which case applies, don't narrow: a missing controller
+  in the output is a worse failure than an unrequested one.
 
-Write the result to a file only if asked; otherwise show it inline. Prefer
-`components.schemas` with one entry per DTO record (named after the record,
-e.g. `CreateBookingRequest`) referenced via `$ref: '#/components/schemas/...'`
-from paths, rather than inlining schemas — this repo has enough shared DTOs
-(e.g. `BookingCargoDetailRequest` reused across requests) that inlining would
-duplicate them.
+Write every generated spec to a file under `./specs` (relative to the repo
+root), creating the directory if it doesn't exist — never write a spec
+inline-only or to the repo root/elsewhere, even for a single-controller ask.
+Name each file after its scope, kebab-case, `.yaml` extension:
+- One controller/feature → `specs/<feature>-openapi.yaml`, e.g.
+  `specs/quote-openapi.yaml`, `specs/booking-openapi.yaml`.
+- The whole API (every controller from step 1) → a single combined
+  `specs/openapi.yaml` covering every controller's paths and schemas, not one
+  file per controller.
+Redeploying/regenerating a spec overwrites its existing file at the same
+path rather than creating a new one. After writing, tell the user the path
+written (and briefly summarize what's in it) rather than pasting the full
+YAML into the response.
+
+Prefer `components.schemas` with one entry per DTO record (named after the
+record, e.g. `CreateBookingRequest`) referenced via
+`$ref: '#/components/schemas/...'` from paths, rather than inlining schemas —
+this repo has enough shared DTOs (e.g. `BookingCargoDetailRequest` reused
+across requests) that inlining would duplicate them.
+
+## 4. Self-verify before presenting
+
+Do this pass yourself, unasked, before showing or writing the spec — don't
+wait for the user to request validation separately:
+
+- Re-open the controller and, for every handler method, confirm the YAML has
+  a matching path + HTTP verb + operation, with the same path/query/header
+  parameters, the same `required`/`default` on each, the same request body
+  presence and `required`, and the same success status code.
+- For every DTO schema, list its record components (including any nested
+  record) and confirm each one appears in the schema's `properties`, with no
+  extras and none missing. Re-check `required` against the rules in step 3 —
+  including the primitive-with-constraint case, which is easy to drop.
+- If anything doesn't match, fix the YAML — don't report the mismatch instead
+  of fixing it.
