@@ -20,7 +20,7 @@ those specs describe.
 | Tests | JUnit 5 + MockMvc against in-memory H2 (65 tests) |
 | Tracing | Micrometer Tracing → OTLP → Jaeger |
 | Boilerplate | Lombok |
-| API client | Bruno collection in `bruno/Eazy Freight` |
+| API client | Bruno collection in `docs/bruno/Eazy Freight` |
 
 ## Running it
 
@@ -47,7 +47,7 @@ Bruno collection:
 brew install bruno
 ```
 
-Open `bruno/Eazy Freight`. Run the quote chain first (Create → Build → Send →
+Open `docs/bruno/Eazy Freight`. Run the quote chain first (Create → Build → Send →
 Accept), then the booking chain (Create → Submit → Confirm → Send Confirmation →
 Truck Delivery Order → Dispatch). Copy the `id` from each create response into the
 `quoteId` / `bookingId` collection variables.

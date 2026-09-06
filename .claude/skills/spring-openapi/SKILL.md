@@ -114,7 +114,7 @@ Write every generated spec to a file under `./specs` (relative to the repo
 root), creating the directory if it doesn't exist — never write a spec
 inline-only or to the repo root/elsewhere. Name each file after its feature,
 kebab-case, `.yaml` extension: `specs/<feature>-openapi.yaml`, e.g.
-`specs/quote-openapi.yaml`, `specs/booking-openapi.yaml`. A "whole API" ask
+`../../../docs/sample_specs/quote-openapi.yaml`, `../../../docs/sample_specs/booking-openapi.yaml`. A "whole API" ask
 produces one such file per controller from the step-1 list, not a single
 `specs/openapi.yaml`.
 
