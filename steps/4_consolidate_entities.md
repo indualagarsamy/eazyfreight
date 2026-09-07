@@ -268,7 +268,15 @@ specs' version bump above.
 | `$ref`s in the consolidated output (up from 108 in the source) | 131 |
 | Cross-context `$ref`s introduced | 0 |
 
-Committed as `3dd06d4` — *"Consolidate duplicated entity JSON schemas
-into 4_consolidate_entities_output"* — adding `4_consolidate_entities.md`
-and all 150 files of `4_consolidate_entities_output`, with
-`3_entities_json_schemas_output` untouched.
+Committed across three commits on the `4_consolidate_entities` branch:
+
+- `3dd06d4` — *"Consolidate duplicated entity JSON schemas into
+  4_consolidate_entities_output"* — added `4_consolidate_entities.md` and
+  all 150 files of `4_consolidate_entities_output`, with
+  `3_entities_json_schemas_output` left untouched.
+- `3f78138` — *"Document totals and commit reference in consolidation
+  doc"* — rounded out this doc with the Totals table.
+- `b7b376a` — *"Bump finance/quote spec versions for the tightened field
+  validation"* — the `info.version` `1.0` → `1.1` bump on
+  `finance/finance.yaml` and `quote/quote.yaml`, plus the "Effective
+  validation changes" section above.
