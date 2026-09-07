@@ -7,13 +7,15 @@ duplicated or near-duplicated object/enum definitions, followed by
 consolidating the ones worth consolidating.
 
 The consolidated result is written to
-[`4_consolidate_entities_output`](4_consolidate_entities_output) — a full copy of
-`3_entities_json_schemas_output` with the changes described below applied
-on top. `3_entities_json_schemas_output` itself is left exactly as step 3
-produced it; every path below written as `<module>/schemas/...` refers to
-that same relative path under both directories, since `4_consolidate_entities_output`
-mirrors the source's structure file-for-file except for the additions and
-edits this step made.
+[`4_consolidate_entities_output`](4_consolidate_entities_output) — a full
+copy of `3_entities_json_schemas_output` with the changes described below
+applied on top, following this project's `<N>_name.md` /
+`<N>_name_output/` convention from steps 1–3. `3_entities_json_schemas_output`
+itself is left exactly as step 3 produced it; every path below written as
+`<module>/schemas/...` refers to that same relative path under both
+directories, since `4_consolidate_entities_output` mirrors the source's
+structure file-for-file except for the additions and edits this step
+made.
 
 ## Method
 
@@ -211,3 +213,19 @@ carrying a comment pointing at its sibling and at this doc.
     fails — nullability preserved alongside the shared pattern.
   - `CreateQuoteRequest.currency`: `"usd"` still fails the ISO pattern
     through the new `$ref` (unchanged behavior, just relocated).
+
+## Totals
+
+| | Count |
+|---|---|
+| Schema files audited (in `3_entities_json_schemas_output`) | 142 |
+| New shared `common/` defs added | 8 (2 cargo-dimension defs × 2 contexts + 2 currency/amount defs × 2 contexts) |
+| Existing schemas edited to `$ref` a shared def | 17 |
+| Schema files in `4_consolidate_entities_output` | 150 |
+| `$ref`s in the consolidated output (up from 108 in the source) | 131 |
+| Cross-context `$ref`s introduced | 0 |
+
+Committed as `3dd06d4` — *"Consolidate duplicated entity JSON schemas
+into 4_consolidate_entities_output"* — adding `4_consolidate_entities.md`
+and all 150 files of `4_consolidate_entities_output`, with
+`3_entities_json_schemas_output` untouched.
