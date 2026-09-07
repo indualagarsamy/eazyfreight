@@ -150,3 +150,95 @@ transitively elsewhere in this project: `tomcat-embed-core` (for
 `ApiUtil` helper) and `jackson-databind` (for `@JsonDeserialize`, emitted
 on `Set`-typed fields with `uniqueItems: true`, e.g. in `alerts.yaml`'s
 `AlertView`/`ConfigurationView`/`UpdateConfiguration`).
+
+## Wiring the controllers to the generated interfaces
+
+The seven jars above are not just a compilation sanity-check — they're
+wired into the real build (`build.gradle`: `implementation
+fileTree(dir: 'steps/2_generate_openapi_specs_output', include: '*.jar')`)
+and every controller now `implements` its generated `<Feature>Api`
+interface instead of declaring its own `@GetMapping`/`@PostMapping`
+routes. The hand-authored yaml is now the enforced contract — a
+controller that drifts from its spec fails to compile (wrong method
+signature) rather than silently diverging from undocumented behavior.
+
+For each module:
+1. `@Override` every method the generated interface declares, keeping
+   only the class-level `@RestController` + `@RequestMapping("/api/...")`
+   on the controller — no per-method Spring annotations, since the
+   interface's default methods already carry `@RequestMapping` and Spring
+   merges annotations from implemented interfaces.
+2. Added a package-private `<Feature>ApiMapper` (in the same `controller`
+   package) that converts between the existing domain/service DTOs and
+   the generated `com.eazyfreight.<feature>.model.*` classes: a generic
+   `mapEnum(source, targetClass)` helper (`Enum.valueOf(targetType,
+   source.name())`) for every enum pair, after confirming constant names
+   and counts line up between the domain enum and its generated
+   counterpart, plus explicit `Instant <-> OffsetDateTime` conversion for
+   every timestamp field (generated models use `OffsetDateTime`;
+   `LocalDate`/`BigDecimal` fields needed no conversion since both sides
+   already use those types).
+3. Where a generated method's javadoc specified a non-200 status (mostly
+   `201` on resource-creation endpoints), preserved that status via
+   `ResponseEntity.status(...)`; everything else returns
+   `ResponseEntity.ok(...)`.
+
+Wiring was parallelized the same way generation was: `AlertController` was
+done first by hand to establish and verify the pattern (it compiled
+clean), then one agent per remaining module replicated it concurrently
+against that reference implementation.
+
+### Per-module notes
+
+- **alerts** — `AlertRequests`/`AlertResponses` were deleted; `AlertController`
+  was their only caller and that mapping logic now lives entirely in
+  `AlertApiMapper`. Every other module's DTOs remain — they're still the
+  types the service layer itself takes/returns, so the mapper only
+  converts at the controller boundary.
+- **booking** — all 20 endpoints matched 1:1 with the existing controller
+  and `BookingService`; `createBooking` returns `201`.
+- **compliance** — method names in the generated interface
+  (`getFilingById`, `getFilingByReference`, `getFilingsByBooking`, etc.)
+  are more verbose than the old controller's (`getById`, `getByReference`)
+  but map onto the same service calls; `filingSystem()` now returns a
+  `FilingSystemStatus` model object instead of a raw `Map`; `initiateFiling`/
+  `correctFiling`/`amendFiling` return `201`.
+- **documentation** — three methods were renamed to match the interface
+  (`instructions`→`instructionsForBooking`, `masterBols`→
+  `masterBolsForBooking`, `houseBols`→`houseBolsForBooking`); kept
+  `generatePdf` at its existing `200` even though the interface's javadoc
+  says `201`, since the PDF-rendering path is shared with `downloadPdf`
+  (flagged as pre-existing spec/implementation drift, not something this
+  step introduced); the optional `MasterBOLCorrection` request body is
+  handled null-safely.
+- **finance** — `FinanceService` already returned `FinanceResponses.*`
+  view types before this change, so `FinanceApiMapper` only had to bridge
+  `FinanceRequests`/`FinanceResponses` to the generated models, not
+  replace them; all 25 endpoints implemented.
+- **logistics** — verified 9 enum pairs (`ContainerType`,
+  `ContainerSource`, `DispatchStatus`, `LogisticsStage`, `MovementType`,
+  `AddressType`, `ExaminationResult`, `SealSource`,
+  `SealDeactivationReason`) before mapping; the generated interface marks
+  `ExaminationHold`/`LoadedOnVessel` request bodies as optional even
+  though the service dereferences their fields directly, so the mapper
+  returns an all-null-fields record on a `null` body instead of NPE'ing;
+  `dispatchOutbound`/`dispatchInbound` return `201`.
+- **quote** — all 7 enum pairs (`ShippingMode`, `QuoteStatus`,
+  `ScreeningStatus`, `ChargeUnit`, `QuoteLineType`, `RateType`,
+  `SurchargeType`) matched by name and count; `createQuote` returns `201`.
+
+### Totals
+
+| Module | Endpoints wired | New mapper |
+|---|---|---|
+| alerts | 12 | `AlertApiMapper` |
+| booking | 20 | `BookingApiMapper` |
+| compliance | 15 | `ComplianceApiMapper` |
+| documentation | 24 | `DocumentationApiMapper` |
+| finance | 25 | `FinanceApiMapper` |
+| logistics | 22 | `LogisticsApiMapper` |
+| quote | 14 | `QuoteApiMapper` |
+
+**Total: 132 endpoints**, matching the operation count from the specs
+above exactly. Verified with `./gradlew clean compileJava` across the
+whole project after every module was wired.

@@ -18,8 +18,8 @@ repositories {
 }
 
 dependencies {
-	// Generated OpenAPI server interfaces/models per module (see steps/2_generate_openapi_specs_output).
-	implementation fileTree(dir: 'libs', include: '*.jar')
+	// Generated OpenAPI server interfaces/models per module.
+	implementation fileTree(dir: 'steps/2_generate_openapi_specs_output', include: '*.jar')
 
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
