@@ -16,9 +16,8 @@ import com.eazyfreight.alerts.service.AlertService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Clock;
@@ -36,6 +35,7 @@ public class AlertController implements AlertsApi {
     // ---------------------------------------------------------------- queries
 
     @Override
+    @RequestMapping(method = RequestMethod.GET, value = {"", "/"}, produces = "application/json")
     public ResponseEntity<List<AlertView>> open(AlertCategory category, AlertTrack track) {
         var domainCategory = AlertApiMapper.toDomain(category);
         var domainTrack = AlertApiMapper.toDomain(track);

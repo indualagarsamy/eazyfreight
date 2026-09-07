@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -36,6 +37,7 @@ public class QuoteController implements QuoteApi {
     private final QuoteService quoteService;
 
     @Override
+    @RequestMapping(method = RequestMethod.GET, value = {"", "/"}, produces = "application/json")
     public ResponseEntity<List<QuoteResponse>> getAllQuotes() {
         return ResponseEntity.ok(quoteService.findAll().stream().map(QuoteApiMapper::toModel).toList());
     }
@@ -75,6 +77,7 @@ public class QuoteController implements QuoteApi {
     }
 
     @Override
+    @RequestMapping(method = RequestMethod.POST, value = {"", "/"}, consumes = "application/json", produces = "application/json")
     public ResponseEntity<QuoteResponse> createQuote(CreateQuoteRequest createQuoteRequest) {
         var response = quoteService.createQuoteRequest(QuoteApiMapper.toDomain(createQuoteRequest));
         return ResponseEntity.status(HttpStatus.CREATED).body(QuoteApiMapper.toModel(response));
