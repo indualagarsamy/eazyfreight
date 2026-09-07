@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AlertTrack.schema.json",
+  "title": "AlertTrack",
+  "type": "string",
+  "description": "Which operational track the condition belongs to.",
+  "enum": [
+    "LOGISTICS",
+    "COMPLIANCE",
+    "FINANCE",
+    "BOOKING",
+    "DOCUMENTATION"
+  ]
+}

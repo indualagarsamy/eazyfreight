@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "EEIFilingHistoryResponse.schema.json",
+  "title": "EEIFilingHistoryResponse",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "sequenceNumber": {
+      "type": "integer"
+    },
+    "fromStatus": {
+      "$ref": "FilingStatus.schema.json"
+    },
+    "toStatus": {
+      "$ref": "FilingStatus.schema.json"
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor": {
+      "type": "string"
+    },
+    "detail": {
+      "type": "string"
+    }
+  }
+}

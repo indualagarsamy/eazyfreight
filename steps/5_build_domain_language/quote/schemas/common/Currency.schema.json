@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "common/Currency.schema.json",
+  "title": "Currency",
+  "type": "string",
+  "pattern": "[A-Z]{3}",
+  "minLength": 1,
+  "description": "ISO 4217 currency code. Duplicated identically in finance/schemas/common — quote and finance are separate bounded contexts and neither $refs the other's schemas (see steps/4_consolidate_entities.md), so each context keeps its own copy. Adopted here from quote's CreateQuoteRequest, the only place this pattern was previously enforced; every other currency field in this project was a bare unconstrained string before this consolidation."
+}

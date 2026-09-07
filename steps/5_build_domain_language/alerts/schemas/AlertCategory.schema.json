@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AlertCategory.schema.json",
+  "title": "AlertCategory",
+  "type": "string",
+  "description": "How much business damage the condition does if nobody acts.",
+  "enum": [
+    "CRITICAL",
+    "HIGH",
+    "MEDIUM",
+    "LOW"
+  ]
+}

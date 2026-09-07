@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "SealSource.schema.json",
+  "title": "SealSource",
+  "type": "string",
+  "enum": [
+    "CUSTOMER_ISSUED",
+    "CUSTOMS_ISSUED"
+  ]
+}

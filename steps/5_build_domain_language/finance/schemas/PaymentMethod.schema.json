@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "PaymentMethod.schema.json",
+  "title": "PaymentMethod",
+  "type": "string",
+  "enum": [
+    "WIRE",
+    "CHECK",
+    "ACH"
+  ]
+}

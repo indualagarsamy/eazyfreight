@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AmendHouseBOL.schema.json",
+  "title": "AmendHouseBOL",
+  "type": "object",
+  "required": [
+    "reason"
+  ],
+  "properties": {
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "consigneeName": {
+      "type": "string"
+    },
+    "consigneeAddress": {
+      "type": "string"
+    },
+    "notifyPartyName": {
+      "type": "string"
+    },
+    "notifyPartyAddress": {
+      "type": "string"
+    },
+    "vesselName": {
+      "type": "string"
+    },
+    "voyageNumber": {
+      "type": "string"
+    },
+    "sealNumber": {
+      "type": "string"
+    },
+    "cargoDescription": {
+      "type": "string"
+    },
+    "weightKg": {
+      "type": "number"
+    },
+    "pieces": {
+      "type": "integer"
+    },
+    "cbm": {
+      "type": "number"
+    },
+    "releaseType": {
+      "$ref": "ReleaseType.schema.json"
+    }
+  }
+}

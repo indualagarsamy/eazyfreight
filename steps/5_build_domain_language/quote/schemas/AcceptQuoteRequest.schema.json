@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AcceptQuoteRequest.schema.json",
+  "title": "AcceptQuoteRequest",
+  "type": "object",
+  "required": [
+    "selectedCarrierId"
+  ],
+  "properties": {
+    "selectedCarrierId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

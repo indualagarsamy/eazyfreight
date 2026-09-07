@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "LogisticsStage.schema.json",
+  "title": "LogisticsStage",
+  "type": "string",
+  "enum": [
+    "NOT_STARTED",
+    "OUTBOUND_DISPATCHED",
+    "AT_CUSTOMER",
+    "LOADING_COMPLETE",
+    "SEALED",
+    "INBOUND_DISPATCHED",
+    "AT_TERMINAL",
+    "UNDER_CBP_EXAMINATION",
+    "LOADED_ON_VESSEL",
+    "DEPARTED"
+  ]
+}

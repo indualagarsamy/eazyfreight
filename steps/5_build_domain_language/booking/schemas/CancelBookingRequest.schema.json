@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CancelBookingRequest.schema.json",
+  "title": "CancelBookingRequest",
+  "type": "object",
+  "required": [
+    "reason",
+    "initiatedBy"
+  ],
+  "properties": {
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "initiatedBy": {
+      "$ref": "CancellationInitiator.schema.json"
+    }
+  }
+}

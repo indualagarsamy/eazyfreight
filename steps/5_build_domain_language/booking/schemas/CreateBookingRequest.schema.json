@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CreateBookingRequest.schema.json",
+  "title": "CreateBookingRequest",
+  "type": "object",
+  "required": [
+    "customerId",
+    "shipperId",
+    "consigneeId",
+    "shippingMode",
+    "originPortCode",
+    "destinationPortCode",
+    "incoterms",
+    "requestedEtd",
+    "cargoDetails"
+  ],
+  "properties": {
+    "quoteId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "customerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "shipperId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "consigneeId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "notifyPartyId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "alsoNotifyId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "shippingMode": {
+      "$ref": "ShippingMode.schema.json"
+    },
+    "originPortCode": {
+      "type": "string",
+      "minLength": 1
+    },
+    "destinationPortCode": {
+      "type": "string",
+      "minLength": 1
+    },
+    "incoterms": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requestedEtd": {
+      "type": "string",
+      "format": "date"
+    },
+    "requestedEta": {
+      "type": "string",
+      "format": "date"
+    },
+    "transportRequired": {
+      "type": "boolean"
+    },
+    "pickupAddress": {
+      "type": "string"
+    },
+    "pickupDateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "specialInstructions": {
+      "type": "string"
+    },
+    "marksAndNumbers": {
+      "type": "string"
+    },
+    "cargoDetails": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "BookingCargoDetailRequest.schema.json"
+      }
+    }
+  }
+}

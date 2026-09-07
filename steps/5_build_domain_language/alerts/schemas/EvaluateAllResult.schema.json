@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "EvaluateAllResult.schema.json",
+  "title": "EvaluateAllResult",
+  "type": "object",
+  "description": "Fixed-shape map returned by POST /evaluate (not a DTO record).",
+  "properties": {
+    "changes": {
+      "type": "integer"
+    },
+    "open": {
+      "type": "integer"
+    }
+  }
+}

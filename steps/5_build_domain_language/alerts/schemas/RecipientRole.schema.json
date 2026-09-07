@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RecipientRole.schema.json",
+  "title": "RecipientRole",
+  "type": "string",
+  "enum": [
+    "OPERATIONS_STAFF",
+    "COMPLIANCE_STAFF",
+    "ACCOUNTING_STAFF",
+    "OPERATIONS_MANAGEMENT",
+    "FINANCE_MANAGEMENT",
+    "MANAGEMENT"
+  ]
+}

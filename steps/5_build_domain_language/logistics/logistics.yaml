@@ -1,0 +1,599 @@
+openapi: 3.0.3
+info:
+  title: Logistics API
+  description: Container and equipment endpoints, keyed by booking. Derived from com.eazyfreight.logistics.controller.LogisticsController.
+  version: '1.0'
+servers:
+- url: /api/logistics
+tags:
+- name: logistics
+paths:
+  /:
+    get:
+      tags:
+      - logistics
+      summary: List all container assignments
+      operationId: getAll
+      responses:
+        '200':
+          description: All container assignments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Logistics'
+  /blocked-on-itn:
+    get:
+      tags:
+      - logistics
+      summary: List container assignments blocked on an ITN
+      operationId: getBlockedOnItn
+      responses:
+        '200':
+          description: Assignments blocked on an ITN
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Logistics'
+  /awaiting-outbound-dispatch:
+    get:
+      tags:
+      - logistics
+      summary: List confirmed bookings needing a truck but with no outbound dispatch yet
+      operationId: getAwaitingOutboundDispatch
+      responses:
+        '200':
+          description: Bookings awaiting outbound dispatch
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AwaitingDispatch'
+  /under-examination:
+    get:
+      tags:
+      - logistics
+      summary: List container assignments currently under CBP examination
+      operationId: getUnderExamination
+      responses:
+        '200':
+          description: Assignments under examination
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}:
+    get:
+      tags:
+      - logistics
+      summary: Get the container assignment for a booking
+      operationId: getByBooking
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: The container assignment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}/itn-gate:
+    get:
+      tags:
+      - logistics
+      summary: 6. CheckITNGate — reports whether the inbound movement may be authorised
+      operationId: checkItnGate
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: ITN gate status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItnGateStatus'
+  /bookings/{bookingId}/outbound-dispatch:
+    post:
+      tags:
+      - logistics
+      summary: 1. DispatchOutboundTruck
+      operationId: dispatchOutbound
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DispatchTruck'
+      responses:
+        '201':
+          description: Outbound dispatch recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}/container-number:
+    post:
+      tags:
+      - logistics
+      summary: 2. RecordContainerNumber
+      operationId: recordContainerNumber
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordContainerNumber'
+      responses:
+        '200':
+          description: Assignment with container number recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}/delivered-to-customer:
+    post:
+      tags:
+      - logistics
+      summary: 3. RecordContainerDeliveredToCustomer
+      operationId: recordDeliveredToCustomer
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Assignment with delivery to customer recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}/loading-complete:
+    post:
+      tags:
+      - logistics
+      summary: 4. RecordCustomerLoadingComplete
+      operationId: recordLoadingComplete
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Assignment with loading complete recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}/seal:
+    post:
+      tags:
+      - logistics
+      summary: 5. RecordSealNumber
+      operationId: recordSeal
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordSeal'
+      responses:
+        '200':
+          description: Assignment with seal recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}/seal/replace:
+    post:
+      tags:
+      - logistics
+      summary: 13. RecordSealReplacement — outside a CBP examination, e.g. a damaged seal
+      operationId: replaceSeal
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordSeal'
+      responses:
+        '200':
+          description: Assignment with seal replaced
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}/inbound-dispatch:
+    post:
+      tags:
+      - logistics
+      summary: 7. DispatchInboundTruck — refused until the ITN gate is clear
+      operationId: dispatchInbound
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DispatchTruck'
+      responses:
+        '201':
+          description: Inbound dispatch recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}/loaded-container-picked-up:
+    post:
+      tags:
+      - logistics
+      summary: 8. RecordLoadedContainerPickedUp
+      operationId: recordLoadedContainerPickedUp
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Assignment with loaded container pickup recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}/delivered-to-port:
+    post:
+      tags:
+      - logistics
+      summary: 9. RecordContainerDeliveredToPort
+      operationId: recordDeliveredToPort
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Assignment with delivery to port recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}/terminal-receipt:
+    post:
+      tags:
+      - logistics
+      summary: 10. RecordTerminalGateReceipt
+      operationId: recordTerminalGateReceipt
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TerminalGateReceipt'
+      responses:
+        '200':
+          description: Assignment with terminal gate receipt recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}/terminal-rejection:
+    post:
+      tags:
+      - logistics
+      summary: 11. RecordTerminalGateRejection
+      operationId: recordTerminalGateRejection
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TerminalGateRejection'
+      responses:
+        '200':
+          description: Assignment with terminal gate rejection recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}/examination-hold:
+    post:
+      tags:
+      - logistics
+      summary: 12. RecordCBPExaminationHold
+      operationId: recordExaminationHold
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExaminationHold'
+      responses:
+        '200':
+          description: Assignment with examination hold recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}/examination-release:
+    post:
+      tags:
+      - logistics
+      summary: 14. RecordCBPExaminationRelease — always issues a replacement seal
+      operationId: recordExaminationRelease
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExaminationRelease'
+      responses:
+        '200':
+          description: Assignment with examination release recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}/loaded-on-vessel:
+    post:
+      tags:
+      - logistics
+      summary: 15. RecordContainerLoadedOnVessel
+      operationId: recordLoadedOnVessel
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoadedOnVessel'
+      responses:
+        '200':
+          description: Assignment with vessel loading recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}/vessel-departed:
+    post:
+      tags:
+      - logistics
+      summary: 16. RecordVesselDeparture
+      operationId: recordVesselDeparted
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Assignment with vessel departure recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+  /bookings/{bookingId}/actual-cargo:
+    post:
+      tags:
+      - logistics
+      summary: 17. RecordActualCargoDetails
+      operationId: recordActualCargo
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActualCargo'
+      responses:
+        '200':
+          description: Assignment with actual cargo details recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logistics'
+components:
+  schemas:
+    ContainerType:
+      $ref: ./schemas/ContainerType.schema.json
+    ContainerSource:
+      $ref: ./schemas/ContainerSource.schema.json
+    AddressType:
+      $ref: ./schemas/AddressType.schema.json
+    DispatchStatus:
+      $ref: ./schemas/DispatchStatus.schema.json
+    ExaminationResult:
+      $ref: ./schemas/ExaminationResult.schema.json
+    LogisticsStage:
+      $ref: ./schemas/LogisticsStage.schema.json
+    MovementType:
+      $ref: ./schemas/MovementType.schema.json
+    SealDeactivationReason:
+      $ref: ./schemas/SealDeactivationReason.schema.json
+    SealSource:
+      $ref: ./schemas/SealSource.schema.json
+    ItnGateStatus:
+      $ref: ./schemas/ItnGateStatus.schema.json
+    DispatchTruck:
+      $ref: ./schemas/DispatchTruck.schema.json
+    RecordContainerNumber:
+      $ref: ./schemas/RecordContainerNumber.schema.json
+    RecordSeal:
+      $ref: ./schemas/RecordSeal.schema.json
+    TerminalGateReceipt:
+      $ref: ./schemas/TerminalGateReceipt.schema.json
+    TerminalGateRejection:
+      $ref: ./schemas/TerminalGateRejection.schema.json
+    ExaminationHold:
+      $ref: ./schemas/ExaminationHold.schema.json
+    ExaminationRelease:
+      $ref: ./schemas/ExaminationRelease.schema.json
+    LoadedOnVessel:
+      $ref: ./schemas/LoadedOnVessel.schema.json
+    ActualCargo:
+      $ref: ./schemas/ActualCargo.schema.json
+    AwaitingDispatch:
+      $ref: ./schemas/AwaitingDispatch.schema.json
+    Seal:
+      $ref: ./schemas/Seal.schema.json
+    Dispatch:
+      $ref: ./schemas/Dispatch.schema.json
+    Terminal:
+      $ref: ./schemas/Terminal.schema.json
+    Examination:
+      $ref: ./schemas/Examination.schema.json
+    ActualCargoView:
+      $ref: ./schemas/ActualCargoView.schema.json
+    Logistics:
+      $ref: ./schemas/Logistics.schema.json

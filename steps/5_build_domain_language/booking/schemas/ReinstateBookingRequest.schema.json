@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ReinstateBookingRequest.schema.json",
+  "title": "ReinstateBookingRequest",
+  "type": "object",
+  "required": [
+    "newVesselName",
+    "newVoyageNumber",
+    "newEtd",
+    "newEta"
+  ],
+  "properties": {
+    "newVesselName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "newVoyageNumber": {
+      "type": "string",
+      "minLength": 1
+    },
+    "newEtd": {
+      "type": "string",
+      "format": "date"
+    },
+    "newEta": {
+      "type": "string",
+      "format": "date"
+    },
+    "reason": {
+      "type": "string"
+    }
+  }
+}

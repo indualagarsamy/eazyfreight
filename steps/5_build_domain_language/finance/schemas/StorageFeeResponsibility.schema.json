@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "StorageFeeResponsibility.schema.json",
+  "title": "StorageFeeResponsibility",
+  "type": "string",
+  "description": "Who ends up carrying a storage fee.",
+  "enum": [
+    "CUSTOMER",
+    "EAZY_FREIGHT",
+    "CARRIER_DISPUTED",
+    "UNDETERMINED"
+  ]
+}

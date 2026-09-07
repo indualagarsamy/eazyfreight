@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "InvoiceView.schema.json",
+  "title": "InvoiceView",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "invoiceNumber": {
+      "type": "string"
+    },
+    "bookingId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "houseBolId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "customerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "status": {
+      "$ref": "InvoiceStatus.schema.json"
+    },
+    "invoiceType": {
+      "$ref": "InvoiceType.schema.json"
+    },
+    "paymentTermsType": {
+      "$ref": "PaymentTermsType.schema.json"
+    },
+    "invoiceDate": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "paymentDueDate": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "confirmedEta": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "totalAmount": {
+      "type": "number"
+    },
+    "totalBuyAmount": {
+      "type": "number"
+    },
+    "margin": {
+      "type": "number",
+      "description": "Sell less buy, answerable per file."
+    },
+    "currency": {
+      "$ref": "common/Currency.schema.json"
+    },
+    "paidAmount": {
+      "type": "number"
+    },
+    "outstandingAmount": {
+      "type": "number"
+    },
+    "actualsConfirmed": {
+      "type": "boolean"
+    },
+    "issueBlockedReason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Why the invoice cannot be issued, or null. The House BOL requirement lives here."
+    },
+    "overdue": {
+      "type": "boolean"
+    },
+    "daysOverdue": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "issuedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "issuedBy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pdfSentAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "voidedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "voidedBy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "voidReason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "creditNoteAgainstInvoiceId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "lines": {
+      "type": "array",
+      "items": {
+        "$ref": "InvoiceLineView.schema.json"
+      }
+    },
+    "payments": {
+      "type": "array",
+      "items": {
+        "$ref": "PaymentView.schema.json"
+      }
+    }
+  }
+}

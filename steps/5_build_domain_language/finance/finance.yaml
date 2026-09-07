@@ -1,0 +1,669 @@
+openapi: 3.0.3
+info:
+  title: Finance API
+  description: Finance endpoints — the fifteen commands from the specification, covering invoicing, carrier
+    payables, storage fees and credit holds. Derived from com.eazyfreight.finance.controller.FinanceController.
+  version: '1.1'
+servers:
+- url: /api/finance
+tags:
+- name: finance
+paths:
+  /invoices:
+    get:
+      tags:
+      - finance
+      summary: List all invoices
+      operationId: invoices
+      responses:
+        '200':
+          description: All invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceView'
+  /invoices/overdue:
+    get:
+      tags:
+      - finance
+      summary: List overdue invoices
+      operationId: overdueInvoices
+      responses:
+        '200':
+          description: Overdue invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceView'
+  /invoices/{id}:
+    get:
+      tags:
+      - finance
+      summary: Get an invoice by ID
+      operationId: invoice
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: The invoice
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceView'
+  /bookings/{bookingId}/invoices:
+    get:
+      tags:
+      - finance
+      summary: List invoices for a booking
+      operationId: invoicesForBooking
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Invoices for the booking
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceView'
+    post:
+      tags:
+      - finance
+      summary: 1. PrepareInvoice
+      operationId: prepare
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrepareInvoice'
+      responses:
+        '201':
+          description: Prepared invoice
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceView'
+  /payables:
+    get:
+      tags:
+      - finance
+      summary: List all carrier payables
+      operationId: payables
+      responses:
+        '200':
+          description: All payables
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PayableView'
+  /bookings/{bookingId}/payables:
+    get:
+      tags:
+      - finance
+      summary: List carrier payables for a booking
+      operationId: payablesForBooking
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Payables for the booking
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PayableView'
+  /storage-fees:
+    get:
+      tags:
+      - finance
+      summary: List all storage fees
+      operationId: storageFees
+      responses:
+        '200':
+          description: All storage fees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StorageFeeView'
+  /credit-holds:
+    get:
+      tags:
+      - finance
+      summary: List active credit holds
+      operationId: creditHolds
+      responses:
+        '200':
+          description: Active credit holds
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CreditHoldView'
+  /invoices/{id}/lines:
+    post:
+      tags:
+      - finance
+      summary: Set the quoted line items on an invoice
+      operationId: updateLines
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLines'
+      responses:
+        '200':
+          description: Invoice with updated lines
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceView'
+  /invoices/{id}/actuals:
+    post:
+      tags:
+      - finance
+      summary: 2. UpdateInvoiceWithActuals
+      operationId: applyActuals
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLines'
+      responses:
+        '200':
+          description: Invoice updated with actuals
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceView'
+  /invoices/{id}/issue:
+    post:
+      tags:
+      - finance
+      summary: 3. IssueInvoiceToCustomer — refused until the House BOL exists
+      operationId: issue
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: accounting
+      responses:
+        '200':
+          description: Issued invoice
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceView'
+  /invoices/{id}/pdf:
+    get:
+      tags:
+      - finance
+      summary: 4. SendInvoicePDF — renders the invoice as a download. Pure read, nothing recorded.
+      operationId: invoicePdf
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Invoice PDF
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+  /invoices/{id}/send:
+    post:
+      tags:
+      - finance
+      summary: Send the already-generated invoice PDF
+      operationId: sendPdf
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Invoice with PDF marked sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceView'
+  /invoices/{id}/payments:
+    post:
+      tags:
+      - finance
+      summary: 5. RecordCustomerPayment — also creates the carrier payable it funds
+      operationId: recordPayment
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: accounting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordPayment'
+      responses:
+        '200':
+          description: Invoice with payment recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceView'
+  /invoices/{id}/void:
+    post:
+      tags:
+      - finance
+      summary: 9. VoidInvoice
+      operationId: voidInvoice
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: accounting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoidInvoice'
+      responses:
+        '200':
+          description: Voided invoice
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceView'
+  /invoices/{id}/credit-note:
+    post:
+      tags:
+      - finance
+      summary: 10. IssueCreditNote
+      operationId: creditNote
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: accounting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditNote'
+      responses:
+        '201':
+          description: Credit note invoice created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceView'
+  /payables/{id}/carrier-invoice:
+    post:
+      tags:
+      - finance
+      summary: 6. RecordCarrierInvoiceReceived
+      operationId: carrierInvoice
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarrierInvoice'
+      responses:
+        '200':
+          description: Payable with carrier invoice recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayableView'
+  /payables/{id}/approve:
+    post:
+      tags:
+      - finance
+      summary: 7. ApproveCarrierPayment
+      operationId: approve
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: accounting
+      responses:
+        '200':
+          description: Approved payable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayableView'
+  /payables/{id}/paid:
+    post:
+      tags:
+      - finance
+      summary: 8. RecordCarrierPaymentMade
+      operationId: paid
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: accounting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarrierPaymentMade'
+      responses:
+        '200':
+          description: Payable marked paid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayableView'
+  /bookings/{bookingId}/storage-fee:
+    post:
+      tags:
+      - finance
+      summary: 11. CalculateStorageFee
+      operationId: calculateStorageFee
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalculateStorageFee'
+      responses:
+        '201':
+          description: Calculated storage fee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StorageFeeView'
+  /storage-fees/{id}/responsibility:
+    post:
+      tags:
+      - finance
+      summary: Assign responsibility for a storage fee
+      operationId: assignResponsibility
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignResponsibility'
+      responses:
+        '200':
+          description: Storage fee with responsibility assigned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StorageFeeView'
+  /storage-fees/{id}/invoice:
+    post:
+      tags:
+      - finance
+      summary: 12. IssueStorageFeeInvoice
+      operationId: storageFeeInvoice
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: accounting
+      responses:
+        '201':
+          description: Invoice created for the storage fee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceView'
+  /bookings/{bookingId}/credit-hold:
+    post:
+      tags:
+      - finance
+      summary: 14. PlaceCreditHold
+      operationId: placeCreditHold
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: accounting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditHoldRequest'
+      responses:
+        '201':
+          description: Credit hold placed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditHoldView'
+  /credit-holds/{customerId}/lift:
+    post:
+      tags:
+      - finance
+      summary: 15. LiftCreditHold
+      operationId: liftCreditHold
+      parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: accounting
+      responses:
+        '200':
+          description: Lifted credit hold
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditHoldView'
+components:
+  schemas:
+    InvoiceStatus:
+      $ref: ./schemas/InvoiceStatus.schema.json
+    InvoiceType:
+      $ref: ./schemas/InvoiceType.schema.json
+    PaymentTermsType:
+      $ref: ./schemas/PaymentTermsType.schema.json
+    PayableStatus:
+      $ref: ./schemas/PayableStatus.schema.json
+    StorageFeeResponsibility:
+      $ref: ./schemas/StorageFeeResponsibility.schema.json
+    StorageFeeCause:
+      $ref: ./schemas/StorageFeeCause.schema.json
+    PaymentMethod:
+      $ref: ./schemas/PaymentMethod.schema.json
+    PrepareInvoice:
+      $ref: ./schemas/PrepareInvoice.schema.json
+    Line:
+      $ref: ./schemas/Line.schema.json
+    UpdateLines:
+      $ref: ./schemas/UpdateLines.schema.json
+    RecordPayment:
+      $ref: ./schemas/RecordPayment.schema.json
+    CarrierInvoice:
+      $ref: ./schemas/CarrierInvoice.schema.json
+    CarrierPaymentMade:
+      $ref: ./schemas/CarrierPaymentMade.schema.json
+    VoidInvoice:
+      $ref: ./schemas/VoidInvoice.schema.json
+    CreditNote:
+      $ref: ./schemas/CreditNote.schema.json
+    CalculateStorageFee:
+      $ref: ./schemas/CalculateStorageFee.schema.json
+    AssignResponsibility:
+      $ref: ./schemas/AssignResponsibility.schema.json
+    CreditHoldRequest:
+      $ref: ./schemas/CreditHoldRequest.schema.json
+    InvoiceLineView:
+      $ref: ./schemas/InvoiceLineView.schema.json
+    PaymentView:
+      $ref: ./schemas/PaymentView.schema.json
+    InvoiceView:
+      $ref: ./schemas/InvoiceView.schema.json
+    PayableView:
+      $ref: ./schemas/PayableView.schema.json
+    StorageFeeView:
+      $ref: ./schemas/StorageFeeView.schema.json
+    CreditHoldView:
+      $ref: ./schemas/CreditHoldView.schema.json
