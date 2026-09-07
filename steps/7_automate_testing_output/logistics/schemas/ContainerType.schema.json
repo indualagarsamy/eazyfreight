@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ContainerType.schema.json",
+  "title": "ContainerType",
+  "type": "string",
+  "description": "Shared with the booking context (com.eazyfreight.booking.domain.ContainerType); duplicated here so this spec stands alone.",
+  "enum": [
+    "TWENTY_GP",
+    "FORTY_GP",
+    "FORTY_HC",
+    "FORTY_FIVE_HC"
+  ]
+}

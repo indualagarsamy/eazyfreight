@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "FilingSystemStatus.schema.json",
+  "title": "FilingSystemStatus",
+  "type": "object",
+  "description": "Fixed-shape map returned by GET /filing-system (not a DTO record).",
+  "properties": {
+    "simulated": {
+      "type": "boolean"
+    },
+    "notice": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "LoadedOnVessel.schema.json",
+  "title": "LoadedOnVessel",
+  "type": "object",
+  "properties": {
+    "vesselName": {
+      "type": "string"
+    }
+  }
+}

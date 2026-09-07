@@ -1,0 +1,311 @@
+openapi: 3.0.3
+info:
+  title: Alerts API
+  description: Alert lifecycle and configuration endpoints. Derived from com.eazyfreight.alerts.controller.AlertController.
+  version: '1.0'
+servers:
+- url: /api/alerts
+tags:
+- name: alerts
+paths:
+  /:
+    get:
+      tags:
+      - alerts
+      summary: List open alerts, optionally filtered by category and/or track
+      operationId: open
+      parameters:
+      - name: category
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/AlertCategory'
+      - name: track
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/AlertTrack'
+      responses:
+        '200':
+          description: Open alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertView'
+  /dashboard:
+    get:
+      tags:
+      - alerts
+      summary: The "what needs attention right now" dashboard view
+      operationId: dashboard
+      responses:
+        '200':
+          description: Alert dashboard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+  /overdue:
+    get:
+      tags:
+      - alerts
+      summary: List overdue alerts
+      operationId: overdue
+      responses:
+        '200':
+          description: Overdue alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertView'
+  /{id}:
+    get:
+      tags:
+      - alerts
+      summary: Get an alert by ID
+      operationId: byId
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: The alert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertView'
+  /bookings/{bookingId}:
+    get:
+      tags:
+      - alerts
+      summary: List alerts for a booking
+      operationId: forBooking
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Alerts for the booking
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertView'
+  /configurations:
+    get:
+      tags:
+      - alerts
+      summary: List alert type configurations
+      operationId: configurations
+      responses:
+        '200':
+          description: Alert configurations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConfigurationView'
+  /evaluate:
+    post:
+      tags:
+      - alerts
+      summary: Force the alert sweep the scheduler runs every half hour, across all bookings.
+      operationId: evaluate
+      responses:
+        '200':
+          description: Evaluation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluateAllResult'
+  /bookings/{bookingId}/evaluate:
+    post:
+      tags:
+      - alerts
+      summary: Force the alert sweep for a single booking
+      operationId: evaluateBooking
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Evaluation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluateBookingResult'
+  /{id}/acknowledge:
+    post:
+      tags:
+      - alerts
+      summary: Acknowledge an alert
+      operationId: acknowledge
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      responses:
+        '200':
+          description: Acknowledged alert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertView'
+  /{id}/snooze:
+    post:
+      tags:
+      - alerts
+      summary: Snooze an alert until a given time
+      operationId: snooze
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Snooze'
+      responses:
+        '200':
+          description: Snoozed alert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertView'
+  /{id}/resolve:
+    post:
+      tags:
+      - alerts
+      summary: Resolve an alert
+      operationId: resolve
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Resolve'
+      responses:
+        '200':
+          description: Resolved alert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertView'
+  /configurations/{alertType}:
+    put:
+      tags:
+      - alerts
+      summary: Replace an alert type's configuration. The sole PUT in this API, because it replaces the
+        whole configuration record.
+      operationId: updateConfiguration
+      parameters:
+      - name: alertType
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/AlertType'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateConfiguration'
+      responses:
+        '200':
+          description: Updated configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationView'
+components:
+  schemas:
+    AlertCategory:
+      $ref: ./schemas/AlertCategory.schema.json
+    AlertTrack:
+      $ref: ./schemas/AlertTrack.schema.json
+    AlertStatus:
+      $ref: ./schemas/AlertStatus.schema.json
+    DeliveryStatus:
+      $ref: ./schemas/DeliveryStatus.schema.json
+    NotificationChannel:
+      $ref: ./schemas/NotificationChannel.schema.json
+    RecipientRole:
+      $ref: ./schemas/RecipientRole.schema.json
+    AlertHistoryAction:
+      $ref: ./schemas/AlertHistoryAction.schema.json
+    AlertType:
+      $ref: ./schemas/AlertType.schema.json
+    Snooze:
+      $ref: ./schemas/Snooze.schema.json
+    Resolve:
+      $ref: ./schemas/Resolve.schema.json
+    UpdateConfiguration:
+      $ref: ./schemas/UpdateConfiguration.schema.json
+    HistoryEntry:
+      $ref: ./schemas/HistoryEntry.schema.json
+    NotificationView:
+      $ref: ./schemas/NotificationView.schema.json
+    AlertView:
+      $ref: ./schemas/AlertView.schema.json
+    Dashboard:
+      $ref: ./schemas/Dashboard.schema.json
+    ConfigurationView:
+      $ref: ./schemas/ConfigurationView.schema.json
+    EvaluateAllResult:
+      $ref: ./schemas/EvaluateAllResult.schema.json
+    EvaluateBookingResult:
+      $ref: ./schemas/EvaluateBookingResult.schema.json

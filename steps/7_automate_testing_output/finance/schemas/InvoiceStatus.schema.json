@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "InvoiceStatus.schema.json",
+  "title": "InvoiceStatus",
+  "type": "string",
+  "enum": [
+    "PREPARED",
+    "ISSUED",
+    "PARTIALLY_PAID",
+    "PAID",
+    "VOIDED"
+  ]
+}

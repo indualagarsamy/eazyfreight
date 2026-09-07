@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Seal.schema.json",
+  "title": "Seal",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "sealNumber": {
+      "type": "string"
+    },
+    "sealSource": {
+      "$ref": "SealSource.schema.json"
+    },
+    "active": {
+      "type": "boolean"
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deactivatedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "deactivationReason": {
+      "$ref": "SealDeactivationReason.schema.json"
+    },
+    "replacedBySealId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "recordedBy": {
+      "type": "string"
+    }
+  }
+}

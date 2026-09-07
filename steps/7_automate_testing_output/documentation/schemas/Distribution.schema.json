@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Distribution.schema.json",
+  "title": "Distribution",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "recipient": {
+      "$ref": "DistributionRecipient.schema.json"
+    },
+    "recipientName": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "recipientAddress": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "channel": {
+      "$ref": "DistributionChannel.schema.json"
+    },
+    "revisionNumber": {
+      "type": "integer"
+    },
+    "sentAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sentBy": {
+      "type": "string"
+    },
+    "reference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "NotificationChannel.schema.json",
+  "title": "NotificationChannel",
+  "type": "string",
+  "enum": [
+    "IN_APP",
+    "EMAIL",
+    "SMS"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "QuoteLineType.schema.json",
+  "title": "QuoteLineType",
+  "type": "string",
+  "enum": [
+    "BASE_FREIGHT",
+    "BAF",
+    "CAF",
+    "PSS",
+    "THC_ORIGIN",
+    "THC_DESTINATION",
+    "DOC_FEE",
+    "INSURANCE"
+  ]
+}

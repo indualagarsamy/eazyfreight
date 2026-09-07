@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "QuoteLineResponse.schema.json",
+  "title": "QuoteLineResponse",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "lineType": {
+      "$ref": "QuoteLineType.schema.json"
+    },
+    "description": {
+      "type": "string"
+    },
+    "buyRate": {
+      "type": "number"
+    },
+    "sellRate": {
+      "type": "number"
+    },
+    "currency": {
+      "$ref": "common/Currency.schema.json"
+    },
+    "quantity": {
+      "type": "number"
+    },
+    "unit": {
+      "$ref": "ChargeUnit.schema.json"
+    },
+    "amount": {
+      "$ref": "common/MonetaryAmount.schema.json"
+    }
+  }
+}

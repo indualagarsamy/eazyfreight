@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "common/MonetaryAmount.schema.json",
+  "title": "MonetaryAmount",
+  "type": "number",
+  "minimum": 0,
+  "description": "A non-negative monetary amount, in whatever currency the enclosing schema's `currency` field names. Duplicated identically in finance/schemas/common; see Currency.schema.json for why. Schemas that require a strictly positive amount (e.g. a manually-entered credit or payment) add a stricter sibling `minimum` alongside the $ref rather than relaxing this one."
+}

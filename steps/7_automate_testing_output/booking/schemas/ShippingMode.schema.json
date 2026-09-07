@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ShippingMode.schema.json",
+  "title": "ShippingMode",
+  "type": "string",
+  "description": "Ocean only \u2014 this context does not handle air.",
+  "enum": [
+    "OCEAN_FCL",
+    "OCEAN_LCL"
+  ]
+}

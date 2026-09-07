@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RecordCounterOfferRequest.schema.json",
+  "title": "RecordCounterOfferRequest",
+  "type": "object",
+  "required": [
+    "proposedVessel",
+    "proposedVoyage",
+    "proposedEtd",
+    "proposedEta"
+  ],
+  "properties": {
+    "proposedVessel": {
+      "type": "string",
+      "minLength": 1
+    },
+    "proposedVoyage": {
+      "type": "string",
+      "minLength": 1
+    },
+    "proposedEtd": {
+      "type": "string",
+      "format": "date"
+    },
+    "proposedEta": {
+      "type": "string",
+      "format": "date"
+    }
+  }
+}

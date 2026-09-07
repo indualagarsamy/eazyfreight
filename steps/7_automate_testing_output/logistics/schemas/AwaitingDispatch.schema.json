@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AwaitingDispatch.schema.json",
+  "title": "AwaitingDispatch",
+  "type": "object",
+  "description": "A confirmed booking that needs a truck but has no outbound dispatch yet.",
+  "properties": {
+    "bookingId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "bookingReference": {
+      "type": "string"
+    },
+    "requestedEtd": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "confirmedEtd": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "pickupAddress": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

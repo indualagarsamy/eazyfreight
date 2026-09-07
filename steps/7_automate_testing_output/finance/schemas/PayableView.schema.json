@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "PayableView.schema.json",
+  "title": "PayableView",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "bookingId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "invoiceId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "customerPaymentId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "carrierId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "amount": {
+      "$ref": "common/MonetaryAmount.schema.json"
+    },
+    "currency": {
+      "$ref": "common/Currency.schema.json"
+    },
+    "customerPaymentDate": {
+      "type": "string",
+      "format": "date",
+      "description": "The payment that funds this; the due date is two business days after it and cannot move."
+    },
+    "dueDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "$ref": "PayableStatus.schema.json"
+    },
+    "carrierInvoiceReference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "carrierInvoiceAmount": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "invoiceVariance": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "carrierInvoiceReceivedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "approvedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "approvedBy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "paidOn": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "paymentReference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "overdue": {
+      "type": "boolean"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

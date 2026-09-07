@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RecordRejectionRequest.schema.json",
+  "title": "RecordRejectionRequest",
+  "type": "object",
+  "required": [
+    "rejectionCode",
+    "rejectionDescription"
+  ],
+  "properties": {
+    "rejectionCode": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rejectionDescription": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rejectedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

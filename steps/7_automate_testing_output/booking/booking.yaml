@@ -1,0 +1,573 @@
+openapi: 3.0.3
+info:
+  title: Booking API
+  description: Booking endpoints. There is no PUT — every change is a named command against the aggregate,
+    recorded in the status history. The X-Actor header names who is acting and is written into the audit
+    trail. Derived from com.eazyfreight.booking.controller.BookingController.
+  version: '1.0'
+servers:
+- url: /api/bookings
+tags:
+- name: booking
+paths:
+  /:
+    get:
+      tags:
+      - booking
+      summary: List all bookings
+      operationId: getAllBookings
+      responses:
+        '200':
+          description: All bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingResponse'
+    post:
+      tags:
+      - booking
+      summary: Create a booking request
+      operationId: createBooking
+      parameters:
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+      responses:
+        '201':
+          description: Booking created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /{id}:
+    get:
+      tags:
+      - booking
+      summary: Get a booking by ID
+      operationId: getBookingById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: The booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /by-reference/{bookingReference}:
+    get:
+      tags:
+      - booking
+      summary: Get a booking by its booking reference
+      operationId: getBookingByReference
+      parameters:
+      - name: bookingReference
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: The booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /{id}/status-history:
+    get:
+      tags:
+      - booking
+      summary: Get the status history of a booking
+      operationId: getBookingStatusHistory
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Status history entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingStatusHistoryResponse'
+  /by-customer/{customerId}:
+    get:
+      tags:
+      - booking
+      summary: List bookings for a customer
+      operationId: getBookingsByCustomer
+      parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: status
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/BookingStatus'
+      responses:
+        '200':
+          description: Bookings for the customer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingResponse'
+  /by-carrier/{carrierId}:
+    get:
+      tags:
+      - booking
+      summary: List bookings for a carrier
+      operationId: getBookingsByCarrier
+      parameters:
+      - name: carrierId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Bookings for the carrier
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingResponse'
+  /pending-carrier-confirmation:
+    get:
+      tags:
+      - booking
+      summary: List bookings pending carrier confirmation
+      operationId: getPendingCarrierConfirmation
+      responses:
+        '200':
+          description: Bookings pending carrier confirmation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingResponse'
+  /approaching-etd:
+    get:
+      tags:
+      - booking
+      summary: List bookings approaching their ETD
+      operationId: getApproachingEtd
+      parameters:
+      - name: withinDays
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 7
+      responses:
+        '200':
+          description: Bookings approaching ETD
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingResponse'
+  /{id}/submit:
+    post:
+      tags:
+      - booking
+      summary: Submit the booking to a carrier
+      operationId: submitBooking
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitBookingRequest'
+      responses:
+        '200':
+          description: Submitted booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /{id}/carrier-confirmation:
+    post:
+      tags:
+      - booking
+      summary: Record the carrier's confirmation
+      operationId: recordCarrierConfirmation
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordCarrierConfirmationRequest'
+      responses:
+        '200':
+          description: Booking with carrier confirmation recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /{id}/carrier-rejection:
+    post:
+      tags:
+      - booking
+      summary: Record the carrier's rejection
+      operationId: recordCarrierRejection
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordCarrierRejectionRequest'
+      responses:
+        '200':
+          description: Booking with carrier rejection recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /{id}/counter-offer:
+    post:
+      tags:
+      - booking
+      summary: Record a carrier counter-offer
+      operationId: recordCounterOffer
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordCounterOfferRequest'
+      responses:
+        '200':
+          description: Booking with counter-offer recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /{id}/counter-offer/accept:
+    post:
+      tags:
+      - booking
+      summary: Accept the carrier's counter-offer
+      operationId: acceptCounterOffer
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      responses:
+        '200':
+          description: Booking with counter-offer accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /{id}/counter-offer/reject:
+    post:
+      tags:
+      - booking
+      summary: Reject the carrier's counter-offer
+      operationId: rejectCounterOffer
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      responses:
+        '200':
+          description: Booking with counter-offer rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /{id}/acknowledge-etd-variance:
+    post:
+      tags:
+      - booking
+      summary: Acknowledge an ETD variance from the requested date
+      operationId: acknowledgeEtdVariance
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      responses:
+        '200':
+          description: Booking with ETD variance acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /{id}/send-confirmation:
+    post:
+      tags:
+      - booking
+      summary: Send the confirmation to the customer
+      operationId: sendConfirmation
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      responses:
+        '200':
+          description: Booking with confirmation sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /{id}/vessel-overbooking:
+    post:
+      tags:
+      - booking
+      summary: Record a vessel overbooking by the carrier
+      operationId: recordVesselOverbooking
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      responses:
+        '200':
+          description: Booking with vessel overbooking recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /{id}/reinstate:
+    post:
+      tags:
+      - booking
+      summary: Reinstate a booking after an overbooking, with new vessel details
+      operationId: reinstateBooking
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReinstateBookingRequest'
+      responses:
+        '200':
+          description: Reinstated booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /{id}/cancel:
+    post:
+      tags:
+      - booking
+      summary: Cancel the booking
+      operationId: cancelBooking
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Actor
+        in: header
+        required: false
+        description: Actor recorded in the audit trail.
+        schema:
+          type: string
+          default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelBookingRequest'
+      responses:
+        '200':
+          description: Cancelled booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+components:
+  schemas:
+    ShippingMode:
+      $ref: ./schemas/ShippingMode.schema.json
+    BookingStatus:
+      $ref: ./schemas/BookingStatus.schema.json
+    CancellationInitiator:
+      $ref: ./schemas/CancellationInitiator.schema.json
+    StatusChangeSource:
+      $ref: ./schemas/StatusChangeSource.schema.json
+    BookingSourceType:
+      $ref: ./schemas/BookingSourceType.schema.json
+    ContainerType:
+      $ref: ./schemas/ContainerType.schema.json
+    BookingCargoDetailRequest:
+      $ref: ./schemas/BookingCargoDetailRequest.schema.json
+    BookingCargoDetailResponse:
+      $ref: ./schemas/BookingCargoDetailResponse.schema.json
+    CreateBookingRequest:
+      $ref: ./schemas/CreateBookingRequest.schema.json
+    SubmitBookingRequest:
+      $ref: ./schemas/SubmitBookingRequest.schema.json
+    RecordCarrierConfirmationRequest:
+      $ref: ./schemas/RecordCarrierConfirmationRequest.schema.json
+    RecordCarrierRejectionRequest:
+      $ref: ./schemas/RecordCarrierRejectionRequest.schema.json
+    RecordCounterOfferRequest:
+      $ref: ./schemas/RecordCounterOfferRequest.schema.json
+    ReinstateBookingRequest:
+      $ref: ./schemas/ReinstateBookingRequest.schema.json
+    CancelBookingRequest:
+      $ref: ./schemas/CancelBookingRequest.schema.json
+    BookingStatusHistoryResponse:
+      $ref: ./schemas/BookingStatusHistoryResponse.schema.json
+    BookingReinstatementResponse:
+      $ref: ./schemas/BookingReinstatementResponse.schema.json
+    CarrierBookingResponse:
+      $ref: ./schemas/CarrierBookingResponse.schema.json
+    BookingResponse:
+      $ref: ./schemas/BookingResponse.schema.json

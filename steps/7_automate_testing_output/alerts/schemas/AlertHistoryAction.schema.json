@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AlertHistoryAction.schema.json",
+  "title": "AlertHistoryAction",
+  "type": "string",
+  "enum": [
+    "CREATED",
+    "NOTIFICATION_SENT",
+    "ACKNOWLEDGED",
+    "SNOOZED",
+    "REACTIVATED",
+    "ESCALATED",
+    "DEADLINE_RECALCULATED",
+    "RESOLVED"
+  ]
+}

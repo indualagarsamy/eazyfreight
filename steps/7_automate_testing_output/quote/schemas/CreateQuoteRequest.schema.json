@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CreateQuoteRequest.schema.json",
+  "title": "CreateQuoteRequest",
+  "type": "object",
+  "required": [
+    "customerId",
+    "shippingMode",
+    "originPortCode",
+    "destinationPortCode",
+    "incoterms",
+    "cargoDetails",
+    "currency",
+    "shipperName",
+    "consigneeName"
+  ],
+  "properties": {
+    "customerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "shippingMode": {
+      "$ref": "ShippingMode.schema.json"
+    },
+    "originPortCode": {
+      "type": "string",
+      "minLength": 1
+    },
+    "destinationPortCode": {
+      "type": "string",
+      "minLength": 1
+    },
+    "incoterms": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cargoDetails": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "CargoDetailRequest.schema.json"
+      }
+    },
+    "requestedEtd": {
+      "type": "string",
+      "format": "date"
+    },
+    "specialHandling": {
+      "type": "string"
+    },
+    "insuranceRequired": {
+      "type": "boolean"
+    },
+    "currency": {
+      "$ref": "common/Currency.schema.json"
+    },
+    "shipperName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "shipperAddress": {
+      "type": "string"
+    },
+    "shipperCountry": {
+      "type": "string"
+    },
+    "consigneeName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "consigneeAddress": {
+      "type": "string"
+    },
+    "consigneeCountry": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Dispatch.schema.json",
+  "title": "Dispatch",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "movementType": {
+      "$ref": "MovementType.schema.json"
+    },
+    "tdoReference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "driverId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "truckingVendorId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "vehicleReference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pickupAddress": {
+      "type": "string"
+    },
+    "pickupAddressType": {
+      "$ref": "AddressType.schema.json"
+    },
+    "deliveryAddress": {
+      "type": "string"
+    },
+    "deliveryAddressType": {
+      "$ref": "AddressType.schema.json"
+    },
+    "scheduledPickupDate": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "actualPickupDate": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "scheduledDeliveryDate": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "actualDeliveryDate": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "status": {
+      "$ref": "DispatchStatus.schema.json"
+    },
+    "dispatchedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "dispatchedBy": {
+      "type": "string"
+    },
+    "deliveryReceiptReference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

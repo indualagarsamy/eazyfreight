@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "UpdateConfiguration.schema.json",
+  "title": "UpdateConfiguration",
+  "type": "object",
+  "required": [
+    "escalationHours",
+    "channels",
+    "snoozeMaxHours"
+  ],
+  "properties": {
+    "enabled": {
+      "type": "boolean"
+    },
+    "thresholdDays": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "escalationHours": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "channels": {
+      "type": "array",
+      "uniqueItems": true,
+      "minItems": 1,
+      "items": {
+        "$ref": "NotificationChannel.schema.json"
+      }
+    },
+    "snoozeMaxHours": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "customMessage": {
+      "type": "string"
+    }
+  }
+}

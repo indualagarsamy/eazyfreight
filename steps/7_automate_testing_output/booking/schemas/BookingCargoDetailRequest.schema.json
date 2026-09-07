@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "BookingCargoDetailRequest.schema.json",
+  "title": "BookingCargoDetailRequest",
+  "allOf": [
+    {
+      "$ref": "common/CargoDimensionsInput.schema.json"
+    }
+  ],
+  "type": "object",
+  "required": [
+    "valueUsd"
+  ],
+  "properties": {
+    "valueUsd": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "marksAndNumbers": {
+      "type": "string"
+    }
+  }
+}

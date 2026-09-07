@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Snooze.schema.json",
+  "title": "Snooze",
+  "type": "object",
+  "required": [
+    "until"
+  ],
+  "properties": {
+    "until": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

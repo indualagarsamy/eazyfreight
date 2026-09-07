@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RecordSeal.schema.json",
+  "title": "RecordSeal",
+  "type": "object",
+  "required": [
+    "sealNumber"
+  ],
+  "properties": {
+    "sealNumber": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
