@@ -58,70 +58,92 @@ workflows:
         customerId:
           type: string
           format: uuid
-          description: Customer the quote and booking are placed for.
+          description: Customer the quote and booking are placed for (quoteApi.CreateQuoteRequest.customerId and bookingApi.CreateBookingRequest.customerId; required by both).
         shipperId:
           type: string
           format: uuid
-          description: Shipper party for the booking (not modeled on the quote, which only carries shipper name/address).
+          description: Shipper party for the booking (bookingApi.CreateBookingRequest.shipperId, required). Not modeled on the quote, which only carries shipper name/address instead of an id.
         consigneeId:
           type: string
           format: uuid
-          description: Consignee party for the booking.
+          description: Consignee party for the booking (bookingApi.CreateBookingRequest.consigneeId, required). Not modeled on the quote, which only carries consignee name/address instead of an id.
         shippingMode:
           type: string
           enum: [OCEAN_FCL, OCEAN_LCL]
+          description: Transport mode for the lane (quoteApi.CreateQuoteRequest.shippingMode and bookingApi.CreateBookingRequest.shippingMode; required by both). Restricted to the two ocean values here because bookingApi's ShippingMode enum is ocean-only, while quoteApi's also allows AIR.
         originPortCode:
           type: string
+          minLength: 1
+          description: Port-of-origin code (quoteApi.CreateQuoteRequest.originPortCode and bookingApi.CreateBookingRequest.originPortCode; required by both).
         destinationPortCode:
           type: string
+          minLength: 1
+          description: Port-of-destination code (quoteApi.CreateQuoteRequest.destinationPortCode and bookingApi.CreateBookingRequest.destinationPortCode; required by both).
         incoterms:
           type: string
+          minLength: 1
+          description: Incoterms rule governing the shipment, e.g. FOB or CIF (quoteApi.CreateQuoteRequest.incoterms and bookingApi.CreateBookingRequest.incoterms; required by both, modeled as a free-text string in both specs).
         currency:
           type: string
           pattern: '[A-Z]{3}'
-          description: ISO 4217 currency code for the quote.
+          description: ISO 4217 currency code for the quote (quoteApi.CreateQuoteRequest.currency, required; $refs quoteApi's common/Currency.schema.json, which enforces this 3-letter pattern). Not used by createBooking or dispatchOutboundTruck.
         shipperName:
           type: string
+          minLength: 1
+          description: Shipper's legal name (quoteApi.CreateQuoteRequest.shipperName, required). Used only by createQuote — bookingApi identifies the shipper by shipperId instead.
         shipperAddress:
           type: string
+          description: Shipper's address (quoteApi.CreateQuoteRequest.shipperAddress, optional). Used only by createQuote.
         shipperCountry:
           type: string
+          description: Shipper's country (quoteApi.CreateQuoteRequest.shipperCountry, optional). Used only by createQuote.
         consigneeName:
           type: string
+          minLength: 1
+          description: Consignee's legal name (quoteApi.CreateQuoteRequest.consigneeName, required). Used only by createQuote — bookingApi identifies the consignee by consigneeId instead.
         consigneeAddress:
           type: string
+          description: Consignee's address (quoteApi.CreateQuoteRequest.consigneeAddress, optional). Used only by createQuote.
         consigneeCountry:
           type: string
+          description: Consignee's country (quoteApi.CreateQuoteRequest.consigneeCountry, optional). Used only by createQuote.
         requestedEtd:
           type: string
           format: date
+          description: Requested estimated time of departure. Optional on quoteApi.CreateQuoteRequest.requestedEtd but required on bookingApi.CreateBookingRequest.requestedEtd, so this input is required for the workflow as a whole.
         pickupAddress:
           type: string
-          description: Where the outbound truck collects the cargo (shipper premises); also recorded on the booking.
+          description: Where the outbound truck collects the cargo, i.e. the shipper's premises (bookingApi.CreateBookingRequest.pickupAddress, optional there, and logisticsApi.DispatchTruck.pickupAddress, required there — hence required on this workflow).
         pickupDateTime:
           type: string
           format: date-time
+          description: When the outbound truck is expected to collect the cargo, as recorded on the booking (bookingApi.CreateBookingRequest.pickupDateTime, optional). Distinct from scheduledPickupDate below, which is recorded on the dispatch itself.
         deliveryAddress:
           type: string
-          description: Where the outbound truck delivers the cargo (carrier yard or port terminal).
+          description: Where the outbound truck delivers the cargo, i.e. the carrier yard or port terminal (logisticsApi.DispatchTruck.deliveryAddress, required). Not modeled on the booking, which has no delivery-address field.
         scheduledPickupDate:
           type: string
           format: date-time
+          description: Scheduled pickup timestamp for the outbound dispatch (logisticsApi.DispatchTruck.scheduledPickupDate, optional).
         scheduledDeliveryDate:
           type: string
           format: date-time
+          description: Scheduled delivery timestamp for the outbound dispatch (logisticsApi.DispatchTruck.scheduledDeliveryDate, optional).
         driverId:
           type: string
           format: uuid
+          description: Driver assigned to the outbound dispatch (logisticsApi.DispatchTruck.driverId, optional).
         truckingVendorId:
           type: string
           format: uuid
+          description: Trucking vendor assigned to the outbound dispatch (logisticsApi.DispatchTruck.truckingVendorId, optional).
         vehicleReference:
           type: string
+          description: Vehicle or plate reference for the outbound dispatch (logisticsApi.DispatchTruck.vehicleReference, optional).
         actor:
           type: string
           default: operations
-          description: Written into the X-Actor header on the booking and logistics commands, both of which record it in their audit trail.
+          description: Written into the X-Actor header on the booking and logistics commands, both of which record it in their audit trail (bookingApi and logisticsApi both document X-Actor as "Actor recorded in the audit trail," optional, defaulting to "operations").
         cargoDetails:
           type: array
           minItems: 1
@@ -144,30 +166,41 @@ workflows:
             properties:
               description:
                 type: string
+                minLength: 1
+                description: Cargo description (common/CargoDimensionsInput.schema.json#/properties/description, required, shared identically by quoteApi and bookingApi).
               hsCode:
                 type: string
                 pattern: '\d{4}\.\d{2}\.\d{4}'
+                description: Harmonized System tariff code, formatted NNNN.NN.NNNN (common/CargoDimensionsInput.schema.json#/properties/hsCode, required, shared identically by quoteApi and bookingApi).
               pieces:
                 type: integer
                 minimum: 1
+                description: Number of pieces in this cargo item (common/CargoDimensionsInput.schema.json#/properties/pieces, required, shared identically by quoteApi and bookingApi).
               weightKg:
                 type: number
                 minimum: 0.001
+                description: Weight of this cargo item, in kilograms (common/CargoDimensionsInput.schema.json#/properties/weightKg, required, shared identically by quoteApi and bookingApi).
               lengthCm:
                 type: number
                 minimum: 0.01
+                description: Length of this cargo item, in centimeters (common/CargoDimensionsInput.schema.json#/properties/lengthCm, required, shared identically by quoteApi and bookingApi).
               widthCm:
                 type: number
                 minimum: 0.01
+                description: Width of this cargo item, in centimeters (common/CargoDimensionsInput.schema.json#/properties/widthCm, required, shared identically by quoteApi and bookingApi).
               heightCm:
                 type: number
                 minimum: 0.01
+                description: Height of this cargo item, in centimeters (common/CargoDimensionsInput.schema.json#/properties/heightCm, required, shared identically by quoteApi and bookingApi).
               hazmat:
                 type: boolean
+                description: Whether this cargo item is hazardous material (common/CargoDimensionsInput.schema.json#/properties/hazmat, optional, shared identically by quoteApi and bookingApi).
               temperatureControlled:
                 type: boolean
+                description: Whether this cargo item requires temperature control (common/CargoDimensionsInput.schema.json#/properties/temperatureControlled, optional, shared identically by quoteApi and bookingApi).
               oversized:
                 type: boolean
+                description: Whether this cargo item is oversized (common/CargoDimensionsInput.schema.json#/properties/oversized, optional, shared identically by quoteApi and bookingApi).
               valueUsd:
                 type: number
                 minimum: 0
