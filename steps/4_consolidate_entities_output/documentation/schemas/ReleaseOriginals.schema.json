@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ReleaseOriginals.schema.json",
+  "title": "ReleaseOriginals",
+  "type": "object",
+  "required": [
+    "releasedTo"
+  ],
+  "properties": {
+    "releasedTo": {
+      "type": "string",
+      "minLength": 1
+    },
+    "courierReference": {
+      "type": "string"
+    }
+  }
+}

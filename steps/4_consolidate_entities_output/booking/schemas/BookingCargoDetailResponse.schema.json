@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "BookingCargoDetailResponse.schema.json",
+  "title": "BookingCargoDetailResponse",
+  "allOf": [
+    {
+      "$ref": "common/CargoDimensionsView.schema.json"
+    }
+  ],
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "cbm": {
+      "type": "number"
+    },
+    "valueUsd": {
+      "type": "number"
+    },
+    "marksAndNumbers": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "PaymentTermsType.schema.json",
+  "title": "PaymentTermsType",
+  "type": "string",
+  "description": "How the due date is computed.",
+  "enum": [
+    "TWO_WEEKS_BEFORE_ARRIVAL",
+    "NET_30"
+  ]
+}

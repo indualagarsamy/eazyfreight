@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CalculateStorageFee.schema.json",
+  "title": "CalculateStorageFee",
+  "type": "object",
+  "required": [
+    "cause",
+    "dailyRate",
+    "days"
+  ],
+  "properties": {
+    "cause": {
+      "$ref": "StorageFeeCause.schema.json"
+    },
+    "dailyRate": {
+      "type": "number"
+    },
+    "days": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "periodFrom": {
+      "type": "string",
+      "format": "date"
+    },
+    "periodTo": {
+      "type": "string",
+      "format": "date"
+    },
+    "currency": {
+      "$ref": "common/Currency.schema.json"
+    }
+  }
+}

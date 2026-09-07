@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "GenerateHouseBOL.schema.json",
+  "title": "GenerateHouseBOL",
+  "type": "object",
+  "required": [
+    "releaseType"
+  ],
+  "properties": {
+    "releaseType": {
+      "$ref": "ReleaseType.schema.json"
+    },
+    "freightTerms": {
+      "$ref": "FreightTerms.schema.json"
+    }
+  }
+}

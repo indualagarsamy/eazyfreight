@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "InvoiceType.schema.json",
+  "title": "InvoiceType",
+  "type": "string",
+  "enum": [
+    "FREIGHT",
+    "STORAGE_FEE",
+    "CREDIT_NOTE"
+  ]
+}

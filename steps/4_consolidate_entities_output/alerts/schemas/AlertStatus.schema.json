@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AlertStatus.schema.json",
+  "title": "AlertStatus",
+  "type": "string",
+  "enum": [
+    "ACTIVE",
+    "ACKNOWLEDGED",
+    "SNOOZED",
+    "ESCALATED",
+    "RESOLVED"
+  ]
+}

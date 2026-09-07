@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "DistributionRecipient.schema.json",
+  "title": "DistributionRecipient",
+  "type": "string",
+  "enum": [
+    "SHIPPER",
+    "CONSIGNEE_AGENT",
+    "NOTIFY_PARTY"
+  ]
+}

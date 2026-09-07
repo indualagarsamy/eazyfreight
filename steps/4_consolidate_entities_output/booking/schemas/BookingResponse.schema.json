@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "BookingResponse.schema.json",
+  "title": "BookingResponse",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "bookingReference": {
+      "type": "string"
+    },
+    "quoteId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "customerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "shipperId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "consigneeId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "notifyPartyId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "alsoNotifyId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "status": {
+      "$ref": "BookingStatus.schema.json"
+    },
+    "shippingMode": {
+      "$ref": "ShippingMode.schema.json"
+    },
+    "originPortCode": {
+      "type": "string"
+    },
+    "destinationPortCode": {
+      "type": "string"
+    },
+    "incoterms": {
+      "type": "string"
+    },
+    "requestedEtd": {
+      "type": "string",
+      "format": "date"
+    },
+    "requestedEta": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "transportRequired": {
+      "type": "boolean"
+    },
+    "pickupAddress": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pickupDateTime": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "specialInstructions": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "marksAndNumbers": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cancellationReason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cancellationInitiatedBy": {
+      "$ref": "CancellationInitiator.schema.json"
+    },
+    "cancelledAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "requiresCustomerEtdNotification": {
+      "type": "boolean",
+      "description": "True when the confirmed ETD moved more than two business days from what the customer asked for; the confirmation is blocked until acknowledged."
+    },
+    "etdVarianceAcknowledgedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "confirmationSentAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "itnFiled": {
+      "type": "boolean"
+    },
+    "totalWeightKg": {
+      "type": "number"
+    },
+    "totalValueUsd": {
+      "type": "number"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "createdBy": {
+      "type": "string"
+    },
+    "lastModifiedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "lastModifiedBy": {
+      "type": "string"
+    },
+    "carrierBooking": {
+      "$ref": "CarrierBookingResponse.schema.json"
+    },
+    "cargoDetails": {
+      "type": "array",
+      "items": {
+        "$ref": "BookingCargoDetailResponse.schema.json"
+      }
+    },
+    "statusHistory": {
+      "type": "array",
+      "items": {
+        "$ref": "BookingStatusHistoryResponse.schema.json"
+      }
+    },
+    "reinstatements": {
+      "type": "array",
+      "items": {
+        "$ref": "BookingReinstatementResponse.schema.json"
+      }
+    }
+  }
+}

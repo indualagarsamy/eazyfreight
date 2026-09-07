@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RateResponse.schema.json",
+  "title": "RateResponse",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "laneId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "carrierId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "buyRate": {
+      "type": "number"
+    },
+    "currency": {
+      "$ref": "common/Currency.schema.json"
+    },
+    "rateType": {
+      "$ref": "RateType.schema.json"
+    },
+    "unit": {
+      "$ref": "ChargeUnit.schema.json"
+    },
+    "transitDays": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "validFrom": {
+      "type": "string",
+      "format": "date"
+    },
+    "validUntil": {
+      "type": "string",
+      "format": "date"
+    },
+    "expired": {
+      "type": "boolean",
+      "description": "True when this rate has lapsed as of the lookup date. Expired rates are returned rather than hidden, so operations can see that the lane is stale instead of quietly pricing from it."
+    },
+    "surcharges": {
+      "type": "array",
+      "items": {
+        "$ref": "SurchargeResponse.schema.json"
+      }
+    }
+  }
+}

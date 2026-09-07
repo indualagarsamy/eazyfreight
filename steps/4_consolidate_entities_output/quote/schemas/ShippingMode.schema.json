@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ShippingMode.schema.json",
+  "title": "ShippingMode",
+  "type": "string",
+  "enum": [
+    "OCEAN_FCL",
+    "OCEAN_LCL",
+    "AIR"
+  ]
+}

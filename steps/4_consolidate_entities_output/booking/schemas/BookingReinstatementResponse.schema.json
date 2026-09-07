@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "BookingReinstatementResponse.schema.json",
+  "title": "BookingReinstatementResponse",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "previousVessel": {
+      "type": "string"
+    },
+    "previousVoyage": {
+      "type": "string"
+    },
+    "previousEtd": {
+      "type": "string",
+      "format": "date"
+    },
+    "previousEta": {
+      "type": "string",
+      "format": "date"
+    },
+    "newVesselName": {
+      "type": "string"
+    },
+    "newVoyageNumber": {
+      "type": "string"
+    },
+    "newEtd": {
+      "type": "string",
+      "format": "date"
+    },
+    "newEta": {
+      "type": "string",
+      "format": "date"
+    },
+    "reinstatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reinstatedBy": {
+      "type": "string"
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

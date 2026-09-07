@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Master.schema.json",
+  "title": "Master",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "bookingId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "instructionsId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "masterBolNumber": {
+      "type": "string"
+    },
+    "issuedByCarrierAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "receivedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "receivedBy": {
+      "type": "string"
+    },
+    "verificationStatus": {
+      "$ref": "VerificationStatus.schema.json"
+    },
+    "verifiedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "verifiedBy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "discrepancyFields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "discrepancyRaisedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "discrepancyResolvedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "documentFileReference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "verified": {
+      "type": "boolean"
+    }
+  }
+}

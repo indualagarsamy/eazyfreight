@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ConfigurationView.schema.json",
+  "title": "ConfigurationView",
+  "type": "object",
+  "properties": {
+    "alertType": {
+      "$ref": "AlertType.schema.json"
+    },
+    "alertCode": {
+      "type": "string"
+    },
+    "track": {
+      "$ref": "AlertTrack.schema.json"
+    },
+    "title": {
+      "type": "string"
+    },
+    "category": {
+      "$ref": "AlertCategory.schema.json"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "thresholdDays": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "escalationHours": {
+      "type": "integer"
+    },
+    "channels": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "NotificationChannel.schema.json"
+      }
+    },
+    "snoozeMaxHours": {
+      "type": "integer"
+    },
+    "snoozeCeilingHours": {
+      "type": "integer"
+    },
+    "customMessage": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "recipients": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "RecipientRole.schema.json"
+      }
+    }
+  }
+}

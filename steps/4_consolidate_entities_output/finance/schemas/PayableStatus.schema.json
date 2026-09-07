@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "PayableStatus.schema.json",
+  "title": "PayableStatus",
+  "type": "string",
+  "enum": [
+    "PENDING",
+    "AWAITING_INVOICE_MATCH",
+    "APPROVED",
+    "PAID"
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CompileEEIDataRequest.schema.json",
+  "title": "CompileEEIDataRequest",
+  "type": "object",
+  "required": [
+    "shipperName",
+    "shipperEin",
+    "consigneeName",
+    "consigneeCountry",
+    "commodityDescription",
+    "quantityValue",
+    "quantityUnit",
+    "valueUsd",
+    "carrierScac",
+    "portOfExportCode",
+    "countryOfDestination",
+    "estimatedEtd"
+  ],
+  "properties": {
+    "shipperName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "shipperEin": {
+      "type": "string",
+      "minLength": 1
+    },
+    "shipperAddress": {
+      "type": "string"
+    },
+    "consigneeName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "consigneeAddress": {
+      "type": "string"
+    },
+    "consigneeCountry": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "[A-Z]{2}",
+      "description": "2-letter ISO country code."
+    },
+    "scheduleBNumber": {
+      "type": "string",
+      "pattern": "\\d{4}\\.\\d{2}\\.\\d{4}|",
+      "description": "Leave blank to carry the booking's HS code across the boundary untranslated; it will be flagged as unmapped."
+    },
+    "commodityDescription": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 150
+    },
+    "quantityValue": {
+      "type": "number",
+      "minimum": 0.001
+    },
+    "quantityUnit": {
+      "type": "string",
+      "minLength": 1
+    },
+    "valueUsd": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "carrierScac": {
+      "type": "string",
+      "pattern": "[A-Z]{2,4}",
+      "minLength": 1
+    },
+    "vesselName": {
+      "type": "string"
+    },
+    "voyageNumber": {
+      "type": "string"
+    },
+    "portOfExportCode": {
+      "type": "string",
+      "minLength": 1
+    },
+    "countryOfDestination": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "[A-Z]{2}",
+      "description": "2-letter ISO country code."
+    },
+    "estimatedEtd": {
+      "type": "string",
+      "format": "date"
+    },
+    "licenseRequired": {
+      "type": "boolean"
+    }
+  }
+}

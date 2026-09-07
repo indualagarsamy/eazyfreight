@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CarrierPaymentMade.schema.json",
+  "title": "CarrierPaymentMade",
+  "type": "object",
+  "required": [
+    "paidOn"
+  ],
+  "properties": {
+    "paidOn": {
+      "type": "string",
+      "format": "date"
+    },
+    "reference": {
+      "type": "string"
+    }
+  }
+}

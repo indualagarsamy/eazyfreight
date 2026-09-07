@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "QuoteStatus.schema.json",
+  "title": "QuoteStatus",
+  "type": "string",
+  "enum": [
+    "DRAFT",
+    "SENT",
+    "ACCEPTED",
+    "DECLINED",
+    "EXPIRED"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RecordContainerNumber.schema.json",
+  "title": "RecordContainerNumber",
+  "type": "object",
+  "required": [
+    "containerNumber"
+  ],
+  "properties": {
+    "containerNumber": {
+      "type": "string",
+      "minLength": 1
+    },
+    "containerType": {
+      "$ref": "ContainerType.schema.json"
+    },
+    "source": {
+      "$ref": "ContainerSource.schema.json"
+    }
+  }
+}

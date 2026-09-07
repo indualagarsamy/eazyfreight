@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "DistributionChannel.schema.json",
+  "title": "DistributionChannel",
+  "type": "string",
+  "enum": [
+    "EMAIL",
+    "PORTAL",
+    "COURIER"
+  ]
+}

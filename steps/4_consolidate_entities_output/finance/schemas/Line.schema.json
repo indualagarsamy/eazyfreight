@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Line.schema.json",
+  "title": "Line",
+  "type": "object",
+  "required": [
+    "description",
+    "buyAmount",
+    "sellAmount",
+    "quantity"
+  ],
+  "properties": {
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "buyAmount": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "sellAmount": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "quantity": {
+      "type": "number",
+      "minimum": 0.0001
+    },
+    "unit": {
+      "type": "string"
+    }
+  }
+}
