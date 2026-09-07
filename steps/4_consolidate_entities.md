@@ -185,6 +185,49 @@ carrying a comment pointing at its sibling and at this doc.
      can't be widened by a sibling `type` in 2020-12 (both must hold).
 3. Left every "left as-is" item, including `Line`/`InvoiceLineView`,
    untouched.
+4. **Bumped `info.version`** in `4_consolidate_entities_output/finance/finance.yaml`
+   and `.../quote/quote.yaml` from `1.0` to `1.1` — the two specs whose
+   schemas, once `$ref`s are resolved, now validate differently than
+   before (see "Effective validation changes" below). No other spec's
+   resolved schemas changed, so no other spec's version moved; the yaml
+   files themselves are otherwise still byte-identical to step 3's
+   output, this `info.version` line is the only literal edit to a spec
+   file this step made.
+
+## Effective validation changes (after resolving the new `$ref`s)
+
+None of the yaml specs' own content changed (confirmed above), and no
+schema's property names, `required` lists, or structure changed either —
+but resolving the new `common/` `$ref`s shows a handful of fields now
+validate more strictly than they did in `3_entities_json_schemas_output`,
+because the shared def adopted the *strictest* pre-existing constraint
+rather than the loosest one (by design — see "Repeated inline `currency`/
+`amount` fields" above):
+
+- **9 `currency` fields** went from a bare, unconstrained string to
+  requiring the ISO-4217 `[A-Z]{3}` pattern: `finance/CalculateStorageFee`,
+  `finance/InvoiceView`, `finance/PayableView`, `finance/PaymentView`,
+  `finance/PrepareInvoice`, `finance/StorageFeeView`,
+  `quote/QuoteLineResponse`, `quote/RateResponse`,
+  `quote/SurchargeResponse` — plus `quote/QuoteResponse.currency`, which
+  keeps its nullability but now requires the pattern on the non-null
+  branch.
+- **6 `amount` fields** went from an unconstrained `number` to
+  `minimum: 0` (rejecting negative amounts): `finance/PayableView`,
+  `finance/PaymentView`, `finance/StorageFeeView`,
+  `finance/CarrierInvoice`, `quote/QuoteLineResponse`,
+  `quote/SurchargeResponse`.
+- Unchanged: `quote/CreateQuoteRequest.currency` (already had the ISO
+  pattern), `finance/CreditNote.amount`/`finance/RecordPayment.amount`
+  (already required `minimum: 0.01`, stricter than the shared def's
+  `minimum: 0` and preserved as a sibling constraint), and every cargo
+  detail field in `booking/` and `quote/` (same fields, same
+  `required`/`minimum`/`pattern` — confirmed identical by instance
+  validation above, just composed via `allOf` instead of repeated
+  inline).
+
+This only affects `finance/` and `quote/` schemas, hence only those two
+specs' version bump above.
 
 ## Verification
 

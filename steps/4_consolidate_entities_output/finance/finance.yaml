@@ -3,7 +3,7 @@ info:
   title: Finance API
   description: Finance endpoints — the fifteen commands from the specification, covering invoicing, carrier
     payables, storage fees and credit holds. Derived from com.eazyfreight.finance.controller.FinanceController.
-  version: '1.0'
+  version: '1.1'
 servers:
 - url: /api/finance
 tags:

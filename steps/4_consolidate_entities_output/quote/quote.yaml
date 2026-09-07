@@ -3,7 +3,7 @@ info:
   title: Quote API
   description: Quote lifecycle endpoints. Lifecycle changes are POSTs to named sub-resources (/send, /accept,
     /decline) rather than a PUT that lets a caller set status to anything. Derived from com.eazyfreight.quote.controller.QuoteController.
-  version: '1.0'
+  version: '1.1'
 servers:
 - url: /api/quotes
 tags:
