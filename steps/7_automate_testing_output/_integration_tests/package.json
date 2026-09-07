@@ -1,0 +1,21 @@
+{
+  "name": "eazyfreight-arazzo-playwright-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Playwright API tests that execute steps/7_automate_testing_output/arazzo.yaml against a running eazyfreight backend.",
+  "type": "commonjs",
+  "scripts": {
+    "test": "playwright test",
+    "test:unit": "playwright test tests/arazzo-runner.unit.spec.ts",
+    "test:e2e": "playwright test tests/quote-to-dispatch.spec.ts"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.7.0",
+    "typescript": "^5.6.0"
+  }
+}
