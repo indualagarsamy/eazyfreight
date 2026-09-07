@@ -1,83 +1,80 @@
 package com.eazyfreight.alerts.controller;
 
-import com.eazyfreight.alerts.domain.AlertCategory;
-import com.eazyfreight.alerts.domain.AlertTrack;
-import com.eazyfreight.alerts.domain.AlertType;
-import com.eazyfreight.alerts.dto.AlertRequests;
-import com.eazyfreight.alerts.dto.AlertResponses;
+import com.eazyfreight.alerts.api.AlertsApi;
+import com.eazyfreight.alerts.model.AlertCategory;
+import com.eazyfreight.alerts.model.AlertTrack;
+import com.eazyfreight.alerts.model.AlertType;
+import com.eazyfreight.alerts.model.AlertView;
+import com.eazyfreight.alerts.model.ConfigurationView;
+import com.eazyfreight.alerts.model.Dashboard;
+import com.eazyfreight.alerts.model.EvaluateAllResult;
+import com.eazyfreight.alerts.model.EvaluateBookingResult;
+import com.eazyfreight.alerts.model.Resolve;
+import com.eazyfreight.alerts.model.Snooze;
+import com.eazyfreight.alerts.model.UpdateConfiguration;
 import com.eazyfreight.alerts.service.AlertService;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Clock;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/alerts")
 @RequiredArgsConstructor
-public class AlertController {
-
-    private static final String ACTOR_HEADER = "X-Actor";
-    private static final String DEFAULT_ACTOR = "operations";
+public class AlertController implements AlertsApi {
 
     private final AlertService alertService;
     private final Clock clock;
 
     // ---------------------------------------------------------------- queries
 
-    @GetMapping
-    public List<AlertResponses.AlertView> open(
-            @RequestParam(required = false) AlertCategory category,
-            @RequestParam(required = false) AlertTrack track) {
-        return alertService.findOpen().stream()
-                .filter(alert -> category == null || alert.getCategory() == category)
-                .filter(alert -> track == null || alert.getTrack() == track)
-                .map(alert -> AlertResponses.AlertView.from(alert, clock.instant()))
-                .toList();
+    @Override
+    public ResponseEntity<List<AlertView>> open(AlertCategory category, AlertTrack track) {
+        var domainCategory = AlertApiMapper.toDomain(category);
+        var domainTrack = AlertApiMapper.toDomain(track);
+        return ResponseEntity.ok(alertService.findOpen().stream()
+                .filter(alert -> domainCategory == null || alert.getCategory() == domainCategory)
+                .filter(alert -> domainTrack == null || alert.getTrack() == domainTrack)
+                .map(alert -> AlertApiMapper.toView(alert, clock.instant()))
+                .toList());
     }
 
-    @GetMapping("/dashboard")
-    public AlertResponses.Dashboard dashboard() {
-        return AlertResponses.Dashboard.of(alertService.findOpen(), clock.instant());
+    @Override
+    public ResponseEntity<Dashboard> dashboard() {
+        return ResponseEntity.ok(AlertApiMapper.toDashboard(alertService.findOpen(), clock.instant()));
     }
 
-    @GetMapping("/overdue")
-    public List<AlertResponses.AlertView> overdue() {
-        return alertService.findOverdue().stream()
-                .map(alert -> AlertResponses.AlertView.from(alert, clock.instant()))
-                .toList();
+    @Override
+    public ResponseEntity<List<AlertView>> overdue() {
+        return ResponseEntity.ok(alertService.findOverdue().stream()
+                .map(alert -> AlertApiMapper.toView(alert, clock.instant()))
+                .toList());
     }
 
-    @GetMapping("/{id}")
-    public AlertResponses.AlertView byId(@PathVariable UUID id) {
-        return AlertResponses.AlertView.from(alertService.get(id), clock.instant());
+    @Override
+    public ResponseEntity<AlertView> byId(UUID id) {
+        return ResponseEntity.ok(AlertApiMapper.toView(alertService.get(id), clock.instant()));
     }
 
-    @GetMapping("/bookings/{bookingId}")
-    public List<AlertResponses.AlertView> forBooking(@PathVariable UUID bookingId) {
-        return alertService.findForBooking(bookingId).stream()
-                .map(alert -> AlertResponses.AlertView.from(alert, clock.instant()))
-                .toList();
+    @Override
+    public ResponseEntity<List<AlertView>> forBooking(UUID bookingId) {
+        return ResponseEntity.ok(alertService.findForBooking(bookingId).stream()
+                .map(alert -> AlertApiMapper.toView(alert, clock.instant()))
+                .toList());
     }
 
-    @GetMapping("/configurations")
-    public List<AlertResponses.ConfigurationView> configurations() {
-        return alertService.configurations().stream()
-                .map(AlertResponses.ConfigurationView::from)
-                .toList();
+    @Override
+    public ResponseEntity<List<ConfigurationView>> configurations() {
+        return ResponseEntity.ok(alertService.configurations().stream()
+                .map(AlertApiMapper::toConfigurationView)
+                .toList());
     }
 
     // --------------------------------------------------------------- commands
@@ -88,54 +85,48 @@ public class AlertController {
      * <p>Exposed because "wait up to thirty minutes" is not a demonstration, and because
      * an operator who has just fixed something reasonably wants to see the alert go.
      */
-    @PostMapping("/evaluate")
-    public Map<String, Object> evaluate() {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("changes", alertService.evaluateAll());
-        body.put("open", alertService.findOpen().size());
-        return body;
+    @Override
+    public ResponseEntity<EvaluateAllResult> evaluate() {
+        EvaluateAllResult result = new EvaluateAllResult();
+        result.setChanges(alertService.evaluateAll());
+        result.setOpen(alertService.findOpen().size());
+        return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/bookings/{bookingId}/evaluate")
-    public Map<String, Object> evaluateBooking(@PathVariable UUID bookingId) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("changes", alertService.evaluateBooking(bookingId));
-        return body;
+    @Override
+    public ResponseEntity<EvaluateBookingResult> evaluateBooking(UUID bookingId) {
+        EvaluateBookingResult result = new EvaluateBookingResult();
+        result.setChanges(alertService.evaluateBooking(bookingId));
+        return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/{id}/acknowledge")
-    public AlertResponses.AlertView acknowledge(
-            @PathVariable UUID id,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return AlertResponses.AlertView.from(
-                alertService.acknowledge(id, actor), clock.instant());
+    @Override
+    public ResponseEntity<AlertView> acknowledge(UUID id, String xActor) {
+        return ResponseEntity.ok(AlertApiMapper.toView(
+                alertService.acknowledge(id, xActor), clock.instant()));
     }
 
-    @PostMapping("/{id}/snooze")
-    public AlertResponses.AlertView snooze(
-            @PathVariable UUID id,
-            @Valid @RequestBody AlertRequests.Snooze request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return AlertResponses.AlertView.from(
-                alertService.snooze(id, actor, request.until()), clock.instant());
+    @Override
+    public ResponseEntity<AlertView> snooze(UUID id, Snooze snooze, String xActor) {
+        return ResponseEntity.ok(AlertApiMapper.toView(
+                alertService.snooze(id, xActor, AlertApiMapper.toInstant(snooze.getUntil())), clock.instant()));
     }
 
-    @PostMapping("/{id}/resolve")
-    public AlertResponses.AlertView resolve(
-            @PathVariable UUID id,
-            @Valid @RequestBody AlertRequests.Resolve request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return AlertResponses.AlertView.from(
-                alertService.resolve(id, actor, request.reason()), clock.instant());
+    @Override
+    public ResponseEntity<AlertView> resolve(UUID id, Resolve resolve, String xActor) {
+        return ResponseEntity.ok(AlertApiMapper.toView(
+                alertService.resolve(id, xActor, resolve.getReason()), clock.instant()));
     }
 
-    @PutMapping("/configurations/{alertType}")
-    public AlertResponses.ConfigurationView updateConfiguration(
-            @PathVariable AlertType alertType,
-            @Valid @RequestBody AlertRequests.UpdateConfiguration request) {
-        return AlertResponses.ConfigurationView.from(alertService.updateConfiguration(
-                alertType, request.enabled(), request.thresholdDays(),
-                request.escalationHours(), request.channels(),
-                request.snoozeMaxHours(), request.customMessage()));
+    @Override
+    public ResponseEntity<ConfigurationView> updateConfiguration(AlertType alertType, UpdateConfiguration updateConfiguration) {
+        return ResponseEntity.ok(AlertApiMapper.toConfigurationView(alertService.updateConfiguration(
+                AlertApiMapper.toDomain(alertType),
+                updateConfiguration.getEnabled(),
+                updateConfiguration.getThresholdDays(),
+                updateConfiguration.getEscalationHours(),
+                AlertApiMapper.toDomainChannels(updateConfiguration.getChannels()),
+                updateConfiguration.getSnoozeMaxHours(),
+                updateConfiguration.getCustomMessage())));
     }
 }

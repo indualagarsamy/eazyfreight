@@ -1,20 +1,26 @@
 package com.eazyfreight.finance.controller;
 
-import com.eazyfreight.finance.dto.FinanceRequests;
-import com.eazyfreight.finance.dto.FinanceResponses;
+import com.eazyfreight.finance.api.FinanceApi;
+import com.eazyfreight.finance.model.AssignResponsibility;
+import com.eazyfreight.finance.model.CalculateStorageFee;
+import com.eazyfreight.finance.model.CarrierInvoice;
+import com.eazyfreight.finance.model.CarrierPaymentMade;
+import com.eazyfreight.finance.model.CreditHoldRequest;
+import com.eazyfreight.finance.model.CreditHoldView;
+import com.eazyfreight.finance.model.CreditNote;
+import com.eazyfreight.finance.model.InvoiceView;
+import com.eazyfreight.finance.model.PayableView;
+import com.eazyfreight.finance.model.PrepareInvoice;
+import com.eazyfreight.finance.model.RecordPayment;
+import com.eazyfreight.finance.model.StorageFeeView;
+import com.eazyfreight.finance.model.UpdateLines;
+import com.eazyfreight.finance.model.VoidInvoice;
 import com.eazyfreight.finance.service.FinanceService;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,197 +31,179 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/finance")
 @RequiredArgsConstructor
-public class FinanceController {
-
-    private static final String ACTOR_HEADER = "X-Actor";
-    private static final String DEFAULT_ACTOR = "accounting";
+public class FinanceController implements FinanceApi {
 
     private final FinanceService financeService;
 
     // ------------------------------------------------------------------ reads
 
-    @GetMapping("/invoices")
-    public List<FinanceResponses.InvoiceView> invoices() {
-        return financeService.findAllInvoices();
+    @Override
+    public ResponseEntity<List<InvoiceView>> invoices() {
+        return ResponseEntity.ok(financeService.findAllInvoices().stream()
+                .map(FinanceApiMapper::toView).toList());
     }
 
-    @GetMapping("/invoices/overdue")
-    public List<FinanceResponses.InvoiceView> overdueInvoices() {
-        return financeService.findOverdueInvoices();
+    @Override
+    public ResponseEntity<List<InvoiceView>> overdueInvoices() {
+        return ResponseEntity.ok(financeService.findOverdueInvoices().stream()
+                .map(FinanceApiMapper::toView).toList());
     }
 
-    @GetMapping("/invoices/{id}")
-    public FinanceResponses.InvoiceView invoice(@PathVariable UUID id) {
-        return financeService.findInvoice(id);
+    @Override
+    public ResponseEntity<InvoiceView> invoice(UUID id) {
+        return ResponseEntity.ok(FinanceApiMapper.toView(financeService.findInvoice(id)));
     }
 
-    @GetMapping("/bookings/{bookingId}/invoices")
-    public List<FinanceResponses.InvoiceView> invoicesForBooking(@PathVariable UUID bookingId) {
-        return financeService.findInvoicesForBooking(bookingId);
+    @Override
+    public ResponseEntity<List<InvoiceView>> invoicesForBooking(UUID bookingId) {
+        return ResponseEntity.ok(financeService.findInvoicesForBooking(bookingId).stream()
+                .map(FinanceApiMapper::toView).toList());
     }
 
-    @GetMapping("/payables")
-    public List<FinanceResponses.PayableView> payables() {
-        return financeService.findAllPayables();
+    @Override
+    public ResponseEntity<List<PayableView>> payables() {
+        return ResponseEntity.ok(financeService.findAllPayables().stream()
+                .map(FinanceApiMapper::toView).toList());
     }
 
-    @GetMapping("/bookings/{bookingId}/payables")
-    public List<FinanceResponses.PayableView> payablesForBooking(@PathVariable UUID bookingId) {
-        return financeService.findPayablesForBooking(bookingId);
+    @Override
+    public ResponseEntity<List<PayableView>> payablesForBooking(UUID bookingId) {
+        return ResponseEntity.ok(financeService.findPayablesForBooking(bookingId).stream()
+                .map(FinanceApiMapper::toView).toList());
     }
 
-    @GetMapping("/storage-fees")
-    public List<FinanceResponses.StorageFeeView> storageFees() {
-        return financeService.findStorageFees();
+    @Override
+    public ResponseEntity<List<StorageFeeView>> storageFees() {
+        return ResponseEntity.ok(financeService.findStorageFees().stream()
+                .map(FinanceApiMapper::toView).toList());
     }
 
-    @GetMapping("/credit-holds")
-    public List<FinanceResponses.CreditHoldView> creditHolds() {
-        return financeService.findActiveCreditHolds();
+    @Override
+    public ResponseEntity<List<CreditHoldView>> creditHolds() {
+        return ResponseEntity.ok(financeService.findActiveCreditHolds().stream()
+                .map(FinanceApiMapper::toView).toList());
     }
 
     // ---------------------------------------------------------------- invoice
 
     /** 1. PrepareInvoice */
-    @PostMapping("/bookings/{bookingId}/invoice")
-    public ResponseEntity<FinanceResponses.InvoiceView> prepare(
-            @PathVariable UUID bookingId,
-            @RequestBody(required = false) FinanceRequests.PrepareInvoice request) {
+    @Override
+    public ResponseEntity<InvoiceView> prepare(UUID bookingId, PrepareInvoice prepareInvoice) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(financeService.prepareInvoice(bookingId, request));
+                .body(FinanceApiMapper.toView(financeService.prepareInvoice(
+                        bookingId, FinanceApiMapper.toDomain(prepareInvoice))));
     }
 
-    @PostMapping("/invoices/{id}/lines")
-    public FinanceResponses.InvoiceView updateLines(
-            @PathVariable UUID id, @Valid @RequestBody FinanceRequests.UpdateLines request) {
-        return financeService.updateLines(id, request, false);
+    @Override
+    public ResponseEntity<InvoiceView> updateLines(UUID id, UpdateLines updateLines) {
+        return ResponseEntity.ok(FinanceApiMapper.toView(
+                financeService.updateLines(id, FinanceApiMapper.toDomain(updateLines), false)));
     }
 
     /** 2. UpdateInvoiceWithActuals */
-    @PostMapping("/invoices/{id}/actuals")
-    public FinanceResponses.InvoiceView applyActuals(
-            @PathVariable UUID id, @Valid @RequestBody FinanceRequests.UpdateLines request) {
-        return financeService.updateLines(id, request, true);
+    @Override
+    public ResponseEntity<InvoiceView> applyActuals(UUID id, UpdateLines updateLines) {
+        return ResponseEntity.ok(FinanceApiMapper.toView(
+                financeService.updateLines(id, FinanceApiMapper.toDomain(updateLines), true)));
     }
 
     /** 3. IssueInvoiceToCustomer — refused until the House BOL exists. */
-    @PostMapping("/invoices/{id}/issue")
-    public FinanceResponses.InvoiceView issue(
-            @PathVariable UUID id,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return financeService.issue(id, actor);
+    @Override
+    public ResponseEntity<InvoiceView> issue(UUID id, String xActor) {
+        return ResponseEntity.ok(FinanceApiMapper.toView(financeService.issue(id, xActor)));
     }
 
-    /** 4. SendInvoicePDF */
-    /** Renders the invoice as a download. Pure read — nothing is recorded. */
-    @GetMapping(value = "/invoices/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity<Resource> invoicePdf(@PathVariable UUID id) {
+    /** 4. SendInvoicePDF — renders the invoice as a download. Pure read, nothing recorded. */
+    @Override
+    public ResponseEntity<Resource> invoicePdf(UUID id) {
         return financeService.pdf(id).asAttachment();
     }
 
-    @PostMapping("/invoices/{id}/send")
-    public FinanceResponses.InvoiceView sendPdf(@PathVariable UUID id) {
-        return financeService.sendPdf(id);
+    @Override
+    public ResponseEntity<InvoiceView> sendPdf(UUID id) {
+        return ResponseEntity.ok(FinanceApiMapper.toView(financeService.sendPdf(id)));
     }
 
     /** 5. RecordCustomerPayment — also creates the carrier payable it funds. */
-    @PostMapping("/invoices/{id}/payments")
-    public FinanceResponses.InvoiceView recordPayment(
-            @PathVariable UUID id,
-            @Valid @RequestBody FinanceRequests.RecordPayment request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return financeService.recordPayment(id, request, actor);
+    @Override
+    public ResponseEntity<InvoiceView> recordPayment(UUID id, RecordPayment recordPayment, String xActor) {
+        return ResponseEntity.ok(FinanceApiMapper.toView(
+                financeService.recordPayment(id, FinanceApiMapper.toDomain(recordPayment), xActor)));
     }
 
     /** 9. VoidInvoice */
-    @PostMapping("/invoices/{id}/void")
-    public FinanceResponses.InvoiceView voidInvoice(
-            @PathVariable UUID id,
-            @Valid @RequestBody FinanceRequests.VoidInvoice request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return financeService.voidInvoice(id, request, actor);
+    @Override
+    public ResponseEntity<InvoiceView> voidInvoice(UUID id, VoidInvoice voidInvoice, String xActor) {
+        return ResponseEntity.ok(FinanceApiMapper.toView(
+                financeService.voidInvoice(id, FinanceApiMapper.toDomain(voidInvoice), xActor)));
     }
 
     /** 10. IssueCreditNote */
-    @PostMapping("/invoices/{id}/credit-note")
-    public ResponseEntity<FinanceResponses.InvoiceView> creditNote(
-            @PathVariable UUID id,
-            @Valid @RequestBody FinanceRequests.CreditNote request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
+    @Override
+    public ResponseEntity<InvoiceView> creditNote(UUID id, CreditNote creditNote, String xActor) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(financeService.issueCreditNote(id, request, actor));
+                .body(FinanceApiMapper.toView(
+                        financeService.issueCreditNote(id, FinanceApiMapper.toDomain(creditNote), xActor)));
     }
 
     // --------------------------------------------------------------- payables
 
     /** 6. RecordCarrierInvoiceReceived */
-    @PostMapping("/payables/{id}/carrier-invoice")
-    public FinanceResponses.PayableView carrierInvoice(
-            @PathVariable UUID id, @Valid @RequestBody FinanceRequests.CarrierInvoice request) {
-        return financeService.recordCarrierInvoice(id, request);
+    @Override
+    public ResponseEntity<PayableView> carrierInvoice(UUID id, CarrierInvoice carrierInvoice) {
+        return ResponseEntity.ok(FinanceApiMapper.toView(
+                financeService.recordCarrierInvoice(id, FinanceApiMapper.toDomain(carrierInvoice))));
     }
 
     /** 7. ApproveCarrierPayment */
-    @PostMapping("/payables/{id}/approve")
-    public FinanceResponses.PayableView approve(
-            @PathVariable UUID id,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return financeService.approvePayable(id, actor);
+    @Override
+    public ResponseEntity<PayableView> approve(UUID id, String xActor) {
+        return ResponseEntity.ok(FinanceApiMapper.toView(financeService.approvePayable(id, xActor)));
     }
 
     /** 8. RecordCarrierPaymentMade */
-    @PostMapping("/payables/{id}/paid")
-    public FinanceResponses.PayableView paid(
-            @PathVariable UUID id,
-            @Valid @RequestBody FinanceRequests.CarrierPaymentMade request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return financeService.recordCarrierPaid(id, request, actor);
+    @Override
+    public ResponseEntity<PayableView> paid(UUID id, CarrierPaymentMade carrierPaymentMade, String xActor) {
+        return ResponseEntity.ok(FinanceApiMapper.toView(
+                financeService.recordCarrierPaid(id, FinanceApiMapper.toDomain(carrierPaymentMade), xActor)));
     }
 
     // ----------------------------------------------------------- storage fees
 
     /** 11. CalculateStorageFee */
-    @PostMapping("/bookings/{bookingId}/storage-fee")
-    public ResponseEntity<FinanceResponses.StorageFeeView> calculateStorageFee(
-            @PathVariable UUID bookingId,
-            @Valid @RequestBody FinanceRequests.CalculateStorageFee request) {
+    @Override
+    public ResponseEntity<StorageFeeView> calculateStorageFee(UUID bookingId, CalculateStorageFee calculateStorageFee) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(financeService.calculateStorageFee(bookingId, request));
+                .body(FinanceApiMapper.toView(financeService.calculateStorageFee(
+                        bookingId, FinanceApiMapper.toDomain(calculateStorageFee))));
     }
 
-    @PostMapping("/storage-fees/{id}/responsibility")
-    public FinanceResponses.StorageFeeView assignResponsibility(
-            @PathVariable UUID id,
-            @Valid @RequestBody FinanceRequests.AssignResponsibility request) {
-        return financeService.assignResponsibility(id, request);
+    @Override
+    public ResponseEntity<StorageFeeView> assignResponsibility(UUID id, AssignResponsibility assignResponsibility) {
+        return ResponseEntity.ok(FinanceApiMapper.toView(
+                financeService.assignResponsibility(id, FinanceApiMapper.toDomain(assignResponsibility))));
     }
 
     /** 12. IssueStorageFeeInvoice */
-    @PostMapping("/storage-fees/{id}/invoice")
-    public ResponseEntity<FinanceResponses.InvoiceView> storageFeeInvoice(
-            @PathVariable UUID id,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
+    @Override
+    public ResponseEntity<InvoiceView> storageFeeInvoice(UUID id, String xActor) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(financeService.issueStorageFeeInvoice(id, actor));
+                .body(FinanceApiMapper.toView(financeService.issueStorageFeeInvoice(id, xActor)));
     }
 
     // ----------------------------------------------------------- credit hold
 
     /** 14. PlaceCreditHold */
-    @PostMapping("/bookings/{bookingId}/credit-hold")
-    public ResponseEntity<FinanceResponses.CreditHoldView> placeCreditHold(
-            @PathVariable UUID bookingId,
-            @Valid @RequestBody FinanceRequests.CreditHoldRequest request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
+    @Override
+    public ResponseEntity<CreditHoldView> placeCreditHold(UUID bookingId, CreditHoldRequest creditHoldRequest, String xActor) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(financeService.placeCreditHold(bookingId, request, actor));
+                .body(FinanceApiMapper.toView(financeService.placeCreditHold(
+                        bookingId, FinanceApiMapper.toDomain(creditHoldRequest), xActor)));
     }
 
     /** 15. LiftCreditHold */
-    @PostMapping("/credit-holds/{customerId}/lift")
-    public FinanceResponses.CreditHoldView liftCreditHold(
-            @PathVariable UUID customerId,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return financeService.liftCreditHold(customerId, actor);
+    @Override
+    public ResponseEntity<CreditHoldView> liftCreditHold(UUID customerId, String xActor) {
+        return ResponseEntity.ok(FinanceApiMapper.toView(financeService.liftCreditHold(customerId, xActor)));
     }
 }

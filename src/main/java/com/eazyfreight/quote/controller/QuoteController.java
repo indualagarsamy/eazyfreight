@@ -1,26 +1,20 @@
 package com.eazyfreight.quote.controller;
 
-import com.eazyfreight.quote.domain.Quote;
-import com.eazyfreight.quote.domain.QuoteStatus;
-import com.eazyfreight.quote.domain.ShippingMode;
-import com.eazyfreight.quote.dto.AcceptQuoteRequest;
-import com.eazyfreight.quote.dto.BuildQuotationRequest;
-import com.eazyfreight.quote.dto.CreateQuoteRequest;
-import com.eazyfreight.quote.dto.DeclineQuoteRequest;
-import com.eazyfreight.quote.dto.QuoteResponse;
-import com.eazyfreight.quote.dto.RateResponse;
+import com.eazyfreight.quote.api.QuoteApi;
+import com.eazyfreight.quote.model.AcceptQuoteRequest;
+import com.eazyfreight.quote.model.BuildQuotationRequest;
+import com.eazyfreight.quote.model.CreateQuoteRequest;
+import com.eazyfreight.quote.model.DeclineQuoteRequest;
+import com.eazyfreight.quote.model.QuoteResponse;
+import com.eazyfreight.quote.model.QuoteStatus;
+import com.eazyfreight.quote.model.RateResponse;
+import com.eazyfreight.quote.model.ShippingMode;
 import com.eazyfreight.quote.service.QuoteService;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -37,83 +31,86 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/quotes")
 @RequiredArgsConstructor
-public class QuoteController {
+public class QuoteController implements QuoteApi {
 
     private final QuoteService quoteService;
 
-    @GetMapping
-    public List<QuoteResponse> getAll() {
-        return quoteService.findAll();
+    @Override
+    public ResponseEntity<List<QuoteResponse>> getAllQuotes() {
+        return ResponseEntity.ok(quoteService.findAll().stream().map(QuoteApiMapper::toModel).toList());
     }
 
-    @GetMapping("/{id}")
-    public QuoteResponse getById(@PathVariable UUID id) {
-        return quoteService.findById(id);
+    @Override
+    public ResponseEntity<QuoteResponse> getQuoteById(UUID id) {
+        return ResponseEntity.ok(QuoteApiMapper.toModel(quoteService.findById(id)));
     }
 
-    @GetMapping("/by-reference/{quoteReference}")
-    public QuoteResponse getByReference(@PathVariable String quoteReference) {
-        return quoteService.findByReference(quoteReference);
+    @Override
+    public ResponseEntity<QuoteResponse> getQuoteByReference(String quoteReference) {
+        return ResponseEntity.ok(QuoteApiMapper.toModel(quoteService.findByReference(quoteReference)));
     }
 
-    @GetMapping("/open")
-    public List<QuoteResponse> getOpen() {
-        return quoteService.findOpen();
+    @Override
+    public ResponseEntity<List<QuoteResponse>> getOpenQuotes() {
+        return ResponseEntity.ok(quoteService.findOpen().stream().map(QuoteApiMapper::toModel).toList());
     }
 
-    @GetMapping("/expiring")
-    public List<QuoteResponse> getExpiring(@RequestParam(defaultValue = "3") int withinDays) {
-        return quoteService.findExpiringWithin(withinDays);
+    @Override
+    public ResponseEntity<List<QuoteResponse>> getExpiringQuotes(Integer withinDays) {
+        return ResponseEntity.ok(quoteService.findExpiringWithin(withinDays).stream()
+                .map(QuoteApiMapper::toModel).toList());
     }
 
-    @GetMapping("/by-customer/{customerId}")
-    public List<QuoteResponse> getByCustomer(
-            @PathVariable UUID customerId,
-            @RequestParam(required = false) QuoteStatus status) {
-        return quoteService.findByCustomer(customerId, status);
+    @Override
+    public ResponseEntity<List<QuoteResponse>> getQuotesByCustomer(UUID customerId, QuoteStatus status) {
+        return ResponseEntity.ok(quoteService.findByCustomer(customerId, QuoteApiMapper.toDomain(status)).stream()
+                .map(QuoteApiMapper::toModel).toList());
     }
 
-    @GetMapping("/rates")
-    public List<RateResponse> getRatesForLane(
-            @RequestParam String originPortCode,
-            @RequestParam String destinationPortCode,
-            @RequestParam ShippingMode mode) {
-        return quoteService.findRatesForLane(originPortCode, destinationPortCode, mode);
+    @Override
+    public ResponseEntity<List<RateResponse>> getRatesForLane(String originPortCode, String destinationPortCode, ShippingMode mode) {
+        return ResponseEntity.ok(quoteService.findRatesForLane(
+                        originPortCode, destinationPortCode, QuoteApiMapper.toDomain(mode)).stream()
+                .map(QuoteApiMapper::toModel).toList());
     }
 
-    @PostMapping
-    public ResponseEntity<QuoteResponse> create(@Valid @RequestBody CreateQuoteRequest request) {
-        QuoteResponse response = quoteService.createQuoteRequest(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @Override
+    public ResponseEntity<QuoteResponse> createQuote(CreateQuoteRequest createQuoteRequest) {
+        var response = quoteService.createQuoteRequest(QuoteApiMapper.toDomain(createQuoteRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(QuoteApiMapper.toModel(response));
     }
 
-    @PostMapping("/{id}/rescreen")
-    public QuoteResponse rescreen(@PathVariable UUID id, @Valid @RequestBody CreateQuoteRequest request) {
-        return quoteService.rescreen(id, request);
+    @Override
+    public ResponseEntity<QuoteResponse> rescreenQuote(UUID id, CreateQuoteRequest createQuoteRequest) {
+        return ResponseEntity.ok(QuoteApiMapper.toModel(
+                quoteService.rescreen(id, QuoteApiMapper.toDomain(createQuoteRequest))));
     }
 
-    @PostMapping("/{id}/build")
-    public QuoteResponse build(@PathVariable UUID id, @Valid @RequestBody BuildQuotationRequest request) {
-        return quoteService.buildQuotation(id, request);
+    @Override
+    public ResponseEntity<QuoteResponse> buildQuote(UUID id, BuildQuotationRequest buildQuotationRequest) {
+        return ResponseEntity.ok(QuoteApiMapper.toModel(
+                quoteService.buildQuotation(id, QuoteApiMapper.toDomain(buildQuotationRequest))));
     }
 
-    @PostMapping("/{id}/send")
-    public QuoteResponse send(@PathVariable UUID id) {
-        return quoteService.send(id);
+    @Override
+    public ResponseEntity<QuoteResponse> sendQuote(UUID id) {
+        return ResponseEntity.ok(QuoteApiMapper.toModel(quoteService.send(id)));
     }
 
-    @PostMapping("/{id}/accept")
-    public QuoteResponse accept(@PathVariable UUID id, @Valid @RequestBody AcceptQuoteRequest request) {
-        return quoteService.accept(id, request);
+    @Override
+    public ResponseEntity<QuoteResponse> acceptQuote(UUID id, AcceptQuoteRequest acceptQuoteRequest) {
+        return ResponseEntity.ok(QuoteApiMapper.toModel(
+                quoteService.accept(id, QuoteApiMapper.toDomain(acceptQuoteRequest))));
     }
 
-    @PostMapping("/{id}/decline")
-    public QuoteResponse decline(@PathVariable UUID id, @RequestBody(required = false) DeclineQuoteRequest request) {
-        return quoteService.decline(id, request);
+    @Override
+    public ResponseEntity<QuoteResponse> declineQuote(UUID id, DeclineQuoteRequest declineQuoteRequest) {
+        return ResponseEntity.ok(QuoteApiMapper.toModel(
+                quoteService.decline(id, QuoteApiMapper.toDomain(declineQuoteRequest))));
     }
 
-    @PostMapping("/{id}/expire")
-    public QuoteResponse expire(@PathVariable UUID id) {
-        return quoteService.expire(id);
+    @Override
+    public ResponseEntity<QuoteResponse> expireQuote(UUID id) {
+        return ResponseEntity.ok(QuoteApiMapper.toModel(quoteService.expire(id)));
     }
 }

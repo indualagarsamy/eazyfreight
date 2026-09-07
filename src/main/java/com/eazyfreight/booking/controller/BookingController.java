@@ -1,29 +1,22 @@
 package com.eazyfreight.booking.controller;
 
-import com.eazyfreight.booking.domain.Booking;
-import com.eazyfreight.booking.domain.BookingStatus;
-import com.eazyfreight.booking.dto.BookingResponse;
-import com.eazyfreight.booking.dto.BookingStatusHistoryResponse;
-import com.eazyfreight.booking.dto.CancelBookingRequest;
-import com.eazyfreight.booking.dto.CreateBookingRequest;
-import com.eazyfreight.booking.dto.RecordCarrierConfirmationRequest;
-import com.eazyfreight.booking.dto.RecordCarrierRejectionRequest;
-import com.eazyfreight.booking.dto.RecordCounterOfferRequest;
-import com.eazyfreight.booking.dto.ReinstateBookingRequest;
-import com.eazyfreight.booking.dto.SubmitBookingRequest;
+import com.eazyfreight.booking.api.BookingApi;
+import com.eazyfreight.booking.model.BookingResponse;
+import com.eazyfreight.booking.model.BookingStatus;
+import com.eazyfreight.booking.model.BookingStatusHistoryResponse;
+import com.eazyfreight.booking.model.CancelBookingRequest;
+import com.eazyfreight.booking.model.CreateBookingRequest;
+import com.eazyfreight.booking.model.RecordCarrierConfirmationRequest;
+import com.eazyfreight.booking.model.RecordCarrierRejectionRequest;
+import com.eazyfreight.booking.model.RecordCounterOfferRequest;
+import com.eazyfreight.booking.model.ReinstateBookingRequest;
+import com.eazyfreight.booking.model.SubmitBookingRequest;
 import com.eazyfreight.booking.service.BookingService;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -43,143 +36,121 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/bookings")
 @RequiredArgsConstructor
-public class BookingController {
-
-    private static final String ACTOR_HEADER = "X-Actor";
-    private static final String DEFAULT_ACTOR = "operations";
+public class BookingController implements BookingApi {
 
     private final BookingService bookingService;
 
-    @GetMapping
-    public List<BookingResponse> getAll() {
-        return bookingService.findAll();
+    @Override
+    public ResponseEntity<List<BookingResponse>> getAllBookings() {
+        return ResponseEntity.ok(bookingService.findAll().stream().map(BookingApiMapper::toModel).toList());
     }
 
-    @GetMapping("/{id}")
-    public BookingResponse getById(@PathVariable UUID id) {
-        return bookingService.findById(id);
+    @Override
+    public ResponseEntity<BookingResponse> getBookingById(UUID id) {
+        return ResponseEntity.ok(BookingApiMapper.toModel(bookingService.findById(id)));
     }
 
-    @GetMapping("/by-reference/{bookingReference}")
-    public BookingResponse getByReference(@PathVariable String bookingReference) {
-        return bookingService.findByReference(bookingReference);
+    @Override
+    public ResponseEntity<BookingResponse> getBookingByReference(String bookingReference) {
+        return ResponseEntity.ok(BookingApiMapper.toModel(bookingService.findByReference(bookingReference)));
     }
 
-    @GetMapping("/{id}/status-history")
-    public List<BookingStatusHistoryResponse> getStatusHistory(@PathVariable UUID id) {
-        return bookingService.findStatusHistory(id);
+    @Override
+    public ResponseEntity<List<BookingStatusHistoryResponse>> getBookingStatusHistory(UUID id) {
+        return ResponseEntity.ok(bookingService.findStatusHistory(id).stream().map(BookingApiMapper::toModel).toList());
     }
 
-    @GetMapping("/by-customer/{customerId}")
-    public List<BookingResponse> getByCustomer(
-            @PathVariable UUID customerId,
-            @RequestParam(required = false) BookingStatus status) {
-        return bookingService.findByCustomer(customerId, status);
+    @Override
+    public ResponseEntity<List<BookingResponse>> getBookingsByCustomer(UUID customerId, BookingStatus status) {
+        return ResponseEntity.ok(bookingService.findByCustomer(customerId, BookingApiMapper.toDomain(status)).stream()
+                .map(BookingApiMapper::toModel).toList());
     }
 
-    @GetMapping("/by-carrier/{carrierId}")
-    public List<BookingResponse> getByCarrier(@PathVariable UUID carrierId) {
-        return bookingService.findByCarrier(carrierId);
+    @Override
+    public ResponseEntity<List<BookingResponse>> getBookingsByCarrier(UUID carrierId) {
+        return ResponseEntity.ok(bookingService.findByCarrier(carrierId).stream().map(BookingApiMapper::toModel).toList());
     }
 
-    @GetMapping("/pending-carrier-confirmation")
-    public List<BookingResponse> getPendingCarrierConfirmation() {
-        return bookingService.findPendingCarrierConfirmation();
+    @Override
+    public ResponseEntity<List<BookingResponse>> getPendingCarrierConfirmation() {
+        return ResponseEntity.ok(bookingService.findPendingCarrierConfirmation().stream()
+                .map(BookingApiMapper::toModel).toList());
     }
 
-    @GetMapping("/approaching-etd")
-    public List<BookingResponse> getApproachingEtd(@RequestParam(defaultValue = "7") int withinDays) {
-        return bookingService.findApproachingEtd(withinDays);
+    @Override
+    public ResponseEntity<List<BookingResponse>> getApproachingEtd(Integer withinDays) {
+        return ResponseEntity.ok(bookingService.findApproachingEtd(withinDays).stream()
+                .map(BookingApiMapper::toModel).toList());
     }
 
-    @PostMapping
-    public ResponseEntity<BookingResponse> create(
-            @Valid @RequestBody CreateBookingRequest request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        BookingResponse response = bookingService.createBookingRequest(request, actor);
+    @Override
+    public ResponseEntity<BookingResponse> createBooking(CreateBookingRequest createBookingRequest, String xActor) {
+        BookingResponse response = BookingApiMapper.toModel(
+                bookingService.createBookingRequest(BookingApiMapper.toDto(createBookingRequest), xActor));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PostMapping("/{id}/submit")
-    public BookingResponse submit(
-            @PathVariable UUID id,
-            @Valid @RequestBody SubmitBookingRequest request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return bookingService.submitToCarrier(id, request, actor);
+    @Override
+    public ResponseEntity<BookingResponse> submitBooking(UUID id, SubmitBookingRequest submitBookingRequest, String xActor) {
+        return ResponseEntity.ok(BookingApiMapper.toModel(
+                bookingService.submitToCarrier(id, BookingApiMapper.toDto(submitBookingRequest), xActor)));
     }
 
-    @PostMapping("/{id}/carrier-confirmation")
-    public BookingResponse recordCarrierConfirmation(
-            @PathVariable UUID id,
-            @Valid @RequestBody RecordCarrierConfirmationRequest request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return bookingService.recordCarrierConfirmation(id, request, actor);
+    @Override
+    public ResponseEntity<BookingResponse> recordCarrierConfirmation(
+            UUID id, RecordCarrierConfirmationRequest recordCarrierConfirmationRequest, String xActor) {
+        return ResponseEntity.ok(BookingApiMapper.toModel(bookingService.recordCarrierConfirmation(
+                id, BookingApiMapper.toDto(recordCarrierConfirmationRequest), xActor)));
     }
 
-    @PostMapping("/{id}/carrier-rejection")
-    public BookingResponse recordCarrierRejection(
-            @PathVariable UUID id,
-            @Valid @RequestBody RecordCarrierRejectionRequest request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return bookingService.recordCarrierRejection(id, request, actor);
+    @Override
+    public ResponseEntity<BookingResponse> recordCarrierRejection(
+            UUID id, RecordCarrierRejectionRequest recordCarrierRejectionRequest, String xActor) {
+        return ResponseEntity.ok(BookingApiMapper.toModel(bookingService.recordCarrierRejection(
+                id, BookingApiMapper.toDto(recordCarrierRejectionRequest), xActor)));
     }
 
-    @PostMapping("/{id}/counter-offer")
-    public BookingResponse recordCounterOffer(
-            @PathVariable UUID id,
-            @Valid @RequestBody RecordCounterOfferRequest request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return bookingService.recordCounterOffer(id, request, actor);
+    @Override
+    public ResponseEntity<BookingResponse> recordCounterOffer(
+            UUID id, RecordCounterOfferRequest recordCounterOfferRequest, String xActor) {
+        return ResponseEntity.ok(BookingApiMapper.toModel(bookingService.recordCounterOffer(
+                id, BookingApiMapper.toDto(recordCounterOfferRequest), xActor)));
     }
 
-    @PostMapping("/{id}/counter-offer/accept")
-    public BookingResponse acceptCounterOffer(
-            @PathVariable UUID id,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return bookingService.acceptCounterOffer(id, actor);
+    @Override
+    public ResponseEntity<BookingResponse> acceptCounterOffer(UUID id, String xActor) {
+        return ResponseEntity.ok(BookingApiMapper.toModel(bookingService.acceptCounterOffer(id, xActor)));
     }
 
-    @PostMapping("/{id}/counter-offer/reject")
-    public BookingResponse rejectCounterOffer(
-            @PathVariable UUID id,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return bookingService.rejectCounterOffer(id, actor);
+    @Override
+    public ResponseEntity<BookingResponse> rejectCounterOffer(UUID id, String xActor) {
+        return ResponseEntity.ok(BookingApiMapper.toModel(bookingService.rejectCounterOffer(id, xActor)));
     }
 
-    @PostMapping("/{id}/acknowledge-etd-variance")
-    public BookingResponse acknowledgeEtdVariance(
-            @PathVariable UUID id,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return bookingService.acknowledgeEtdVariance(id, actor);
+    @Override
+    public ResponseEntity<BookingResponse> acknowledgeEtdVariance(UUID id, String xActor) {
+        return ResponseEntity.ok(BookingApiMapper.toModel(bookingService.acknowledgeEtdVariance(id, xActor)));
     }
 
-    @PostMapping("/{id}/send-confirmation")
-    public BookingResponse sendConfirmation(
-            @PathVariable UUID id,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return bookingService.sendConfirmationToCustomer(id, actor);
+    @Override
+    public ResponseEntity<BookingResponse> sendConfirmation(UUID id, String xActor) {
+        return ResponseEntity.ok(BookingApiMapper.toModel(bookingService.sendConfirmationToCustomer(id, xActor)));
     }
 
-    @PostMapping("/{id}/vessel-overbooking")
-    public BookingResponse recordVesselOverbooking(
-            @PathVariable UUID id,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return bookingService.recordVesselOverbooking(id, actor);
+    @Override
+    public ResponseEntity<BookingResponse> recordVesselOverbooking(UUID id, String xActor) {
+        return ResponseEntity.ok(BookingApiMapper.toModel(bookingService.recordVesselOverbooking(id, xActor)));
     }
 
-    @PostMapping("/{id}/reinstate")
-    public BookingResponse reinstate(
-            @PathVariable UUID id,
-            @Valid @RequestBody ReinstateBookingRequest request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return bookingService.reinstate(id, request, actor);
+    @Override
+    public ResponseEntity<BookingResponse> reinstateBooking(UUID id, ReinstateBookingRequest reinstateBookingRequest, String xActor) {
+        return ResponseEntity.ok(BookingApiMapper.toModel(
+                bookingService.reinstate(id, BookingApiMapper.toDto(reinstateBookingRequest), xActor)));
     }
 
-    @PostMapping("/{id}/cancel")
-    public BookingResponse cancel(
-            @PathVariable UUID id,
-            @Valid @RequestBody CancelBookingRequest request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return bookingService.cancel(id, request, actor);
+    @Override
+    public ResponseEntity<BookingResponse> cancelBooking(UUID id, CancelBookingRequest cancelBookingRequest, String xActor) {
+        return ResponseEntity.ok(BookingApiMapper.toModel(
+                bookingService.cancel(id, BookingApiMapper.toDto(cancelBookingRequest), xActor)));
     }
 }

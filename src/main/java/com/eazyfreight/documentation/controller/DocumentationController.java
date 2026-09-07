@@ -1,20 +1,27 @@
 package com.eazyfreight.documentation.controller;
 
-import com.eazyfreight.documentation.dto.DocumentationRequests;
-import com.eazyfreight.documentation.dto.DocumentationResponses;
+import com.eazyfreight.documentation.api.DocumentationApi;
+import com.eazyfreight.documentation.model.AmendHouseBOL;
+import com.eazyfreight.documentation.model.CarrierQuery;
+import com.eazyfreight.documentation.model.CompileInstructions;
+import com.eazyfreight.documentation.model.Discrepancy;
+import com.eazyfreight.documentation.model.Distribute;
+import com.eazyfreight.documentation.model.GenerateHouseBOL;
+import com.eazyfreight.documentation.model.House;
+import com.eazyfreight.documentation.model.Instructions;
+import com.eazyfreight.documentation.model.Master;
+import com.eazyfreight.documentation.model.MasterBOLCorrection;
+import com.eazyfreight.documentation.model.MasterBOLReceived;
+import com.eazyfreight.documentation.model.Preconditions;
+import com.eazyfreight.documentation.model.ReleaseOriginals;
+import com.eazyfreight.documentation.model.SurrenderOriginals;
+import com.eazyfreight.documentation.model.VoidHouseBOL;
 import com.eazyfreight.documentation.service.DocumentationService;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,142 +32,125 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/documentation")
 @RequiredArgsConstructor
-public class DocumentationController {
-
-    private static final String ACTOR_HEADER = "X-Actor";
-    private static final String DEFAULT_ACTOR = "operations";
+public class DocumentationController implements DocumentationApi {
 
     private final DocumentationService documentationService;
 
     // ------------------------------------------------------------ preconditions
 
     /** 1. CheckDocumentationPreconditions */
-    @GetMapping("/bookings/{bookingId}/preconditions")
-    public DocumentationResponses.Preconditions preconditions(@PathVariable UUID bookingId) {
-        return documentationService.checkPreconditions(bookingId);
+    @Override
+    public ResponseEntity<Preconditions> preconditions(UUID bookingId) {
+        return ResponseEntity.ok(DocumentationApiMapper.toApi(documentationService.checkPreconditions(bookingId)));
     }
 
-    @GetMapping("/bookings/{bookingId}/instructions")
-    public List<DocumentationResponses.Instructions> instructions(@PathVariable UUID bookingId) {
-        return documentationService.instructionsForBooking(bookingId);
+    @Override
+    public ResponseEntity<List<Instructions>> instructionsForBooking(UUID bookingId) {
+        return ResponseEntity.ok(documentationService.instructionsForBooking(bookingId).stream()
+                .map(DocumentationApiMapper::toApi).toList());
     }
 
-    @GetMapping("/bookings/{bookingId}/master-bols")
-    public List<DocumentationResponses.Master> masterBols(@PathVariable UUID bookingId) {
-        return documentationService.masterBolsForBooking(bookingId);
+    @Override
+    public ResponseEntity<List<Master>> masterBolsForBooking(UUID bookingId) {
+        return ResponseEntity.ok(documentationService.masterBolsForBooking(bookingId).stream()
+                .map(DocumentationApiMapper::toApi).toList());
     }
 
-    @GetMapping("/bookings/{bookingId}/house-bols")
-    public List<DocumentationResponses.House> houseBols(@PathVariable UUID bookingId) {
-        return documentationService.houseBolsForBooking(bookingId);
+    @Override
+    public ResponseEntity<List<House>> houseBolsForBooking(UUID bookingId) {
+        return ResponseEntity.ok(documentationService.houseBolsForBooking(bookingId).stream()
+                .map(DocumentationApiMapper::toApi).toList());
     }
 
-    @GetMapping("/house-bols")
-    public List<DocumentationResponses.House> activeHouseBols() {
-        return documentationService.activeHouseBols();
+    @Override
+    public ResponseEntity<List<House>> activeHouseBols() {
+        return ResponseEntity.ok(documentationService.activeHouseBols().stream()
+                .map(DocumentationApiMapper::toApi).toList());
     }
 
-    @GetMapping("/house-bols/{id}")
-    public DocumentationResponses.House houseBol(@PathVariable UUID id) {
-        return documentationService.houseBol(id);
+    @Override
+    public ResponseEntity<House> houseBol(UUID id) {
+        return ResponseEntity.ok(DocumentationApiMapper.toApi(documentationService.houseBol(id)));
     }
 
     /** Every revision of a BOL number, oldest first. */
-    @GetMapping("/house-bols/by-number/{houseBolNumber}/revisions")
-    public List<DocumentationResponses.House> revisions(@PathVariable String houseBolNumber) {
-        return documentationService.revisions(houseBolNumber);
+    @Override
+    public ResponseEntity<List<House>> revisions(String houseBolNumber) {
+        return ResponseEntity.ok(documentationService.revisions(houseBolNumber).stream()
+                .map(DocumentationApiMapper::toApi).toList());
     }
 
     // ------------------------------------------------------------- instructions
 
     /** 2. CompileMasterBOLInstructions */
-    @PostMapping("/bookings/{bookingId}/instructions")
-    public ResponseEntity<DocumentationResponses.Instructions> compile(
-            @PathVariable UUID bookingId,
-            @RequestBody DocumentationRequests.CompileInstructions request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(documentationService.compileInstructions(bookingId, request, actor));
+    @Override
+    public ResponseEntity<Instructions> compile(UUID bookingId, CompileInstructions compileInstructions, String xActor) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(DocumentationApiMapper.toApi(
+                documentationService.compileInstructions(bookingId, DocumentationApiMapper.toDomain(compileInstructions), xActor)));
     }
 
     /** 3. ApproveMasterBOLInstructions */
-    @PostMapping("/instructions/{id}/approve")
-    public DocumentationResponses.Instructions approve(
-            @PathVariable UUID id,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return documentationService.approveInstructions(id, actor);
+    @Override
+    public ResponseEntity<Instructions> approve(UUID id, String xActor) {
+        return ResponseEntity.ok(DocumentationApiMapper.toApi(documentationService.approveInstructions(id, xActor)));
     }
 
     /** 4. SendMasterBOLInstructionsToCarrier */
-    @PostMapping("/instructions/{id}/send")
-    public DocumentationResponses.Instructions send(@PathVariable UUID id) {
-        return documentationService.sendInstructions(id);
+    @Override
+    public ResponseEntity<Instructions> send(UUID id) {
+        return ResponseEntity.ok(DocumentationApiMapper.toApi(documentationService.sendInstructions(id)));
     }
 
     /** 5. RecordCarrierQuery */
-    @PostMapping("/instructions/{id}/carrier-query")
-    public DocumentationResponses.Instructions carrierQuery(
-            @PathVariable UUID id,
-            @Valid @RequestBody DocumentationRequests.CarrierQuery request) {
-        return documentationService.recordCarrierQuery(id, request);
+    @Override
+    public ResponseEntity<Instructions> carrierQuery(UUID id, CarrierQuery carrierQuery) {
+        return ResponseEntity.ok(DocumentationApiMapper.toApi(
+                documentationService.recordCarrierQuery(id, DocumentationApiMapper.toDomain(carrierQuery))));
     }
 
     /** 6. ResendCorrectedInstructions */
-    @PostMapping("/instructions/{id}/resend-corrected")
-    public ResponseEntity<DocumentationResponses.Instructions> resendCorrected(
-            @PathVariable UUID id,
-            @RequestBody DocumentationRequests.CompileInstructions request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(documentationService.resendCorrectedInstructions(id, request, actor));
+    @Override
+    public ResponseEntity<Instructions> resendCorrected(UUID id, CompileInstructions compileInstructions, String xActor) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(DocumentationApiMapper.toApi(
+                documentationService.resendCorrectedInstructions(id, DocumentationApiMapper.toDomain(compileInstructions), xActor)));
     }
 
     // ---------------------------------------------------------------- Master BOL
 
     /** 7. RecordMasterBOLReceived */
-    @PostMapping("/instructions/{id}/master-bol")
-    public ResponseEntity<DocumentationResponses.Master> masterBolReceived(
-            @PathVariable UUID id,
-            @Valid @RequestBody DocumentationRequests.MasterBOLReceived request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(documentationService.recordMasterBolReceived(id, request, actor));
+    @Override
+    public ResponseEntity<Master> masterBolReceived(UUID id, MasterBOLReceived masterBOLReceived, String xActor) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(DocumentationApiMapper.toApi(
+                documentationService.recordMasterBolReceived(id, DocumentationApiMapper.toDomain(masterBOLReceived), xActor)));
     }
 
     /** 8. VerifyMasterBOL */
-    @PostMapping("/master-bols/{id}/verify")
-    public DocumentationResponses.Master verify(
-            @PathVariable UUID id,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return documentationService.verifyMasterBol(id, actor);
+    @Override
+    public ResponseEntity<Master> verify(UUID id, String xActor) {
+        return ResponseEntity.ok(DocumentationApiMapper.toApi(documentationService.verifyMasterBol(id, xActor)));
     }
 
     /** 9. RaiseMasterBOLDiscrepancy */
-    @PostMapping("/master-bols/{id}/discrepancy")
-    public DocumentationResponses.Master discrepancy(
-            @PathVariable UUID id,
-            @Valid @RequestBody DocumentationRequests.Discrepancy request) {
-        return documentationService.raiseDiscrepancy(id, request);
+    @Override
+    public ResponseEntity<Master> discrepancy(UUID id, Discrepancy discrepancy) {
+        return ResponseEntity.ok(DocumentationApiMapper.toApi(
+                documentationService.raiseDiscrepancy(id, DocumentationApiMapper.toDomain(discrepancy))));
     }
 
     /** 10. RecordMasterBOLCorrection */
-    @PostMapping("/master-bols/{id}/correction")
-    public DocumentationResponses.Master correction(
-            @PathVariable UUID id,
-            @RequestBody DocumentationRequests.MasterBOLCorrection request) {
-        return documentationService.recordMasterBolCorrection(id, request);
+    @Override
+    public ResponseEntity<Master> correction(UUID id, MasterBOLCorrection masterBOLCorrection) {
+        return ResponseEntity.ok(DocumentationApiMapper.toApi(
+                documentationService.recordMasterBolCorrection(id, DocumentationApiMapper.toDomain(masterBOLCorrection))));
     }
 
     // ----------------------------------------------------------------- House BOL
 
     /** 11-12. ConfirmReleaseType and GenerateHouseBOL */
-    @PostMapping("/master-bols/{id}/house-bol")
-    public ResponseEntity<DocumentationResponses.House> generateHouseBol(
-            @PathVariable UUID id,
-            @Valid @RequestBody DocumentationRequests.GenerateHouseBOL request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(documentationService.generateHouseBol(id, request, actor));
+    @Override
+    public ResponseEntity<House> generateHouseBol(UUID id, GenerateHouseBOL generateHouseBOL, String xActor) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(DocumentationApiMapper.toApi(
+                documentationService.generateHouseBol(id, DocumentationApiMapper.toDomain(generateHouseBOL), xActor)));
     }
 
     /**
@@ -170,57 +160,49 @@ public class DocumentationController {
      * and "then fetch" would leave the caller holding a reference to a document the
      * server did not keep.
      */
-    @PostMapping(value = "/house-bols/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity<Resource> generatePdf(@PathVariable UUID id) {
+    @Override
+    public ResponseEntity<Resource> generatePdf(UUID id) {
         return documentationService.generateHouseBolPdf(id).asAttachment();
     }
 
     /** Re-download of a document already produced. Renders again; records nothing. */
-    @GetMapping(value = "/house-bols/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity<Resource> downloadPdf(@PathVariable UUID id) {
+    @Override
+    public ResponseEntity<Resource> downloadPdf(UUID id) {
         return documentationService.houseBolPdf(id).asAttachment();
     }
 
     /** 14-16. SendHouseBOLToShipper / Consignee / NotifyParty */
-    @PostMapping("/house-bols/{id}/distribute")
-    public DocumentationResponses.House distribute(
-            @PathVariable UUID id,
-            @Valid @RequestBody DocumentationRequests.Distribute request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return documentationService.distribute(id, request, actor);
+    @Override
+    public ResponseEntity<House> distribute(UUID id, Distribute distribute, String xActor) {
+        return ResponseEntity.ok(DocumentationApiMapper.toApi(
+                documentationService.distribute(id, DocumentationApiMapper.toDomain(distribute), xActor)));
     }
 
     /** 17. ReleaseOriginalBOLs */
-    @PostMapping("/house-bols/{id}/originals/release")
-    public DocumentationResponses.House releaseOriginals(
-            @PathVariable UUID id,
-            @Valid @RequestBody DocumentationRequests.ReleaseOriginals request) {
-        return documentationService.releaseOriginals(id, request);
+    @Override
+    public ResponseEntity<House> releaseOriginals(UUID id, ReleaseOriginals releaseOriginals) {
+        return ResponseEntity.ok(DocumentationApiMapper.toApi(
+                documentationService.releaseOriginals(id, DocumentationApiMapper.toDomain(releaseOriginals))));
     }
 
     /** 18. RecordOriginalBOLsSurrendered */
-    @PostMapping("/house-bols/{id}/originals/surrender")
-    public DocumentationResponses.House surrenderOriginals(
-            @PathVariable UUID id,
-            @Valid @RequestBody DocumentationRequests.SurrenderOriginals request) {
-        return documentationService.surrenderOriginals(id, request);
+    @Override
+    public ResponseEntity<House> surrenderOriginals(UUID id, SurrenderOriginals surrenderOriginals) {
+        return ResponseEntity.ok(DocumentationApiMapper.toApi(
+                documentationService.surrenderOriginals(id, DocumentationApiMapper.toDomain(surrenderOriginals))));
     }
 
     /** 19-20. RequestHouseBOLAmendment and AmendHouseBOL */
-    @PostMapping("/house-bols/{id}/amend")
-    public ResponseEntity<DocumentationResponses.House> amend(
-            @PathVariable UUID id,
-            @Valid @RequestBody DocumentationRequests.AmendHouseBOL request,
-            @RequestHeader(value = ACTOR_HEADER, defaultValue = DEFAULT_ACTOR) String actor) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(documentationService.amendHouseBol(id, request, actor));
+    @Override
+    public ResponseEntity<House> amend(UUID id, AmendHouseBOL amendHouseBOL, String xActor) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(DocumentationApiMapper.toApi(
+                documentationService.amendHouseBol(id, DocumentationApiMapper.toDomain(amendHouseBOL), xActor)));
     }
 
     /** 21. VoidHouseBOL */
-    @PostMapping("/house-bols/{id}/void")
-    public DocumentationResponses.House voidBol(
-            @PathVariable UUID id,
-            @Valid @RequestBody DocumentationRequests.VoidHouseBOL request) {
-        return documentationService.voidHouseBol(id, request);
+    @Override
+    public ResponseEntity<House> voidBol(UUID id, VoidHouseBOL voidHouseBOL) {
+        return ResponseEntity.ok(DocumentationApiMapper.toApi(
+                documentationService.voidHouseBol(id, DocumentationApiMapper.toDomain(voidHouseBOL))));
     }
 }
