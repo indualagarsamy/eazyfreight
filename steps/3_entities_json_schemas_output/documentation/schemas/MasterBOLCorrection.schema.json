@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "MasterBOLCorrection.schema.json",
+  "title": "MasterBOLCorrection",
+  "type": "object",
+  "properties": {
+    "correctedMasterBolNumber": {
+      "type": "string"
+    },
+    "documentFileReference": {
+      "type": "string"
+    }
+  }
+}

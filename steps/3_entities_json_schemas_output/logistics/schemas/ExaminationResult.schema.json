@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ExaminationResult.schema.json",
+  "title": "ExaminationResult",
+  "type": "string",
+  "enum": [
+    "RELEASED",
+    "ADDITIONAL_HOLD",
+    "SEIZED"
+  ]
+}

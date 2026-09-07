@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Instructions.schema.json",
+  "title": "Instructions",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "bookingId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "instructionsReference": {
+      "type": "string"
+    },
+    "status": {
+      "$ref": "InstructionsStatus.schema.json"
+    },
+    "supersedesInstructionsId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "carrierBookingRef": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "containerNumber": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sealNumber": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "itnNumber": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "shipperName": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "shipperAddress": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "consigneeName": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "consigneeAddress": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notifyPartyName": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notifyPartyAddress": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "portOfLoadingCode": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "portOfDischargeCode": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "vesselName": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "voyageNumber": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cargoDescription": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "hsCode": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "actualWeightKg": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "actualPieces": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "actualCbm": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "marksAndNumbers": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "freightTerms": {
+      "$ref": "FreightTerms.schema.json"
+    },
+    "draftedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "draftedBy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "approvedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "approvedBy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sentAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "documentationCutOffDate": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "sentAfterCutOff": {
+      "type": "boolean"
+    },
+    "carrierQuery": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

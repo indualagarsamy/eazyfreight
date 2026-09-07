@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ExaminationHold.schema.json",
+  "title": "ExaminationHold",
+  "type": "object",
+  "properties": {
+    "cbpOfficerId": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

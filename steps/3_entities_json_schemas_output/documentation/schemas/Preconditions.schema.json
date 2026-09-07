@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Preconditions.schema.json",
+  "title": "Preconditions",
+  "type": "object",
+  "description": "What the Documentation track is waiting on, per booking.",
+  "properties": {
+    "bookingId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "met": {
+      "type": "boolean"
+    },
+    "containerNumber": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sealNumber": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "itnNumber": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "carrierBookingRef": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "missing": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ContainerType.schema.json",
+  "title": "ContainerType",
+  "type": "string",
+  "enum": [
+    "TWENTY_GP",
+    "FORTY_GP",
+    "FORTY_HC",
+    "FORTY_FIVE_HC"
+  ]
+}

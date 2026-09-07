@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "NotificationView.schema.json",
+  "title": "NotificationView",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "channel": {
+      "$ref": "NotificationChannel.schema.json"
+    },
+    "recipientRole": {
+      "$ref": "RecipientRole.schema.json"
+    },
+    "sentAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deliveredAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "deliveryStatus": {
+      "$ref": "DeliveryStatus.schema.json"
+    },
+    "failureReason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "simulated": {
+      "type": "boolean"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RecordCarrierConfirmationRequest.schema.json",
+  "title": "RecordCarrierConfirmationRequest",
+  "type": "object",
+  "required": [
+    "carrierBookingRef",
+    "vesselName",
+    "voyageNumber",
+    "confirmedEtd",
+    "confirmedEta"
+  ],
+  "properties": {
+    "carrierBookingRef": {
+      "type": "string",
+      "minLength": 1
+    },
+    "coLoaderBookingRef": {
+      "type": "string"
+    },
+    "vesselName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "voyageNumber": {
+      "type": "string",
+      "minLength": 1
+    },
+    "confirmedEtd": {
+      "type": "string",
+      "format": "date"
+    },
+    "confirmedEta": {
+      "type": "string",
+      "format": "date"
+    },
+    "containerType": {
+      "$ref": "ContainerType.schema.json"
+    },
+    "confirmedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

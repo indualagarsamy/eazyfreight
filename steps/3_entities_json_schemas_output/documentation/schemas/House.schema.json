@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "House.schema.json",
+  "title": "House",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "bookingId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "masterBolId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "houseBolNumber": {
+      "type": "string"
+    },
+    "revisionNumber": {
+      "type": "integer"
+    },
+    "active": {
+      "type": "boolean"
+    },
+    "status": {
+      "$ref": "HouseBOLStatus.schema.json"
+    },
+    "releaseType": {
+      "$ref": "ReleaseType.schema.json"
+    },
+    "releaseTypeConfirmedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "releaseTypeConfirmedBy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "shipperNameSnapshot": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "shipperAddressSnapshot": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "consigneeNameSnapshot": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "consigneeAddressSnapshot": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notifyPartyNameSnapshot": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notifyPartyAddressSnapshot": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "portOfLoadingCode": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "portOfDischargeCode": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "vesselName": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "voyageNumber": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "containerNumber": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sealNumber": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cargoDescription": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "hsCode": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "weightKg": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "pieces": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "cbm": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "marksAndNumbers": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "freightTerms": {
+      "$ref": "FreightTerms.schema.json"
+    },
+    "issuedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "issuedBy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "voidedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "supersededByHouseBolId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "amendmentReason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pdfReference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "amendmentBlockedReason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Why this revision cannot be amended, or null. Outstanding negotiable originals live here."
+    },
+    "originals": {
+      "$ref": "Originals.schema.json"
+    },
+    "distributions": {
+      "type": "array",
+      "items": {
+        "$ref": "Distribution.schema.json"
+      }
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CarrierBookingResponse.schema.json",
+  "title": "CarrierBookingResponse",
+  "type": [
+    "object",
+    "null"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "bookingSourceType": {
+      "$ref": "BookingSourceType.schema.json"
+    },
+    "carrierId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "carrierBookingRef": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "coLoaderBookingRef": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "vesselName": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "voyageNumber": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "confirmedEtd": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "confirmedEta": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "containerType": {
+      "$ref": "ContainerType.schema.json"
+    },
+    "numberOfContainers": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "submittedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "confirmedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "confirmedBy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

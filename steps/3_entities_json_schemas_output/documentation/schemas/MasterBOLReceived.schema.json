@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "MasterBOLReceived.schema.json",
+  "title": "MasterBOLReceived",
+  "type": "object",
+  "required": [
+    "masterBolNumber"
+  ],
+  "properties": {
+    "masterBolNumber": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issuedByCarrierAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "documentFileReference": {
+      "type": "string"
+    }
+  }
+}

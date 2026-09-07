@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "EvaluateBookingResult.schema.json",
+  "title": "EvaluateBookingResult",
+  "type": "object",
+  "description": "Fixed-shape map returned by POST /bookings/{bookingId}/evaluate (not a DTO record).",
+  "properties": {
+    "changes": {
+      "type": "integer"
+    }
+  }
+}

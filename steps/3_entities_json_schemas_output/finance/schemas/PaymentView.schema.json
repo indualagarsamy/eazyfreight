@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "PaymentView.schema.json",
+  "title": "PaymentView",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "paymentDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "paymentMethod": {
+      "$ref": "PaymentMethod.schema.json"
+    },
+    "reference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "recordedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "recordedBy": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CargoDetailResponse.schema.json",
+  "title": "CargoDetailResponse",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "description": {
+      "type": "string"
+    },
+    "hsCode": {
+      "type": "string"
+    },
+    "pieces": {
+      "type": "integer"
+    },
+    "weightKg": {
+      "type": "number"
+    },
+    "lengthCm": {
+      "type": "number"
+    },
+    "widthCm": {
+      "type": "number"
+    },
+    "heightCm": {
+      "type": "number"
+    },
+    "volumetricWeightCbm": {
+      "type": "number"
+    },
+    "volumetricWeightKg": {
+      "type": "number"
+    },
+    "chargeableWeight": {
+      "type": "number"
+    },
+    "chargeableUnit": {
+      "$ref": "ChargeUnit.schema.json"
+    },
+    "hazmat": {
+      "type": "boolean"
+    },
+    "temperatureControlled": {
+      "type": "boolean"
+    },
+    "oversized": {
+      "type": "boolean"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RecordPayment.schema.json",
+  "title": "RecordPayment",
+  "type": "object",
+  "required": [
+    "amount",
+    "paymentDate",
+    "paymentMethod"
+  ],
+  "properties": {
+    "amount": {
+      "type": "number",
+      "minimum": 0.01
+    },
+    "paymentDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "paymentMethod": {
+      "$ref": "PaymentMethod.schema.json"
+    },
+    "reference": {
+      "type": "string"
+    }
+  }
+}

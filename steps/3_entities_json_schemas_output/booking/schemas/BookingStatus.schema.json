@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "BookingStatus.schema.json",
+  "title": "BookingStatus",
+  "type": "string",
+  "enum": [
+    "BOOKING_REQUESTED",
+    "SUBMITTED_TO_CARRIER",
+    "REJECTED_BY_CARRIER",
+    "COUNTER_OFFER_RECEIVED",
+    "CONFIRMED_BY_CARRIER",
+    "CUSTOMER_CONFIRMED",
+    "VESSEL_OVERBOOKED",
+    "CANCELLED"
+  ]
+}

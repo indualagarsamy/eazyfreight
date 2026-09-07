@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "InvoiceLineView.schema.json",
+  "title": "InvoiceLineView",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "lineNumber": {
+      "type": "integer"
+    },
+    "description": {
+      "type": "string"
+    },
+    "buyAmount": {
+      "type": "number"
+    },
+    "sellAmount": {
+      "type": "number"
+    },
+    "quantity": {
+      "type": "number"
+    },
+    "unit": {
+      "type": "string"
+    },
+    "extendedBuy": {
+      "type": "number"
+    },
+    "extendedSell": {
+      "type": "number"
+    },
+    "margin": {
+      "type": "number"
+    }
+  }
+}

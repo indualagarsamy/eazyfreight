@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ReleaseType.schema.json",
+  "title": "ReleaseType",
+  "type": "string",
+  "description": "How the consignee obtains the cargo.",
+  "enum": [
+    "ORIGINAL_BOL",
+    "TELEX_RELEASE",
+    "SEA_WAYBILL"
+  ]
+}

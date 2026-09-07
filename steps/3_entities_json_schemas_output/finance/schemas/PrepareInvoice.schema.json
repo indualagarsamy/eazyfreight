@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "PrepareInvoice.schema.json",
+  "title": "PrepareInvoice",
+  "type": "object",
+  "properties": {
+    "paymentTermsType": {
+      "$ref": "PaymentTermsType.schema.json"
+    },
+    "currency": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CreditNote.schema.json",
+  "title": "CreditNote",
+  "type": "object",
+  "required": [
+    "amount",
+    "reason"
+  ],
+  "properties": {
+    "amount": {
+      "type": "number",
+      "minimum": 0.01
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

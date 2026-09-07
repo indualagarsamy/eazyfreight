@@ -1,0 +1,360 @@
+openapi: 3.0.3
+info:
+  title: Quote API
+  description: Quote lifecycle endpoints. Lifecycle changes are POSTs to named sub-resources (/send, /accept,
+    /decline) rather than a PUT that lets a caller set status to anything. Derived from com.eazyfreight.quote.controller.QuoteController.
+  version: '1.0'
+servers:
+- url: /api/quotes
+tags:
+- name: quote
+paths:
+  /:
+    get:
+      tags:
+      - quote
+      summary: List all quotes
+      operationId: getAllQuotes
+      responses:
+        '200':
+          description: All quotes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuoteResponse'
+    post:
+      tags:
+      - quote
+      summary: Create a quote request
+      operationId: createQuote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuoteRequest'
+      responses:
+        '201':
+          description: Quote created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+  /{id}:
+    get:
+      tags:
+      - quote
+      summary: Get a quote by ID
+      operationId: getQuoteById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: The quote
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+  /by-reference/{quoteReference}:
+    get:
+      tags:
+      - quote
+      summary: Get a quote by its quote reference
+      operationId: getQuoteByReference
+      parameters:
+      - name: quoteReference
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: The quote
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+  /open:
+    get:
+      tags:
+      - quote
+      summary: List open quotes
+      operationId: getOpenQuotes
+      responses:
+        '200':
+          description: Open quotes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuoteResponse'
+  /expiring:
+    get:
+      tags:
+      - quote
+      summary: List quotes expiring within a window
+      operationId: getExpiringQuotes
+      parameters:
+      - name: withinDays
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 3
+      responses:
+        '200':
+          description: Expiring quotes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuoteResponse'
+  /by-customer/{customerId}:
+    get:
+      tags:
+      - quote
+      summary: List quotes for a customer
+      operationId: getQuotesByCustomer
+      parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: status
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/QuoteStatus'
+      responses:
+        '200':
+          description: Quotes for the customer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuoteResponse'
+  /rates:
+    get:
+      tags:
+      - quote
+      summary: Look up carrier rates for a lane
+      operationId: getRatesForLane
+      parameters:
+      - name: originPortCode
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: destinationPortCode
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: mode
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/ShippingMode'
+      responses:
+        '200':
+          description: Rates for the lane
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RateResponse'
+  /{id}/rescreen:
+    post:
+      tags:
+      - quote
+      summary: Re-run screening on a quote request
+      operationId: rescreenQuote
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuoteRequest'
+      responses:
+        '200':
+          description: Rescreened quote
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+  /{id}/build:
+    post:
+      tags:
+      - quote
+      summary: Build the quotation (pricing lines) for a quote
+      operationId: buildQuote
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuildQuotationRequest'
+      responses:
+        '200':
+          description: Quote with quotation built
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+  /{id}/send:
+    post:
+      tags:
+      - quote
+      summary: Send the quote to the customer
+      operationId: sendQuote
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Sent quote
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+  /{id}/accept:
+    post:
+      tags:
+      - quote
+      summary: Accept the quote and select a carrier
+      operationId: acceptQuote
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptQuoteRequest'
+      responses:
+        '200':
+          description: Accepted quote
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+  /{id}/decline:
+    post:
+      tags:
+      - quote
+      summary: Decline the quote
+      operationId: declineQuote
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeclineQuoteRequest'
+      responses:
+        '200':
+          description: Declined quote
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+  /{id}/expire:
+    post:
+      tags:
+      - quote
+      summary: Force-expire the quote
+      operationId: expireQuote
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Expired quote
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+components:
+  schemas:
+    ChargeUnit:
+      $ref: ./schemas/ChargeUnit.schema.json
+    QuoteLineType:
+      $ref: ./schemas/QuoteLineType.schema.json
+    ShippingMode:
+      $ref: ./schemas/ShippingMode.schema.json
+    QuoteStatus:
+      $ref: ./schemas/QuoteStatus.schema.json
+    ScreeningStatus:
+      $ref: ./schemas/ScreeningStatus.schema.json
+    RateType:
+      $ref: ./schemas/RateType.schema.json
+    SurchargeType:
+      $ref: ./schemas/SurchargeType.schema.json
+    CargoDetailRequest:
+      $ref: ./schemas/CargoDetailRequest.schema.json
+    CargoDetailResponse:
+      $ref: ./schemas/CargoDetailResponse.schema.json
+    CreateQuoteRequest:
+      $ref: ./schemas/CreateQuoteRequest.schema.json
+    QuoteLineRequest:
+      $ref: ./schemas/QuoteLineRequest.schema.json
+    BuildQuotationRequest:
+      $ref: ./schemas/BuildQuotationRequest.schema.json
+    AcceptQuoteRequest:
+      $ref: ./schemas/AcceptQuoteRequest.schema.json
+    DeclineQuoteRequest:
+      $ref: ./schemas/DeclineQuoteRequest.schema.json
+    QuoteLineResponse:
+      $ref: ./schemas/QuoteLineResponse.schema.json
+    QuoteResponse:
+      $ref: ./schemas/QuoteResponse.schema.json
+    SurchargeResponse:
+      $ref: ./schemas/SurchargeResponse.schema.json
+    RateResponse:
+      $ref: ./schemas/RateResponse.schema.json

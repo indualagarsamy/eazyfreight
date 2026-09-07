@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "QuoteResponse.schema.json",
+  "title": "QuoteResponse",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "quoteReference": {
+      "type": "string"
+    },
+    "customerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "status": {
+      "$ref": "QuoteStatus.schema.json"
+    },
+    "shippingMode": {
+      "$ref": "ShippingMode.schema.json"
+    },
+    "originPortCode": {
+      "type": "string"
+    },
+    "destinationPortCode": {
+      "type": "string"
+    },
+    "incoterms": {
+      "type": "string"
+    },
+    "selectedCarrierId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "screeningStatus": {
+      "$ref": "ScreeningStatus.schema.json"
+    },
+    "screeningReferenceId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "requestedEtd": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "validFrom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "validUntil": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "rateValidUntil": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sentAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "acceptedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "declinedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "expiredAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "declineReason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "totalBuyRate": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "totalSellRate": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "margin": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "currency": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "spotRate": {
+      "type": "boolean"
+    },
+    "specialHandling": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "insuranceRequired": {
+      "type": "boolean"
+    },
+    "quoteLines": {
+      "type": "array",
+      "items": {
+        "$ref": "QuoteLineResponse.schema.json"
+      }
+    },
+    "cargoDetails": {
+      "type": "array",
+      "items": {
+        "$ref": "CargoDetailResponse.schema.json"
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ScreeningStatus.schema.json",
+  "title": "ScreeningStatus",
+  "type": "string",
+  "enum": [
+    "PENDING",
+    "CLEARED",
+    "FLAGGED"
+  ]
+}

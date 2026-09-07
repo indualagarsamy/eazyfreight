@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "BookingCargoDetailResponse.schema.json",
+  "title": "BookingCargoDetailResponse",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "description": {
+      "type": "string"
+    },
+    "hsCode": {
+      "type": "string"
+    },
+    "pieces": {
+      "type": "integer"
+    },
+    "weightKg": {
+      "type": "number"
+    },
+    "lengthCm": {
+      "type": "number"
+    },
+    "widthCm": {
+      "type": "number"
+    },
+    "heightCm": {
+      "type": "number"
+    },
+    "cbm": {
+      "type": "number"
+    },
+    "valueUsd": {
+      "type": "number"
+    },
+    "hazmat": {
+      "type": "boolean"
+    },
+    "temperatureControlled": {
+      "type": "boolean"
+    },
+    "oversized": {
+      "type": "boolean"
+    },
+    "marksAndNumbers": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}
