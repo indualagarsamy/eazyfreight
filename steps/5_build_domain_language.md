@@ -10,8 +10,8 @@ document a domain expert or new engineer can read top to bottom per
 context to learn what each concept *means*, not just what fields it has.
 
 Written to
-[`5_build_domain_language/domain_language.md`](5_build_domain_language/domain_language.md).
-The `5_build_domain_language/` folder itself is a straight copy of
+[`5_build_domain_language_output/domain_language.md`](5_build_domain_language_output/domain_language.md).
+The `5_build_domain_language_output/` folder itself is a straight copy of
 `4_consolidate_entities_output` (all 150 schema files plus the 7 spec
 `.yaml` files, unchanged) — this step reads that copy but doesn't modify
 any schema or spec; `domain_language.md` is the only new artifact.
@@ -54,7 +54,7 @@ any schema or spec; `domain_language.md` is the only new artifact.
 
 ## Coverage
 
-Every one of the 150 schema files in `5_build_domain_language/` has an
+Every one of the 150 schema files in `5_build_domain_language_output/` has an
 entry in `domain_language.md`; none were skipped as "self-explanatory."
 The 8 shared `common/` defs (`ContainerType` ×2, `ShippingMode` ×2,
 `Currency` ×2, `MonetaryAmount` ×2, `CargoDimensionsInput`/`View` ×2 each)
@@ -100,7 +100,7 @@ framing.
 
 | | Count |
 |---|---|
-| Schema files covered (in `5_build_domain_language/`) | 150 |
+| Schema files covered (in `5_build_domain_language_output/`) | 150 |
 | Bounded contexts | 7 |
 | Distinct concept write-ups (150 files minus 8 shared duplicates counted once) | 142 |
 | Enumerations documented | 47 |
@@ -110,7 +110,7 @@ framing.
 
 - `5bef265` — *"5 preview"* — set up this step: copied
   `4_consolidate_entities_output` file-for-file into
-  `5_build_domain_language/` and added the placeholder
+  `5_build_domain_language_output/` and added the placeholder
   `5_build_domain_language.md`.
-- This doc and `5_build_domain_language/domain_language.md` — written in
+- This doc and `5_build_domain_language_output/domain_language.md` — written in
   this session, pending commit.
