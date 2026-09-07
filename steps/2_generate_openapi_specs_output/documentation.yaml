@@ -1,0 +1,1121 @@
+openapi: 3.0.3
+info:
+  title: Documentation API
+  description: >-
+    Documentation endpoints — the twenty-one commands from the specification,
+    covering Master BOL instructions and House BOL issuance/distribution/
+    amendment. Derived from
+    com.eazyfreight.documentation.controller.DocumentationController.
+  version: "1.0"
+servers:
+  - url: /api/documentation
+tags:
+  - name: documentation
+paths:
+  /bookings/{bookingId}/preconditions:
+    get:
+      tags: [documentation]
+      summary: 1. CheckDocumentationPreconditions
+      operationId: preconditions
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Preconditions for documentation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preconditions'
+  /bookings/{bookingId}/instructions:
+    get:
+      tags: [documentation]
+      summary: List Master BOL instructions for a booking
+      operationId: instructionsForBooking
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Instructions for the booking
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Instructions'
+    post:
+      tags: [documentation]
+      summary: 2. CompileMasterBOLInstructions
+      operationId: compile
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Actor
+          in: header
+          required: false
+          description: Actor recorded in the audit trail.
+          schema:
+            type: string
+            default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompileInstructions'
+      responses:
+        "201":
+          description: Compiled instructions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Instructions'
+  /bookings/{bookingId}/master-bols:
+    get:
+      tags: [documentation]
+      summary: List Master BOLs for a booking
+      operationId: masterBolsForBooking
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Master BOLs for the booking
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Master'
+  /bookings/{bookingId}/house-bols:
+    get:
+      tags: [documentation]
+      summary: List House BOLs for a booking
+      operationId: houseBolsForBooking
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: House BOLs for the booking
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/House'
+  /house-bols:
+    get:
+      tags: [documentation]
+      summary: List active House BOLs
+      operationId: activeHouseBols
+      responses:
+        "200":
+          description: Active House BOLs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/House'
+  /house-bols/{id}:
+    get:
+      tags: [documentation]
+      summary: Get a House BOL by ID
+      operationId: houseBol
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: The House BOL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+  /house-bols/by-number/{houseBolNumber}/revisions:
+    get:
+      tags: [documentation]
+      summary: List every revision of a House BOL number, oldest first
+      operationId: revisions
+      parameters:
+        - name: houseBolNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Revisions of the House BOL
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/House'
+  /instructions/{id}/approve:
+    post:
+      tags: [documentation]
+      summary: 3. ApproveMasterBOLInstructions
+      operationId: approve
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Actor
+          in: header
+          required: false
+          description: Actor recorded in the audit trail.
+          schema:
+            type: string
+            default: operations
+      responses:
+        "200":
+          description: Approved instructions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Instructions'
+  /instructions/{id}/send:
+    post:
+      tags: [documentation]
+      summary: 4. SendMasterBOLInstructionsToCarrier
+      operationId: send
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Sent instructions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Instructions'
+  /instructions/{id}/carrier-query:
+    post:
+      tags: [documentation]
+      summary: 5. RecordCarrierQuery
+      operationId: carrierQuery
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarrierQuery'
+      responses:
+        "200":
+          description: Instructions with carrier query recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Instructions'
+  /instructions/{id}/resend-corrected:
+    post:
+      tags: [documentation]
+      summary: 6. ResendCorrectedInstructions
+      operationId: resendCorrected
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Actor
+          in: header
+          required: false
+          description: Actor recorded in the audit trail.
+          schema:
+            type: string
+            default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompileInstructions'
+      responses:
+        "201":
+          description: New, superseding instructions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Instructions'
+  /instructions/{id}/master-bol:
+    post:
+      tags: [documentation]
+      summary: 7. RecordMasterBOLReceived
+      operationId: masterBolReceived
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Actor
+          in: header
+          required: false
+          description: Actor recorded in the audit trail.
+          schema:
+            type: string
+            default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MasterBOLReceived'
+      responses:
+        "201":
+          description: Master BOL recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Master'
+  /master-bols/{id}/verify:
+    post:
+      tags: [documentation]
+      summary: 8. VerifyMasterBOL
+      operationId: verify
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Actor
+          in: header
+          required: false
+          description: Actor recorded in the audit trail.
+          schema:
+            type: string
+            default: operations
+      responses:
+        "200":
+          description: Verified Master BOL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Master'
+  /master-bols/{id}/discrepancy:
+    post:
+      tags: [documentation]
+      summary: 9. RaiseMasterBOLDiscrepancy
+      operationId: discrepancy
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Discrepancy'
+      responses:
+        "200":
+          description: Master BOL with discrepancy raised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Master'
+  /master-bols/{id}/correction:
+    post:
+      tags: [documentation]
+      summary: 10. RecordMasterBOLCorrection
+      operationId: correction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MasterBOLCorrection'
+      responses:
+        "200":
+          description: Corrected Master BOL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Master'
+  /master-bols/{id}/house-bol:
+    post:
+      tags: [documentation]
+      summary: 11-12. ConfirmReleaseType and GenerateHouseBOL
+      operationId: generateHouseBol
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Actor
+          in: header
+          required: false
+          description: Actor recorded in the audit trail.
+          schema:
+            type: string
+            default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateHouseBOL'
+      responses:
+        "201":
+          description: Generated House BOL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+  /house-bols/{id}/pdf:
+    post:
+      tags: [documentation]
+      summary: 13. GenerateHouseBOLPDF — renders the document and returns it as a download
+      operationId: generatePdf
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "201":
+          description: Generated House BOL PDF
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+    get:
+      tags: [documentation]
+      summary: Re-download of a House BOL PDF already produced. Renders again; records nothing.
+      operationId: downloadPdf
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: House BOL PDF
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+  /house-bols/{id}/distribute:
+    post:
+      tags: [documentation]
+      summary: 14-16. SendHouseBOLToShipper / Consignee / NotifyParty
+      operationId: distribute
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Actor
+          in: header
+          required: false
+          description: Actor recorded in the audit trail.
+          schema:
+            type: string
+            default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Distribute'
+      responses:
+        "200":
+          description: House BOL with distribution recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+  /house-bols/{id}/originals/release:
+    post:
+      tags: [documentation]
+      summary: 17. ReleaseOriginalBOLs
+      operationId: releaseOriginals
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReleaseOriginals'
+      responses:
+        "200":
+          description: House BOL with originals released
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+  /house-bols/{id}/originals/surrender:
+    post:
+      tags: [documentation]
+      summary: 18. RecordOriginalBOLsSurrendered
+      operationId: surrenderOriginals
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurrenderOriginals'
+      responses:
+        "200":
+          description: House BOL with originals surrendered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+  /house-bols/{id}/amend:
+    post:
+      tags: [documentation]
+      summary: 19-20. RequestHouseBOLAmendment and AmendHouseBOL
+      operationId: amend
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Actor
+          in: header
+          required: false
+          description: Actor recorded in the audit trail.
+          schema:
+            type: string
+            default: operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AmendHouseBOL'
+      responses:
+        "201":
+          description: New, amended House BOL revision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+  /house-bols/{id}/void:
+    post:
+      tags: [documentation]
+      summary: 21. VoidHouseBOL
+      operationId: voidBol
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoidHouseBOL'
+      responses:
+        "200":
+          description: Voided House BOL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+components:
+  schemas:
+    InstructionsStatus:
+      type: string
+      enum: [DRAFT, APPROVED, SENT, QUERIED, SUPERSEDED]
+    VerificationStatus:
+      type: string
+      enum: [PENDING, VERIFIED, DISCREPANCY_RAISED, CORRECTED]
+    HouseBOLStatus:
+      type: string
+      enum: [ISSUED, VOIDED]
+    ReleaseType:
+      type: string
+      description: How the consignee obtains the cargo.
+      enum: [ORIGINAL_BOL, TELEX_RELEASE, SEA_WAYBILL]
+    FreightTerms:
+      type: string
+      enum: [PREPAID, COLLECT]
+    DistributionRecipient:
+      type: string
+      enum: [SHIPPER, CONSIGNEE_AGENT, NOTIFY_PARTY]
+    DistributionChannel:
+      type: string
+      enum: [EMAIL, PORTAL, COURIER]
+    CompileInstructions:
+      type: object
+      description: >-
+        Overrides for the instruction snapshot. Everything else is pulled
+        from the booking, logistics and compliance records at compile time.
+        No field is required — all are optional overrides.
+      properties:
+        shipperName:
+          type: string
+        shipperAddress:
+          type: string
+        consigneeName:
+          type: string
+        consigneeAddress:
+          type: string
+        notifyPartyName:
+          type: string
+        notifyPartyAddress:
+          type: string
+        marksAndNumbers:
+          type: string
+        freightTerms:
+          $ref: '#/components/schemas/FreightTerms'
+        documentationCutOffDate:
+          type: string
+          format: date
+    CarrierQuery:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          minLength: 1
+    MasterBOLReceived:
+      type: object
+      required:
+        - masterBolNumber
+      properties:
+        masterBolNumber:
+          type: string
+          minLength: 1
+        issuedByCarrierAt:
+          type: string
+          format: date-time
+        documentFileReference:
+          type: string
+    Discrepancy:
+      type: object
+      required:
+        - discrepancyFields
+      properties:
+        discrepancyFields:
+          type: array
+          minItems: 1
+          items:
+            type: string
+    MasterBOLCorrection:
+      type: object
+      properties:
+        correctedMasterBolNumber:
+          type: string
+        documentFileReference:
+          type: string
+    GenerateHouseBOL:
+      type: object
+      required:
+        - releaseType
+      properties:
+        releaseType:
+          $ref: '#/components/schemas/ReleaseType'
+        freightTerms:
+          $ref: '#/components/schemas/FreightTerms'
+    Distribute:
+      type: object
+      required:
+        - recipient
+      properties:
+        recipient:
+          $ref: '#/components/schemas/DistributionRecipient'
+        recipientName:
+          type: string
+        recipientAddress:
+          type: string
+        channel:
+          $ref: '#/components/schemas/DistributionChannel'
+        reference:
+          type: string
+    ReleaseOriginals:
+      type: object
+      required:
+        - releasedTo
+      properties:
+        releasedTo:
+          type: string
+          minLength: 1
+        courierReference:
+          type: string
+    SurrenderOriginals:
+      type: object
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          minimum: 1
+    AmendHouseBOL:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+          minLength: 1
+        consigneeName:
+          type: string
+        consigneeAddress:
+          type: string
+        notifyPartyName:
+          type: string
+        notifyPartyAddress:
+          type: string
+        vesselName:
+          type: string
+        voyageNumber:
+          type: string
+        sealNumber:
+          type: string
+        cargoDescription:
+          type: string
+        weightKg:
+          type: number
+        pieces:
+          type: integer
+        cbm:
+          type: number
+        releaseType:
+          $ref: '#/components/schemas/ReleaseType'
+    VoidHouseBOL:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+          minLength: 1
+    Preconditions:
+      type: object
+      description: What the Documentation track is waiting on, per booking.
+      properties:
+        bookingId:
+          type: string
+          format: uuid
+        met:
+          type: boolean
+        containerNumber:
+          type: string
+          nullable: true
+        sealNumber:
+          type: string
+          nullable: true
+        itnNumber:
+          type: string
+          nullable: true
+        carrierBookingRef:
+          type: string
+          nullable: true
+        missing:
+          type: array
+          items:
+            type: string
+    Instructions:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingId:
+          type: string
+          format: uuid
+        instructionsReference:
+          type: string
+        status:
+          $ref: '#/components/schemas/InstructionsStatus'
+        supersedesInstructionsId:
+          type: string
+          format: uuid
+          nullable: true
+        carrierBookingRef:
+          type: string
+          nullable: true
+        containerNumber:
+          type: string
+          nullable: true
+        sealNumber:
+          type: string
+          nullable: true
+        itnNumber:
+          type: string
+          nullable: true
+        shipperName:
+          type: string
+          nullable: true
+        shipperAddress:
+          type: string
+          nullable: true
+        consigneeName:
+          type: string
+          nullable: true
+        consigneeAddress:
+          type: string
+          nullable: true
+        notifyPartyName:
+          type: string
+          nullable: true
+        notifyPartyAddress:
+          type: string
+          nullable: true
+        portOfLoadingCode:
+          type: string
+          nullable: true
+        portOfDischargeCode:
+          type: string
+          nullable: true
+        vesselName:
+          type: string
+          nullable: true
+        voyageNumber:
+          type: string
+          nullable: true
+        cargoDescription:
+          type: string
+          nullable: true
+        hsCode:
+          type: string
+          nullable: true
+        actualWeightKg:
+          type: number
+          nullable: true
+        actualPieces:
+          type: integer
+          nullable: true
+        actualCbm:
+          type: number
+          nullable: true
+        marksAndNumbers:
+          type: string
+          nullable: true
+        freightTerms:
+          $ref: '#/components/schemas/FreightTerms'
+        draftedAt:
+          type: string
+          format: date-time
+          nullable: true
+        draftedBy:
+          type: string
+          nullable: true
+        approvedAt:
+          type: string
+          format: date-time
+          nullable: true
+        approvedBy:
+          type: string
+          nullable: true
+        sentAt:
+          type: string
+          format: date-time
+          nullable: true
+        documentationCutOffDate:
+          type: string
+          format: date
+          nullable: true
+        sentAfterCutOff:
+          type: boolean
+        carrierQuery:
+          type: string
+          nullable: true
+    Master:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingId:
+          type: string
+          format: uuid
+        instructionsId:
+          type: string
+          format: uuid
+        masterBolNumber:
+          type: string
+        issuedByCarrierAt:
+          type: string
+          format: date-time
+          nullable: true
+        receivedAt:
+          type: string
+          format: date-time
+        receivedBy:
+          type: string
+        verificationStatus:
+          $ref: '#/components/schemas/VerificationStatus'
+        verifiedAt:
+          type: string
+          format: date-time
+          nullable: true
+        verifiedBy:
+          type: string
+          nullable: true
+        discrepancyFields:
+          type: array
+          items:
+            type: string
+        discrepancyRaisedAt:
+          type: string
+          format: date-time
+          nullable: true
+        discrepancyResolvedAt:
+          type: string
+          format: date-time
+          nullable: true
+        documentFileReference:
+          type: string
+          nullable: true
+        verified:
+          type: boolean
+    Originals:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: string
+          format: uuid
+        originalsIssued:
+          type: integer
+        originalsSurrendered:
+          type: integer
+        outstanding:
+          type: integer
+        allSurrendered:
+          type: boolean
+        releasedAt:
+          type: string
+          format: date-time
+          nullable: true
+        releasedTo:
+          type: string
+          nullable: true
+        courierReference:
+          type: string
+          nullable: true
+        surrenderedAt:
+          type: string
+          format: date-time
+          nullable: true
+    Distribution:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        recipient:
+          $ref: '#/components/schemas/DistributionRecipient'
+        recipientName:
+          type: string
+          nullable: true
+        recipientAddress:
+          type: string
+          nullable: true
+        channel:
+          $ref: '#/components/schemas/DistributionChannel'
+        revisionNumber:
+          type: integer
+        sentAt:
+          type: string
+          format: date-time
+        sentBy:
+          type: string
+        reference:
+          type: string
+          nullable: true
+    House:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingId:
+          type: string
+          format: uuid
+        masterBolId:
+          type: string
+          format: uuid
+        houseBolNumber:
+          type: string
+        revisionNumber:
+          type: integer
+        active:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/HouseBOLStatus'
+        releaseType:
+          $ref: '#/components/schemas/ReleaseType'
+        releaseTypeConfirmedAt:
+          type: string
+          format: date-time
+          nullable: true
+        releaseTypeConfirmedBy:
+          type: string
+          nullable: true
+        shipperNameSnapshot:
+          type: string
+          nullable: true
+        shipperAddressSnapshot:
+          type: string
+          nullable: true
+        consigneeNameSnapshot:
+          type: string
+          nullable: true
+        consigneeAddressSnapshot:
+          type: string
+          nullable: true
+        notifyPartyNameSnapshot:
+          type: string
+          nullable: true
+        notifyPartyAddressSnapshot:
+          type: string
+          nullable: true
+        portOfLoadingCode:
+          type: string
+          nullable: true
+        portOfDischargeCode:
+          type: string
+          nullable: true
+        vesselName:
+          type: string
+          nullable: true
+        voyageNumber:
+          type: string
+          nullable: true
+        containerNumber:
+          type: string
+          nullable: true
+        sealNumber:
+          type: string
+          nullable: true
+        cargoDescription:
+          type: string
+          nullable: true
+        hsCode:
+          type: string
+          nullable: true
+        weightKg:
+          type: number
+          nullable: true
+        pieces:
+          type: integer
+          nullable: true
+        cbm:
+          type: number
+          nullable: true
+        marksAndNumbers:
+          type: string
+          nullable: true
+        freightTerms:
+          $ref: '#/components/schemas/FreightTerms'
+        issuedAt:
+          type: string
+          format: date-time
+          nullable: true
+        issuedBy:
+          type: string
+          nullable: true
+        voidedAt:
+          type: string
+          format: date-time
+          nullable: true
+        supersededByHouseBolId:
+          type: string
+          format: uuid
+          nullable: true
+        amendmentReason:
+          type: string
+          nullable: true
+        pdfReference:
+          type: string
+          nullable: true
+        amendmentBlockedReason:
+          type: string
+          nullable: true
+          description: Why this revision cannot be amended, or null. Outstanding negotiable originals live here.
+        originals:
+          $ref: '#/components/schemas/Originals'
+        distributions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Distribution'
