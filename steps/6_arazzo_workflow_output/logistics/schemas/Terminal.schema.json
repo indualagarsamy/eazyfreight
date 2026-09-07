@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Terminal.schema.json",
+  "title": "Terminal",
+  "type": [
+    "object",
+    "null"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "gateReceiptNumber": {
+      "type": "string"
+    },
+    "terminalName": {
+      "type": "string"
+    },
+    "acceptedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "earliestAcceptanceDate": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "vesselCutOffDate": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "storageFeeApplies": {
+      "type": "boolean"
+    },
+    "daysEarly": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "storageFeeDailyRate": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "estimatedStorageFee": {
+      "type": [
+        "number",
+        "null"
+      ]
+    }
+  }
+}

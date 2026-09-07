@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ContainerSource.schema.json",
+  "title": "ContainerSource",
+  "type": "string",
+  "enum": [
+    "CARRIER_YARD",
+    "MANUAL_ENTRY"
+  ]
+}

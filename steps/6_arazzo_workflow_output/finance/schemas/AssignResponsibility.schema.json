@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AssignResponsibility.schema.json",
+  "title": "AssignResponsibility",
+  "type": "object",
+  "required": [
+    "responsibility"
+  ],
+  "properties": {
+    "responsibility": {
+      "$ref": "StorageFeeResponsibility.schema.json"
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

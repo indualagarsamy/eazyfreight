@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "StorageFeeView.schema.json",
+  "title": "StorageFeeView",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "bookingId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "cause": {
+      "$ref": "StorageFeeCause.schema.json"
+    },
+    "responsibility": {
+      "$ref": "StorageFeeResponsibility.schema.json"
+    },
+    "dailyRate": {
+      "type": "number"
+    },
+    "days": {
+      "type": "integer"
+    },
+    "amount": {
+      "$ref": "common/MonetaryAmount.schema.json"
+    },
+    "currency": {
+      "$ref": "common/Currency.schema.json"
+    },
+    "periodFrom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "periodTo": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "invoiceId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "invoiceBlockedReason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

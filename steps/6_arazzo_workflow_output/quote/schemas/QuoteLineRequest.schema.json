@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "QuoteLineRequest.schema.json",
+  "title": "QuoteLineRequest",
+  "type": "object",
+  "required": [
+    "lineType",
+    "description",
+    "buyRate",
+    "sellRate",
+    "quantity",
+    "unit"
+  ],
+  "properties": {
+    "lineType": {
+      "$ref": "QuoteLineType.schema.json"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "buyRate": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "sellRate": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "quantity": {
+      "type": "number",
+      "minimum": 0.0001
+    },
+    "unit": {
+      "$ref": "ChargeUnit.schema.json"
+    }
+  }
+}

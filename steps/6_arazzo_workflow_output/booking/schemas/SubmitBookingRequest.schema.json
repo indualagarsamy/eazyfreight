@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "SubmitBookingRequest.schema.json",
+  "title": "SubmitBookingRequest",
+  "type": "object",
+  "required": [
+    "bookingSourceType",
+    "carrierId"
+  ],
+  "properties": {
+    "bookingSourceType": {
+      "$ref": "BookingSourceType.schema.json"
+    },
+    "carrierId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "containerType": {
+      "$ref": "ContainerType.schema.json"
+    },
+    "numberOfContainers": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}

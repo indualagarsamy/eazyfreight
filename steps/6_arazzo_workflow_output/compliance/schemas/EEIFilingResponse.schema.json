@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "EEIFilingResponse.schema.json",
+  "title": "EEIFilingResponse",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "bookingId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "filingReference": {
+      "type": "string"
+    },
+    "filingType": {
+      "$ref": "FilingType.schema.json"
+    },
+    "parentFilingId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "status": {
+      "$ref": "FilingStatus.schema.json"
+    },
+    "shipperName": {
+      "type": "string"
+    },
+    "shipperEin": {
+      "type": "string"
+    },
+    "shipperAddress": {
+      "type": "string"
+    },
+    "consigneeName": {
+      "type": "string"
+    },
+    "consigneeAddress": {
+      "type": "string"
+    },
+    "consigneeCountry": {
+      "type": "string"
+    },
+    "scheduleBNumber": {
+      "type": "string"
+    },
+    "scheduleBTranslated": {
+      "type": "boolean",
+      "description": "False when the Schedule B number is an untranslated HS code carried across the CBP boundary as-is."
+    },
+    "commodityDescription": {
+      "type": "string"
+    },
+    "quantityValue": {
+      "type": "number"
+    },
+    "quantityUnit": {
+      "type": "string"
+    },
+    "valueUsd": {
+      "type": "number"
+    },
+    "carrierScac": {
+      "type": "string"
+    },
+    "vesselName": {
+      "type": "string"
+    },
+    "voyageNumber": {
+      "type": "string"
+    },
+    "portOfExportCode": {
+      "type": "string"
+    },
+    "countryOfDestination": {
+      "type": "string"
+    },
+    "estimatedEtd": {
+      "type": "string",
+      "format": "date"
+    },
+    "submittedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "submittedBy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "acceptedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "rejectedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "rejectionReasonCode": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "rejectionReasonDescription": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cancelledAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "cancellationReason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "aesSubmissionReference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "simulated": {
+      "type": "boolean",
+      "description": "True when the accepted ITN came from the local simulator rather than CBP."
+    },
+    "amendmentReason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "licenseRequired": {
+      "type": "boolean"
+    },
+    "filingRequired": {
+      "type": "boolean"
+    },
+    "missingRequiredFields": {
+      "type": "array",
+      "description": "CBP-mandated fields still blank; submission is refused while non-empty.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "activeItnNumber": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "exportLicense": {
+      "$ref": "ExportLicenseResponse.schema.json"
+    },
+    "itnRecords": {
+      "type": "array",
+      "items": {
+        "$ref": "ItnRecordResponse.schema.json"
+      }
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "$ref": "EEIFilingHistoryResponse.schema.json"
+      }
+    }
+  }
+}

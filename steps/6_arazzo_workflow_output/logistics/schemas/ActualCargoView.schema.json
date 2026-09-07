@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ActualCargoView.schema.json",
+  "title": "ActualCargoView",
+  "type": [
+    "object",
+    "null"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "actualWeightKg": {
+      "type": "number"
+    },
+    "actualPieces": {
+      "type": "integer"
+    },
+    "actualCbm": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "bookedWeightKg": {
+      "type": "number"
+    },
+    "bookedPieces": {
+      "type": "integer"
+    },
+    "bookedCbm": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "weightVarianceKg": {
+      "type": "number"
+    },
+    "divergesMaterially": {
+      "type": "boolean"
+    },
+    "recordedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "recordedBy": {
+      "type": "string"
+    }
+  }
+}

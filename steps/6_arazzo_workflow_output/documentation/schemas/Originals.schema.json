@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Originals.schema.json",
+  "title": "Originals",
+  "type": [
+    "object",
+    "null"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "originalsIssued": {
+      "type": "integer"
+    },
+    "originalsSurrendered": {
+      "type": "integer"
+    },
+    "outstanding": {
+      "type": "integer"
+    },
+    "allSurrendered": {
+      "type": "boolean"
+    },
+    "releasedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "releasedTo": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "courierReference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "surrenderedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  }
+}

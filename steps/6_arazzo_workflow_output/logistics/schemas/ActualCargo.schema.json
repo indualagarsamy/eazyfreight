@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ActualCargo.schema.json",
+  "title": "ActualCargo",
+  "type": "object",
+  "required": [
+    "actualWeightKg",
+    "actualPieces"
+  ],
+  "properties": {
+    "actualWeightKg": {
+      "type": "number",
+      "minimum": 0.001
+    },
+    "actualPieces": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "actualCbm": {
+      "type": "number"
+    }
+  }
+}

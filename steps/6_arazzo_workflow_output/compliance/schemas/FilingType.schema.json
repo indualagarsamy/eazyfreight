@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "FilingType.schema.json",
+  "title": "FilingType",
+  "type": "string",
+  "enum": [
+    "ORIGINAL",
+    "AMENDMENT",
+    "CANCELLATION"
+  ]
+}

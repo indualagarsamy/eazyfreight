@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AlertView.schema.json",
+  "title": "AlertView",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "bookingId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "bookingReference": {
+      "type": "string"
+    },
+    "alertType": {
+      "$ref": "AlertType.schema.json"
+    },
+    "alertCode": {
+      "type": "string"
+    },
+    "track": {
+      "$ref": "AlertTrack.schema.json"
+    },
+    "category": {
+      "$ref": "AlertCategory.schema.json"
+    },
+    "status": {
+      "$ref": "AlertStatus.schema.json"
+    },
+    "title": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "recommendedAction": {
+      "type": "string"
+    },
+    "recipients": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "RecipientRole.schema.json"
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deadlineAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "lastEvaluatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "overdue": {
+      "type": "boolean"
+    },
+    "acknowledgedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "acknowledgedBy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "snoozedUntil": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "snoozedBy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "escalatedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "escalatedTo": {
+      "$ref": "RecipientRole.schema.json"
+    },
+    "resolvedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "resolvedBy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "resolutionReason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "maxSnoozeHours": {
+      "type": "integer"
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "$ref": "HistoryEntry.schema.json"
+      }
+    },
+    "notifications": {
+      "type": "array",
+      "items": {
+        "$ref": "NotificationView.schema.json"
+      }
+    }
+  }
+}

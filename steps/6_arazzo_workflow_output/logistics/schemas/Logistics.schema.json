@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Logistics.schema.json",
+  "title": "Logistics",
+  "type": "object",
+  "description": "inboundBlockedReason: why the inbound truck cannot go yet, or null when it can. The ITN gate lives behind this.",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "bookingId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "containerNumber": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "containerType": {
+      "$ref": "ContainerType.schema.json"
+    },
+    "source": {
+      "$ref": "ContainerSource.schema.json"
+    },
+    "assignedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "assignedBy": {
+      "type": "string"
+    },
+    "stage": {
+      "$ref": "LogisticsStage.schema.json"
+    },
+    "itnReceived": {
+      "type": "boolean"
+    },
+    "itnNumber": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "inboundBlockedReason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "documentationPreconditionsMet": {
+      "type": "boolean"
+    },
+    "loadingCompletedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "loadedOnVesselAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "vesselDepartedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "activeSealNumber": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sealRecords": {
+      "type": "array",
+      "items": {
+        "$ref": "Seal.schema.json"
+      }
+    },
+    "dispatches": {
+      "type": "array",
+      "items": {
+        "$ref": "Dispatch.schema.json"
+      }
+    },
+    "examinations": {
+      "type": "array",
+      "items": {
+        "$ref": "Examination.schema.json"
+      }
+    },
+    "terminalAcceptance": {
+      "$ref": "Terminal.schema.json"
+    },
+    "actualCargoDetails": {
+      "$ref": "ActualCargoView.schema.json"
+    }
+  }
+}

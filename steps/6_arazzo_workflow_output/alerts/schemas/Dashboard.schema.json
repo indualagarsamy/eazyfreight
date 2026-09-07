@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Dashboard.schema.json",
+  "title": "Dashboard",
+  "type": "object",
+  "description": "The \"what needs attention right now\" view \u2014 counts by severity and by track, plus how many alerts nobody has looked at and how many have run past their deadline.",
+  "properties": {
+    "open": {
+      "type": "integer"
+    },
+    "byCategory": {
+      "type": "object",
+      "description": "Map keyed by AlertCategory name to a count.",
+      "additionalProperties": {
+        "type": "integer"
+      }
+    },
+    "byTrack": {
+      "type": "object",
+      "description": "Map keyed by AlertTrack name to a count.",
+      "additionalProperties": {
+        "type": "integer"
+      }
+    },
+    "unacknowledged": {
+      "type": "integer"
+    },
+    "escalated": {
+      "type": "integer"
+    },
+    "overdue": {
+      "type": "integer"
+    },
+    "bookingsAffected": {
+      "type": "integer"
+    }
+  }
+}

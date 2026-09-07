@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RecordExportLicenseRequest.schema.json",
+  "title": "RecordExportLicenseRequest",
+  "type": "object",
+  "required": [
+    "licenseNumber",
+    "issuingAuthority",
+    "licenseType",
+    "validFrom",
+    "validUntil"
+  ],
+  "properties": {
+    "licenseNumber": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issuingAuthority": {
+      "type": "string",
+      "minLength": 1
+    },
+    "licenseType": {
+      "type": "string",
+      "minLength": 1
+    },
+    "commodityEccn": {
+      "type": "string"
+    },
+    "validFrom": {
+      "type": "string",
+      "format": "date"
+    },
+    "validUntil": {
+      "type": "string",
+      "format": "date"
+    },
+    "valueAuthorized": {
+      "type": "number"
+    }
+  }
+}

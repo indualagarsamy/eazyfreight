@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "DeliveryStatus.schema.json",
+  "title": "DeliveryStatus",
+  "type": "string",
+  "enum": [
+    "PENDING",
+    "DELIVERED",
+    "FAILED"
+  ]
+}

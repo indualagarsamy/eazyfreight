@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RecordAcceptanceRequest.schema.json",
+  "title": "RecordAcceptanceRequest",
+  "type": "object",
+  "required": [
+    "itnNumber"
+  ],
+  "properties": {
+    "itnNumber": {
+      "type": "string",
+      "minLength": 1
+    },
+    "aesSubmissionReference": {
+      "type": "string"
+    },
+    "acceptedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

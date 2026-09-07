@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "InstructionsStatus.schema.json",
+  "title": "InstructionsStatus",
+  "type": "string",
+  "enum": [
+    "DRAFT",
+    "APPROVED",
+    "SENT",
+    "QUERIED",
+    "SUPERSEDED"
+  ]
+}

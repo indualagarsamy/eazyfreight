@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ItnGateStatus.schema.json",
+  "title": "ItnGateStatus",
+  "type": "object",
+  "description": "Fixed-shape map returned by GET /bookings/{bookingId}/itn-gate (not a DTO record).",
+  "properties": {
+    "clear": {
+      "type": "boolean"
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CreditHoldView.schema.json",
+  "title": "CreditHoldView",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "customerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "triggeringBookingId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    },
+    "placedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "placedBy": {
+      "type": "string"
+    },
+    "liftedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "liftedBy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

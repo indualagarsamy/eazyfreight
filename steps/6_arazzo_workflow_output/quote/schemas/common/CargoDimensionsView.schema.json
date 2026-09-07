@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "common/CargoDimensionsView.schema.json",
+  "title": "CargoDimensionsView",
+  "description": "Physical cargo dimensions as returned on a response — same fields as CargoDimensionsInput, without the request-side validation constraints. Duplicated identically in booking/schemas/common; see CargoDimensionsInput for why.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "hsCode": {
+      "type": "string"
+    },
+    "pieces": {
+      "type": "integer"
+    },
+    "weightKg": {
+      "type": "number"
+    },
+    "lengthCm": {
+      "type": "number"
+    },
+    "widthCm": {
+      "type": "number"
+    },
+    "heightCm": {
+      "type": "number"
+    },
+    "hazmat": {
+      "type": "boolean"
+    },
+    "temperatureControlled": {
+      "type": "boolean"
+    },
+    "oversized": {
+      "type": "boolean"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ExportLicenseResponse.schema.json",
+  "title": "ExportLicenseResponse",
+  "type": [
+    "object",
+    "null"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "licenseNumber": {
+      "type": "string"
+    },
+    "issuingAuthority": {
+      "type": "string"
+    },
+    "licenseType": {
+      "type": "string"
+    },
+    "commodityEccn": {
+      "type": "string"
+    },
+    "validFrom": {
+      "type": "string",
+      "format": "date"
+    },
+    "validUntil": {
+      "type": "string",
+      "format": "date"
+    },
+    "valueAuthorized": {
+      "type": "number"
+    }
+  }
+}
