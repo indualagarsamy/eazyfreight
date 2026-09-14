@@ -9,3 +9,5 @@ target/
 /.claude/settings.local.json
 node_modules/
 frontend/dist/
+/bin/
+/.vscode/
