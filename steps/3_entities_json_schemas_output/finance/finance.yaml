@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
   title: Finance API
-  description: Finance endpoints — the fifteen commands from the specification, covering invoicing, carrier
-    payables, storage fees and credit holds. Derived from com.eazyfreight.finance.controller.FinanceController.
+  description: Finance endpoints — the fifteen commands from the specification, covering
+    invoicing, carrier payables, storage fees and credit holds. Derived from com.eazyfreight.finance.controller.FinanceController.
   version: '1.0'
 servers:
 - url: /api/finance
@@ -256,7 +256,8 @@ paths:
     get:
       tags:
       - finance
-      summary: 4. SendInvoicePDF — renders the invoice as a download. Pure read, nothing recorded.
+      summary: 4. SendInvoicePDF — renders the invoice as a download. Pure read, nothing
+        recorded.
       operationId: invoicePdf
       parameters:
       - name: id
