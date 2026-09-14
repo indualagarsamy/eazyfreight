@@ -1,8 +1,9 @@
 openapi: 3.0.3
 info:
   title: Documentation API
-  description: Documentation endpoints — the twenty-one commands from the specification, covering Master
-    BOL instructions and House BOL issuance/distribution/ amendment. Derived from com.eazyfreight.documentation.controller.DocumentationController.
+  description: Documentation endpoints — the twenty-one commands from the specification,
+    covering Master BOL instructions and House BOL issuance/distribution/ amendment.
+    Derived from com.eazyfreight.documentation.controller.DocumentationController.
   version: '1.0'
 servers:
 - url: /api/documentation
@@ -438,7 +439,8 @@ paths:
     post:
       tags:
       - documentation
-      summary: 13. GenerateHouseBOLPDF — renders the document and returns it as a download
+      summary: 13. GenerateHouseBOLPDF — renders the document and returns it as a
+        download
       operationId: generatePdf
       parameters:
       - name: id
@@ -458,7 +460,8 @@ paths:
     get:
       tags:
       - documentation
-      summary: Re-download of a House BOL PDF already produced. Renders again; records nothing.
+      summary: Re-download of a House BOL PDF already produced. Renders again; records
+        nothing.
       operationId: downloadPdf
       parameters:
       - name: id
