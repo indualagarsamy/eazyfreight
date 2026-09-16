@@ -112,5 +112,9 @@ framing.
   `4_consolidate_entities_output` file-for-file into
   `5_build_domain_language_output/` and added the placeholder
   `5_build_domain_language.md`.
-- This doc and `5_build_domain_language_output/domain_language.md` — written in
-  this session, pending commit.
+- `5ea60b6` — *"Build domain language glossary from consolidated entity
+  schemas"* — wrote this doc and `domain_language.md` (under the
+  then-current `5_build_domain_language/` folder name).
+- `63c4ad7` — *"renamed folder"* — renamed
+  `5_build_domain_language/` to `5_build_domain_language_output/`,
+  updating every path reference in this doc to match.
