@@ -42,7 +42,8 @@ paths:
     get:
       tags:
       - logistics
-      summary: List confirmed bookings needing a truck but with no outbound dispatch yet
+      summary: List confirmed bookings needing a truck but with no outbound dispatch
+        yet
       operationId: getAwaitingOutboundDispatch
       responses:
         '200':
@@ -251,7 +252,8 @@ paths:
     post:
       tags:
       - logistics
-      summary: 13. RecordSealReplacement — outside a CBP examination, e.g. a damaged seal
+      summary: 13. RecordSealReplacement — outside a CBP examination, e.g. a damaged
+        seal
       operationId: replaceSeal
       parameters:
       - name: bookingId
