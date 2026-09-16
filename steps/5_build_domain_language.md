@@ -69,7 +69,7 @@ occurrence, so the doc has 142 distinct concept write-ups covering all
 | compliance | 13 | `EEIFilingResponse` | 3 | 7 |
 | documentation | 24 | `Instructions`, `Master`, `House` | 7 | 9 |
 | finance | 24 | `InvoiceView`, `PayableView`, `StorageFeeView`, `CreditHoldView` | 7 | 8 |
-| logistics | 26 | `Logistics` | 9 | 9 |
+| logistics | 26 | `Logistics` | 10 | 9 |
 | quote | 18 | `QuoteResponse` | 7 | 4 |
 
 Three modules (`documentation`, `finance`) surface more than one core
@@ -90,11 +90,47 @@ framing.
 - Every enum's value list in the glossary matches its schema file
   exactly — no values added, dropped, or reworded.
 - The "Shared Concepts" section's claims about which pairs are
-  byte-identical vs. deliberately divergent (`ContainerType` identical;
+  byte-identical vs. deliberately divergent (`ContainerType`;
   `ShippingMode` a hand-synced subset) were re-verified against the
   actual files with `diff`, not assumed from
   [`4_consolidate_entities.md`](4_consolidate_entities.md)'s prior
   write-up.
+
+### Re-check after merging `4_consolidate_entities` (2026-09-15)
+
+Branch `5_build_domain_language` merged in `4_consolidate_entities` (which
+had itself merged `3_entities_json_schemas`), so the glossary was re-run
+through steps 1-5 to confirm nothing in the schema set moved underneath it.
+Findings:
+
+- The merge itself touched only `steps/3_entities_json_schemas_output/*.yaml`,
+  three new unrelated skills, `.gitignore`, and `BookingApiMapper.java` — it
+  did not add, remove, or edit any file under
+  `steps/4_consolidate_entities_output/` or
+  `steps/5_build_domain_language_output/`. Schema file count is still 150
+  (confirmed by recount, not by trusting the prior total), and
+  `5_build_domain_language_output/` is still byte-for-byte identical to
+  `4_consolidate_entities_output/` apart from `domain_language.md`.
+- Re-running the title-coverage check (every schema `title` must appear in
+  `domain_language.md`) surfaced one pre-existing gap the original pass
+  missed: `ItnGateStatus` (a fixed-shape `GET
+  /bookings/{bookingId}/itn-gate` response, same pattern as
+  `FilingSystemStatus` in `compliance`) was described conceptually inside
+  the `Logistics` write-up but its schema title never appeared verbatim, so
+  it had no table row. Added it to the Logistics enumerations table as a
+  "(fixed-shape response, not an enum)" row, matching `FilingSystemStatus`'s
+  treatment — bumping logistics enums documented from 9 to 10 and the
+  Enumerations-documented total from 47 to 48. Pre-existing since `5ea60b6`,
+  not introduced by this merge.
+- Re-running the shared-pair `diff` also caught that the "Shared Concepts"
+  section's `ContainerType` claim ("byte-identical in both contexts") was
+  never quite true: `logistics/schemas/ContainerType.schema.json` carries an
+  extra `description` field pointing back at `booking`'s copy that
+  `booking`'s own file doesn't have. The four enum values are identical;
+  only the description differs. Reworded the claim accordingly. Also
+  pre-existing since `5ea60b6`.
+- `ShippingMode`'s claim (quote: 3 modes, booking: ocean-only subset) still
+  checked out exactly against the current files, no change needed.
 
 ## Totals
 
@@ -103,7 +139,7 @@ framing.
 | Schema files covered (in `5_build_domain_language_output/`) | 150 |
 | Bounded contexts | 7 |
 | Distinct concept write-ups (150 files minus 8 shared duplicates counted once) | 142 |
-| Enumerations documented | 47 |
+| Enumerations documented | 48 |
 | Command schemas documented | 47 |
 
 ## Commits
