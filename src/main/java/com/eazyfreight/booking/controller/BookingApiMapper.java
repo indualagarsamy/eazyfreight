@@ -39,7 +39,7 @@ final class BookingApiMapper {
         model.setNotifyPartyId(response.notifyPartyId());
         model.setAlsoNotifyId(response.alsoNotifyId());
         model.setStatus(mapEnum(response.status(), com.eazyfreight.booking.model.BookingStatus.class));
-        model.setShippingMode(mapEnum(response.shippingMode(), com.eazyfreight.booking.model.ShippingMode.class));
+        model.setShippingMode(toModel(response.shippingMode()));
         model.setOriginPortCode(response.originPortCode());
         model.setDestinationPortCode(response.destinationPortCode());
         model.setIncoterms(response.incoterms());
@@ -153,7 +153,7 @@ final class BookingApiMapper {
                 request.getConsigneeId(),
                 request.getNotifyPartyId(),
                 request.getAlsoNotifyId(),
-                mapEnum(request.getShippingMode(), com.eazyfreight.booking.domain.ShippingMode.class),
+                toDomain(request.getShippingMode()),
                 request.getOriginPortCode(),
                 request.getDestinationPortCode(),
                 request.getIncoterms(),
@@ -232,6 +232,21 @@ final class BookingApiMapper {
 
     static com.eazyfreight.booking.domain.BookingStatus toDomain(com.eazyfreight.booking.model.BookingStatus status) {
         return mapEnum(status, com.eazyfreight.booking.domain.BookingStatus.class);
+    }
+
+    /**
+     * {@code ShippingMode} can't use the generic {@link #mapEnum}: the OpenAPI Generator
+     * strips the shared {@code OCEAN_} prefix from the Java constant names ({@code FCL}/
+     * {@code LCL}) while keeping the original spec value ({@code OCEAN_FCL}/{@code OCEAN_LCL})
+     * as the wire value, so {@code Enum.valueOf} by constant name fails both directions.
+     * Convert through the wire value instead, which both enums still agree on.
+     */
+    private static com.eazyfreight.booking.model.ShippingMode toModel(com.eazyfreight.booking.domain.ShippingMode mode) {
+        return mode == null ? null : com.eazyfreight.booking.model.ShippingMode.fromValue(mode.name());
+    }
+
+    private static com.eazyfreight.booking.domain.ShippingMode toDomain(com.eazyfreight.booking.model.ShippingMode mode) {
+        return mode == null ? null : com.eazyfreight.booking.domain.ShippingMode.valueOf(mode.getValue());
     }
 
     private static Instant toInstant(OffsetDateTime dateTime) {

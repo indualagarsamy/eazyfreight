@@ -123,7 +123,8 @@ paths:
     post:
       tags:
       - alerts
-      summary: Force the alert sweep the scheduler runs every half hour, across all bookings.
+      summary: Force the alert sweep the scheduler runs every half hour, across all
+        bookings.
       operationId: evaluate
       responses:
         '200':
@@ -249,8 +250,8 @@ paths:
     put:
       tags:
       - alerts
-      summary: Replace an alert type's configuration. The sole PUT in this API, because it replaces the
-        whole configuration record.
+      summary: Replace an alert type's configuration. The sole PUT in this API, because
+        it replaces the whole configuration record.
       operationId: updateConfiguration
       parameters:
       - name: alertType

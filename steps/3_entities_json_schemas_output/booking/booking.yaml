@@ -1,9 +1,9 @@
 openapi: 3.0.3
 info:
   title: Booking API
-  description: Booking endpoints. There is no PUT — every change is a named command against the aggregate,
-    recorded in the status history. The X-Actor header names who is acting and is written into the audit
-    trail. Derived from com.eazyfreight.booking.controller.BookingController.
+  description: Booking endpoints. There is no PUT — every change is a named command
+    against the aggregate, recorded in the status history. The X-Actor header names
+    who is acting and is written into the audit trail. Derived from com.eazyfreight.booking.controller.BookingController.
   version: '1.0'
 servers:
 - url: /api/bookings

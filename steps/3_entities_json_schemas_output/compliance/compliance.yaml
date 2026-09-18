@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
   title: Compliance API
-  description: Export compliance endpoints (Electronic Export Information filings against a simulated
-    AES/CBP boundary). Derived from com.eazyfreight.compliance.controller.ComplianceController.
+  description: Export compliance endpoints (Electronic Export Information filings
+    against a simulated AES/CBP boundary). Derived from com.eazyfreight.compliance.controller.ComplianceController.
   version: '1.0'
 servers:
 - url: /api/compliance
