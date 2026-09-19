@@ -64,7 +64,7 @@ public class BookingService {
                 request.destinationPortCode(),
                 request.incoterms(),
                 request.requestedEta(),
-                request.requestedEtd(),
+                request.requestedEta(),
                 request.transportRequired(),
                 request.pickupAddress(),
                 request.pickupDateTime(),
