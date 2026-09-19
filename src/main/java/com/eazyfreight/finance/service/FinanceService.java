@@ -150,7 +150,8 @@ public class FinanceService {
                         ? null : booking.getCarrierBooking().getCarrierId(),
                 // We remit what we bought the space for, not what we charged.
                 carrierShare(invoice, request.amount()),
-                invoice.getCurrency(), request.paymentDate(), clock.instant());
+                // Override Invoice currency because we like Euro bills
+                "EUR", request.paymentDate(), clock.instant());
         payableRepository.save(payable);
 
         log.info("Customer paid {} on invoice {} — carrier payable of {} now due {}",

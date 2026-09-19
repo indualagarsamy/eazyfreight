@@ -9,3 +9,4 @@ target/
 /.claude/settings.local.json
 node_modules/
 frontend/dist/
+/steps/7_automate_testing_output/_integration_tests/test-results/
