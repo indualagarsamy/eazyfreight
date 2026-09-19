@@ -3,6 +3,7 @@ package com.eazyfreight.booking.service;
 import com.eazyfreight.booking.domain.Booking;
 import com.eazyfreight.booking.domain.BookingCargoDetail;
 import com.eazyfreight.booking.domain.BookingStatus;
+import com.eazyfreight.booking.dto.BookingCargoDetailRequest;
 import com.eazyfreight.booking.dto.BookingResponse;
 import com.eazyfreight.booking.dto.BookingStatusHistoryResponse;
 import com.eazyfreight.booking.dto.CancelBookingRequest;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
@@ -37,6 +39,9 @@ public class BookingService {
 
     private static final List<BookingStatus> ACTIVE_CONFIRMED = List.of(
             BookingStatus.CONFIRMED_BY_CARRIER, BookingStatus.CUSTOMER_CONFIRMED);
+
+    private static final BigDecimal LB_TO_KG = BigDecimal.valueOf(0.45359237);
+    private static final BigDecimal IN_TO_CM = BigDecimal.valueOf(2.54);
 
     private final BookingRepository bookingRepository;
     private final ReferenceGenerator referenceGenerator;
@@ -58,7 +63,7 @@ public class BookingService {
                 request.originPortCode(),
                 request.destinationPortCode(),
                 request.incoterms(),
-                request.requestedEtd(),
+                request.requestedEta(),
                 request.requestedEta(),
                 request.transportRequired(),
                 request.pickupAddress(),
@@ -70,20 +75,23 @@ public class BookingService {
                 actor
         );
 
-        request.cargoDetails().forEach(detail -> booking.addCargoDetail(BookingCargoDetail.builder()
-                .description(detail.description())
-                .hsCode(detail.hsCode())
-                .pieces(detail.pieces())
-                .weightKg(detail.weightKg())
-                .lengthCm(detail.lengthCm())
-                .widthCm(detail.widthCm())
-                .heightCm(detail.heightCm())
-                .valueUsd(detail.valueUsd())
-                .hazmat(detail.hazmat())
-                .temperatureControlled(detail.temperatureControlled())
-                .oversized(detail.oversized())
-                .marksAndNumbers(detail.marksAndNumbers())
-                .build()));
+        for (BookingCargoDetailRequest detail : request.cargoDetails()) {
+            BookingCargoDetail cargoDetail = BookingCargoDetail.builder()
+                    .description(detail.description())
+                    .hsCode(detail.hsCode())
+                    .pieces(detail.pieces())
+                    .weightKg(detail.weightKg().multiply(LB_TO_KG))
+                    .lengthCm(detail.lengthCm().multiply(IN_TO_CM))
+                    .widthCm(detail.widthCm().multiply(IN_TO_CM))
+                    .heightCm(detail.heightCm().multiply(IN_TO_CM))
+                    .valueUsd(detail.valueUsd())
+                    .hazmat(detail.hazmat())
+                    .temperatureControlled(detail.temperatureControlled())
+                    .oversized(detail.oversized())
+                    .marksAndNumbers(detail.marksAndNumbers())
+                    .build();
+            booking.addCargoDetail(cargoDetail);
+        }
 
         return BookingResponse.fromEntity(bookingRepository.save(booking));
     }
