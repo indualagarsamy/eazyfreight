@@ -1,7 +1,6 @@
 .DS_Store
 /.idea/
 build/
-/bin/
 .gradle/
 !gradle/wrapper/gradle-wrapper.jar
 target/
@@ -10,4 +9,5 @@ target/
 /.claude/settings.local.json
 node_modules/
 frontend/dist/
+/bin/
 /.vscode/

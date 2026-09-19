@@ -39,12 +39,7 @@ final class BookingApiMapper {
         model.setNotifyPartyId(response.notifyPartyId());
         model.setAlsoNotifyId(response.alsoNotifyId());
         model.setStatus(mapEnum(response.status(), com.eazyfreight.booking.model.BookingStatus.class));
-        // Not mapEnum(): the generated model.ShippingMode's Java constants are FCL/LCL (openapi-generator
-        // stripped the shared OCEAN_ prefix), so Enum.valueOf can't find "OCEAN_FCL" — fromValue(String)
-        // is the generated type's own wire-value parser and handles the rename correctly.
-        model.setShippingMode(response.shippingMode() == null
-                ? null
-                : com.eazyfreight.booking.model.ShippingMode.fromValue(response.shippingMode().toString()));
+        model.setShippingMode(toModel(response.shippingMode()));
         model.setOriginPortCode(response.originPortCode());
         model.setDestinationPortCode(response.destinationPortCode());
         model.setIncoterms(response.incoterms());
@@ -158,7 +153,7 @@ final class BookingApiMapper {
                 request.getConsigneeId(),
                 request.getNotifyPartyId(),
                 request.getAlsoNotifyId(),
-                mapEnum(request.getShippingMode(), com.eazyfreight.booking.domain.ShippingMode.class),
+                toDomain(request.getShippingMode()),
                 request.getOriginPortCode(),
                 request.getDestinationPortCode(),
                 request.getIncoterms(),
@@ -239,6 +234,21 @@ final class BookingApiMapper {
         return mapEnum(status, com.eazyfreight.booking.domain.BookingStatus.class);
     }
 
+    /**
+     * {@code ShippingMode} can't use the generic {@link #mapEnum}: the OpenAPI Generator
+     * strips the shared {@code OCEAN_} prefix from the Java constant names ({@code FCL}/
+     * {@code LCL}) while keeping the original spec value ({@code OCEAN_FCL}/{@code OCEAN_LCL})
+     * as the wire value, so {@code Enum.valueOf} by constant name fails both directions.
+     * Convert through the wire value instead, which both enums still agree on.
+     */
+    private static com.eazyfreight.booking.model.ShippingMode toModel(com.eazyfreight.booking.domain.ShippingMode mode) {
+        return mode == null ? null : com.eazyfreight.booking.model.ShippingMode.fromValue(mode.name());
+    }
+
+    private static com.eazyfreight.booking.domain.ShippingMode toDomain(com.eazyfreight.booking.model.ShippingMode mode) {
+        return mode == null ? null : com.eazyfreight.booking.domain.ShippingMode.valueOf(mode.getValue());
+    }
+
     private static Instant toInstant(OffsetDateTime dateTime) {
         return dateTime == null ? null : dateTime.toInstant();
     }
@@ -248,11 +258,6 @@ final class BookingApiMapper {
     }
 
     private static <S extends Enum<S>, T extends Enum<T>> T mapEnum(S source, Class<T> targetType) {
-        // source.toString(), not source.name(): the generated OpenAPI model enums override
-        // toString() to return the wire value (e.g. "OCEAN_FCL"), but when every value of an
-        // enum shares a common prefix, openapi-generator strips it from the Java constant name
-        // (model.ShippingMode's constants are FCL/LCL, not OCEAN_FCL/OCEAN_LCL) — so name()
-        // doesn't reliably match the domain enum's constant name, but toString() does.
-        return source == null ? null : Enum.valueOf(targetType, source.toString());
+        return source == null ? null : Enum.valueOf(targetType, source.name());
     }
 }

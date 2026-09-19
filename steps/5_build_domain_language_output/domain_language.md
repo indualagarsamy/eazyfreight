@@ -77,7 +77,7 @@ another's schemas, each keeps its own copy (see
 [`4_consolidate_entities.md`](../4_consolidate_entities.md) for the
 consolidation history):
 
-- **ContainerType** (`booking/`, `logistics/`) — the ISO container size/type a shipment moves in: `TWENTY_GP`, `FORTY_GP`, `FORTY_HC`, `FORTY_FIVE_HC`. Byte-identical in both contexts.
+- **ContainerType** (`booking/`, `logistics/`) — the ISO container size/type a shipment moves in: `TWENTY_GP`, `FORTY_GP`, `FORTY_HC`, `FORTY_FIVE_HC`. Same four enum values in both contexts; `logistics/`'s copy additionally carries a `description` noting it's shared with `booking`'s, so the two files aren't byte-identical.
 - **ShippingMode** (`booking/`, `quote/`) — the transport mode: `quote/` supports `OCEAN_FCL`, `OCEAN_LCL`, `AIR`; `booking/` supports only the two ocean values, since bookings in this system are ocean-only.
 - **Currency** (`finance/schemas/common/`, `quote/schemas/common/`) — an ISO-4217 3-letter currency code (`[A-Z]{3}` pattern).
 - **MonetaryAmount** (`finance/schemas/common/`, `quote/schemas/common/`) — a non-negative number denominated in the sibling `currency` field; schemas needing a strictly-positive amount (e.g. `CreditNote`, `RecordPayment`) layer a stricter `minimum: 0.01` on top.
@@ -194,6 +194,7 @@ loading.
 | **SealSource** | `CUSTOMER_ISSUED`, `CUSTOMS_ISSUED` | Who issued a seal |
 | **SealDeactivationReason** | `CUSTOMS_INSPECTION`, `DAMAGED_SEAL` | Why a seal was deactivated |
 | **ExaminationResult** | `RELEASED`, `ADDITIONAL_HOLD`, `SEIZED` | Outcome of a CBP examination |
+| **ItnGateStatus** (fixed-shape response, not an enum) | — | `GET /bookings/{bookingId}/itn-gate`'s payload: `clear` (boolean) and `reason` (nullable string) — whether the inbound truck may proceed, and why not if it can't |
 
 ### Logistics: commands
 
