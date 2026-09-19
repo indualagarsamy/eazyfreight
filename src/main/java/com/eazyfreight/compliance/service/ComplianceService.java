@@ -85,6 +85,9 @@ public class ComplianceService {
                 ? scheduleBFromBooking(filing.getBookingId())
                 : ScheduleBCode.declared(request.scheduleBNumber());
 
+        log.info("Compiling EEI filing {} for shipper {} (EIN {}) at {}",
+                filingId, request.shipperName(), request.shipperEin(), request.shipperAddress());
+
         filing.compile(
                 request.shipperName(), request.shipperEin(), request.shipperAddress(),
                 request.consigneeName(), request.consigneeAddress(), request.consigneeCountry(),
@@ -115,8 +118,13 @@ public class ComplianceService {
 
         filing.markSubmitted(now, actor);
 
+        AesFilingClient.AesSubmission submission = filing.toSubmission(supersedes);
+        log.info("Submitting AES filing {} — shipper {} (EIN {}) at {}, consignee at {}",
+                filing.getFilingReference(), submission.shipperName(), submission.shipperEin(),
+                submission.shipperAddress(), submission.consigneeAddress());
+
         try {
-            AesFilingClient.AesResponse response = aesClient.submit(filing.toSubmission(supersedes));
+            AesFilingClient.AesResponse response = aesClient.submit(submission);
             if (response.accepted()) {
                 applyAcceptance(filing, new ItnNumber(response.itnNumber()),
                         response.aesSubmissionReference(), response.respondedAt(), now, actor);
