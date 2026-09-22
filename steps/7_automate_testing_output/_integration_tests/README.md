@@ -29,7 +29,18 @@ If the backend isn't reachable at `EAZYFREIGHT_BASE_URL` (default `http://localh
 
 - `src/arazzoRunner.ts` — the Arazzo executor. Deliberately scoped to the subset of the spec `arazzo.yaml` uses (see its top comment) rather than a general-purpose Arazzo runtime.
 - `tests/arazzo-runner.unit.spec.ts` — unit tests for the runner itself: operation-index resolution against the real `arazzo.yaml` + specs, runtime-expression resolution, and a full 5-step run against a stateful fake backend (no network).
-- `tests/quote-to-dispatch.spec.ts` — the real integration test against a live backend, plus a second test that documents the business rule the workflow's `submitBooking`/`recordCarrierConfirmation` steps exist to satisfy (`dispatchOutbound` returns 409 against an unconfirmed booking).
+- `tests/quote-to-dispatch.spec.ts` — the real integration test against a live backend, a second test that documents the business rule the workflow's `submitBooking`/`recordCarrierConfirmation` steps exist to satisfy (`dispatchOutbound` returns 409 against an unconfirmed booking), and a third test proving the same refusal through the real frontend (`LogisticsDetailPage`) — clicking "Dispatch outbound truck" and asserting the toast, not the status code. The UI test self-skips if `EAZYFREIGHT_FRONTEND_URL` (default `http://localhost:5173`) isn't reachable, same as the backend-reachability skip for the other two.
+
+## Known issue this surfaced
+
+`BookingService.createBookingRequest` passes `request.requestedEta()` into both the
+`requestedEtd` and `requestedEta` parameters of `Booking.request(...)` — `requestedEtd`
+is never read from the request at all. Any caller that omits `requestedEta` (as the
+`dispatchOutboundTruck is refused...` test above does) gets a 500 (NPE on
+`requestedEtd.isBefore(...)`) instead of the 201 it expects. The UI test works around
+this by sending `requestedEta` explicitly rather than fixing the service, since fixing
+it was out of scope for adding UI coverage — see `BookingService.java` around the
+`Booking.request(...)` call.
 
 ## Why 5 steps, not 3
 

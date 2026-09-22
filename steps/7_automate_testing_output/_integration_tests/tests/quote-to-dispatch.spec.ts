@@ -2,6 +2,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@playwright/test';
 import { loadArazzoWorkflow, runWorkflow } from '../src/arazzoRunner';
+import { FRONTEND_BASE_URL } from '../playwright.config';
 
 const ARAZZO_PATH = path.resolve(__dirname, '../../arazzo.yaml');
 const WORKFLOW_ID = 'quoteToOutboundDispatch';
@@ -146,5 +147,65 @@ test.describe('quoteToOutboundDispatch (arazzo.yaml)', () => {
 
     // GlobalExceptionHandler maps DomainRuleViolationException to 409 Conflict.
     expect(dispatchResponse.status()).toBe(409);
+  });
+
+  test('the UI refuses to dispatch outbound on an unconfirmed booking', async ({ request, page, baseURL }) => {
+    // Same business rule as the API-level test above, driven through the real
+    // frontend (LogisticsDetailPage) instead of a raw HTTP call, so the refusal
+    // is verified the way an operator would actually see it: a toast, not a
+    // status code. Skips (rather than fails) if the frontend dev server isn't
+    // reachable, matching the backend-reachability skip in beforeEach above.
+    try {
+      await request.get(FRONTEND_BASE_URL, { timeout: 3000 });
+    } catch {
+      test.skip(true, `Frontend not reachable at ${FRONTEND_BASE_URL}. Start it with 'cd frontend && npm run dev' before running this test.`);
+    }
+
+    // Seed via the API — creating the booking has its own dedicated coverage
+    // above and in the arazzo-driven test; this test's subject is the dispatch
+    // refusal, not booking creation. requestedEta is set explicitly: at the
+    // time this was written, BookingService.createBookingRequest passes
+    // request.requestedEta() into both the requestedEtd and requestedEta slots
+    // of Booking.request(...), so omitting requestedEta (as the sibling API
+    // test above does) 500s instead of the 201 this setup needs.
+    const bookingResponse = await request.post('/api/bookings', {
+      data: {
+        customerId: randomUUID(),
+        shipperId: randomUUID(),
+        consigneeId: randomUUID(),
+        shippingMode: 'OCEAN_FCL',
+        originPortCode: 'USLAX',
+        destinationPortCode: 'CNSHA',
+        incoterms: 'FOB',
+        requestedEtd: '2026-11-01',
+        requestedEta: '2026-11-20',
+        cargoDetails: freshInputs().cargoDetails,
+      },
+    });
+    expect(bookingResponse.status()).toBe(201);
+    const booking = await bookingResponse.json();
+
+    await page.goto(`${FRONTEND_BASE_URL}/logistics/${booking.id}`);
+
+    // A booking with no container movements yet shows the empty-state entry
+    // point rather than the full lifecycle view (see LogisticsDetailPage's
+    // ApiError.isNotFound branch) — this is what a fresh, unconfirmed booking
+    // looks like, so this is the button an operator would actually reach for.
+    await page.getByRole('button', { name: 'Dispatch outbound truck' }).click();
+
+    const dialog = page.getByRole('dialog', { name: 'Dispatch outbound truck' });
+    // DispatchModal's <label> has no htmlFor/aria-labelledby linking it to its
+    // input (see the shared F() helper in LogisticsDetailPage.tsx), so
+    // getByLabel can't find it — driver id, pickup address, and delivery
+    // address are the only three textboxes in this dialog, in that DOM order.
+    await dialog.getByRole('textbox').nth(2).fill('Carrier Yard, Long Beach, CA');
+    await dialog.getByRole('button', { name: 'Dispatch', exact: true }).click();
+
+    // The 409 the API test asserts directly surfaces here as a toast — the
+    // dialog stays open (Toast.run only closes it on success), matching how
+    // client.ts documents a 409 as the domain refusing the command.
+    await expect(page.getByText('Action not allowed')).toBeVisible();
+    await expect(page.getByText('No truck is dispatched before the carrier confirms space')).toBeVisible();
+    await expect(dialog).toBeVisible();
   });
 });
