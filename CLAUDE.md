@@ -43,6 +43,13 @@ npm install
 npm run dev          # http://localhost:5173
 npm run build         # tsc -b && vite build
 npm run lint          # oxlint
+
+# Playwright end-to-end tests. Needs the service up (docker compose up -d + bootRun);
+# the Vite server is started automatically. Every run records a video per test.
+npm run test:e2e
+npm run test:e2e -- e2e/quote-to-booking.spec.ts   # the green happy-path flow only
+npm run test:e2e:report                            # open the HTML report with videos
+E2E_SLOW_MO=0 npm run test:e2e                     # full speed, for CI
 ```
 
 API testing: Bruno collection at `docs/bruno/Eazy Freight` (`brew install bruno`).
@@ -138,6 +145,15 @@ Aggregates above) — don't conflate them when extending compliance.
   against a real Postgres 16 container, not just `./gradlew build`.
 - H2 uses `ddl-auto: update` with Flyway off for ordinary tests (only
   `MigrationSchemaTest` turns Flyway on).
+- `frontend/e2e/` holds Playwright tests that drive the real UI against a running
+  service — no request interception. `quote-to-booking.spec.ts` walks enquiry →
+  priced → sent → accepted → booking → submitted → confirmed → customer confirmed →
+  EEI filing, plus the screening refusal. **`booking-integrity.spec.ts` fails on
+  purpose**: it asserts a booking keeps the requested ETD that was typed (not the
+  ETA) and cargo weight in kilograms, and `BookingService.createBooking` currently
+  does neither. Those assertions are right — don't relax them to get a green run.
+  Videos, traces and the HTML report land in `frontend/e2e-results/` and
+  `frontend/e2e-report/` (both gitignored).
 
 ### Known gaps (don't "fix" these without asking — they're deliberate workshop scope cuts)
 
